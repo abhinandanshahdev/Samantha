@@ -1,0 +1,393 @@
+/* Artifacts Browser - Finder-like interface */
+
+.artifacts-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.artifacts-modal {
+  background: #fff;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 800px;
+  min-height: 500px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.35);
+  animation: slideUp 0.2s ease;
+  overflow: hidden;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Header - Finder style */
+.artifacts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, #f8f8f8 0%, #e8e8e8 100%);
+  border-bottom: 1px solid #c8c8c8;
+}
+
+.artifacts-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.artifacts-header-icon {
+  font-size: 18px;
+  color: #B79546;
+}
+
+.artifacts-header h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.artifacts-header-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.artifacts-refresh-btn,
+.artifacts-close-btn {
+  background: none;
+  border: none;
+  padding: 6px 8px;
+  cursor: pointer;
+  color: #666;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.artifacts-refresh-btn:hover,
+.artifacts-close-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: #333;
+}
+
+.artifacts-refresh-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Toolbar */
+.artifacts-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 12px;
+}
+
+.artifacts-count {
+  color: #666;
+  font-weight: 500;
+}
+
+.artifacts-notice {
+  color: #999;
+  font-style: italic;
+}
+
+/* Content area */
+.artifacts-content {
+  flex: 1;
+  overflow-y: auto;
+  background: #fff;
+}
+
+/* Table */
+.artifacts-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.artifacts-table thead {
+  position: sticky;
+  top: 0;
+  background: #fafafa;
+  z-index: 1;
+}
+
+.artifacts-table th {
+  text-align: left;
+  padding: 10px 16px;
+  font-weight: 500;
+  color: #666;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.artifacts-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+}
+
+.artifacts-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.artifacts-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Column widths */
+.col-name {
+  width: 50%;
+}
+
+.col-date {
+  width: 25%;
+  color: #666;
+}
+
+.col-action {
+  width: 25%;
+  text-align: right;
+}
+
+.col-action th {
+  text-align: right;
+}
+
+/* File name cell */
+.file-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.file-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.file-icon.pptx {
+  color: #d35230;
+}
+
+.file-icon.xlsx {
+  color: #217346;
+}
+
+.file-icon.docx {
+  color: #B79546;
+}
+
+.file-icon.default {
+  color: #666;
+}
+
+.file-name-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.file-name {
+  font-weight: 500;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-ext {
+  font-size: 11px;
+  color: #999;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Download button */
+.download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #F4E8D0 0%, #FAF6F0 100%);
+  border: 1px solid #E6CC7F;
+  border-radius: 5px;
+  color: #8B7355;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.download-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #E6CC7F 0%, #F4E8D0 100%);
+  color: #6B5344;
+}
+
+.download-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.download-btn svg {
+  font-size: 12px;
+}
+
+/* Empty state */
+.artifacts-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #999;
+  text-align: center;
+}
+
+.artifacts-empty .empty-icon {
+  font-size: 48px;
+  color: #D4AF37;
+  opacity: 0.5;
+  margin-bottom: 16px;
+}
+
+.artifacts-empty p {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #666;
+}
+
+.artifacts-empty span {
+  font-size: 13px;
+}
+
+/* Loading state */
+.artifacts-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.artifacts-loading svg {
+  font-size: 24px;
+  margin-bottom: 12px;
+  color: #B79546;
+}
+
+.artifacts-loading span {
+  font-size: 13px;
+}
+
+/* Error state */
+.artifacts-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  margin: 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #dc2626;
+  font-size: 13px;
+}
+
+.artifacts-error button {
+  padding: 6px 14px;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.artifacts-error button:hover {
+  background: #b91c1c;
+}
+
+/* Spinner animation */
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .artifacts-modal {
+    width: 95%;
+    min-height: 400px;
+    max-height: 85vh;
+  }
+
+  .artifacts-table th,
+  .artifacts-table td {
+    padding: 10px 12px;
+  }
+
+  .col-date {
+    display: none;
+  }
+
+  .col-name {
+    width: 70%;
+  }
+
+  .col-action {
+    width: 30%;
+  }
+
+  .download-btn span {
+    display: none;
+  }
+
+  .download-btn {
+    padding: 8px;
+  }
+}

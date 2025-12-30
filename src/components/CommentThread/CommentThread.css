@@ -1,0 +1,256 @@
+.comment-thread {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.comment-thread-title {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.25rem;
+  color: #2c3e50;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 0.5rem;
+}
+
+.comment-thread-loading {
+  text-align: center;
+  padding: 2rem;
+  color: #7f8c8d;
+}
+
+/* New Comment Form */
+.comment-new-form {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+}
+
+.comment-new-header {
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+}
+
+.comment-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  resize: vertical;
+  min-height: 80px;
+  box-sizing: border-box;
+}
+
+.comment-textarea:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.comment-form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.comment-submit-btn {
+  padding: 0.5rem 1.25rem;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.comment-submit-btn:hover:not(:disabled) {
+  background: #2980b9;
+}
+
+.comment-submit-btn:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+}
+
+.comment-cancel-btn {
+  padding: 0.5rem 1.25rem;
+  background: #ecf0f1;
+  color: #2c3e50;
+  border: 1px solid #bdc3c7;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.comment-cancel-btn:hover:not(:disabled) {
+  background: #bdc3c7;
+}
+
+.comment-cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Comment List */
+.comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.no-comments {
+  text-align: center;
+  padding: 2rem;
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+/* Individual Comment */
+.comment {
+  padding: 1rem;
+  background: white;
+  border: 1px solid #e1e8ed;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.comment:hover {
+  border-color: #cbd6e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.comment-reply {
+  margin-top: 0.75rem;
+  border-left: 3px solid #3498db;
+  background: #f8f9fa;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.comment-author {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.comment-author strong {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.comment-date {
+  color: #7f8c8d;
+  font-size: 0.85rem;
+}
+
+.comment-edited {
+  color: #95a5a6;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.comment-action-btn {
+  padding: 0.25rem 0.75rem;
+  background: transparent;
+  color: #3498db;
+  border: 1px solid #3498db;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.comment-action-btn:hover {
+  background: #3498db;
+  color: white;
+}
+
+.comment-delete-btn {
+  color: #e74c3c;
+  border-color: #e74c3c;
+}
+
+.comment-delete-btn:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+.comment-content {
+  color: #2c3e50;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.comment-footer {
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #ecf0f1;
+}
+
+.comment-reply-btn {
+  padding: 0.25rem 0.75rem;
+  background: transparent;
+  color: #7f8c8d;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.comment-reply-btn:hover {
+  color: #3498db;
+}
+
+/* Reply and Edit Forms */
+.comment-reply-form,
+.comment-edit-form {
+  margin-top: 0.75rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.comment-replies {
+  margin-top: 0.75rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .comment-thread {
+    padding: 1rem;
+  }
+
+  .comment {
+    padding: 0.75rem;
+  }
+
+  .comment-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .comment-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

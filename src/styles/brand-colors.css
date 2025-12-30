@@ -1,0 +1,79 @@
+/* Department of Finance Abu Dhabi - Official Brand Visual Guidelines */
+:root {
+  /* Primary Brand Colors - Official DoF Guidelines */
+  --dof-gold: #B79546;  /* Pantone 871 C - Primary institutional gold */
+  --dof-metal-grey: #77787B;  /* Pantone Cool Gray 9 C - Strength & reliability */
+  
+  /* Primary Color Tints */
+  --dof-gold-80: rgba(183, 149, 70, 0.8);
+  --dof-gold-60: rgba(183, 149, 70, 0.6);
+  --dof-gold-40: rgba(183, 149, 70, 0.4);
+  --dof-gold-20: rgba(183, 149, 70, 0.2);
+  
+  --dof-grey-80: rgba(119, 120, 123, 0.8);
+  --dof-grey-60: rgba(119, 120, 123, 0.6);
+  --dof-grey-40: rgba(119, 120, 123, 0.4);
+  --dof-grey-20: rgba(119, 120, 123, 0.2);
+  
+  /* Secondary Colors - Internal Communication Only */
+  --dof-sea-green: #00A79D;  /* Pantone 7472 C - Renewal, Abu Dhabi coast */
+  --dof-earthy-brown: #C68D6D;  /* Pantone 7515 C - Stability, Dirham inspired */
+  --dof-sunset-yellow: #F6BD60;  /* Pantone 148 C - Dependability, Dirham inspired */
+  
+  /* Secondary Color Tints */
+  --dof-green-80: rgba(0, 167, 157, 0.8);
+  --dof-green-60: rgba(0, 167, 157, 0.6);
+  --dof-green-40: rgba(0, 167, 157, 0.4);
+  --dof-green-20: rgba(0, 167, 157, 0.2);
+  
+  --dof-brown-80: rgba(198, 141, 109, 0.8);
+  --dof-brown-60: rgba(198, 141, 109, 0.6);
+  --dof-brown-40: rgba(198, 141, 109, 0.4);
+  --dof-brown-20: rgba(198, 141, 109, 0.2);
+  
+  --dof-yellow-80: rgba(246, 189, 96, 0.8);
+  --dof-yellow-60: rgba(246, 189, 96, 0.6);
+  --dof-yellow-40: rgba(246, 189, 96, 0.4);
+  --dof-yellow-20: rgba(246, 189, 96, 0.2);
+  
+  /* Internal Digital Gradient */
+  --dof-gradient: linear-gradient(135deg, var(--dof-sea-green) 0%, var(--dof-sunset-yellow) 100%);
+  
+  /* Legacy Support - Mapping to new colors */
+  --dof-primary-gold: var(--dof-gold);
+  --dof-primary-dark-gold: var(--dof-gold);
+  --dof-primary-light-gold: var(--dof-gold-60);
+  
+  /* Supporting Colors */
+  --dof-dark-blue: #1E3A8A;
+  --dof-light-blue: #3B82F6;
+  --dof-gray-dark: #2C3E50;
+  --dof-gray-medium: #6C757D;
+  --dof-gray-light: #F8F9FA;
+  
+  /* Status Colors */
+  --dof-success: var(--dof-sea-green);
+  --dof-warning: var(--dof-sunset-yellow);
+  --dof-error: #DC2626;
+  --dof-info: var(--dof-metal-grey);
+  
+  /* Application Primary Colors */
+  --primary-color: var(--dof-gold);
+  --primary-dark: var(--dof-gold);
+  --primary-light: var(--dof-gold-60);
+  
+  /* Background and Surface Colors */
+  --surface-primary: #FFFFFF;
+  --surface-secondary: #F8F9FA;
+  --surface-accent: var(--dof-gold-20);
+  
+  /* Text Colors */
+  --text-primary: var(--dof-gray-dark);
+  --text-secondary: var(--dof-metal-grey);
+  --text-accent: var(--dof-gold);
+  
+  /* Border Colors */
+  --border-light: var(--dof-grey-20);
+  --border-medium: var(--dof-grey-40);
+  --border-dark: var(--dof-grey-60);
+}

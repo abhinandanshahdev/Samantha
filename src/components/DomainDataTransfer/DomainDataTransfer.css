@@ -1,0 +1,166 @@
+.domain-data-transfer {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+  min-height: 100vh;
+}
+
+/* Back button - full width left aligned */
+.domain-data-transfer > .back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #f3f4f6;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 24px;
+  margin-left: 0;
+}
+
+.domain-data-transfer > .back-button:hover {
+  background: #e5e7eb;
+  color: #1f2937;
+}
+
+.domain-data-transfer > .back-button svg {
+  flex-shrink: 0;
+}
+
+.transfer-header {
+  margin-bottom: 24px;
+}
+
+.transfer-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #1f2937;
+}
+
+.transfer-header p {
+  font-size: 15px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.transfer-tabs {
+  display: flex;
+  gap: 4px;
+  background: #f3f4f6;
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.tab-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+  color: #1f2937;
+}
+
+.tab-button.active {
+  background: white;
+  color: var(--dof-primary-gold, #D4AF37);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tab-button svg {
+  flex-shrink: 0;
+}
+
+.transfer-content {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+/* Dark Mode Support - Using dm- variables from dark-mode.css */
+body.dark-mode .transfer-header h1 {
+  color: var(--dm-text-1, #EDECF3) !important;
+}
+
+body.dark-mode .transfer-header p {
+  color: var(--dm-text-2, #C2C0D1);
+}
+
+body.dark-mode .domain-data-transfer > .back-button {
+  background: var(--dm-surface-2, #252034);
+  color: var(--dm-text-2, #C2C0D1);
+  border: 1px solid var(--dm-border-1, #2D293C);
+}
+
+body.dark-mode .domain-data-transfer > .back-button:hover {
+  background: var(--dm-surface-3, #2D293C);
+  color: var(--dm-text-1, #EDECF3);
+}
+
+body.dark-mode .transfer-tabs {
+  background: var(--dm-surface-2, #252034);
+  border: 1px solid var(--dm-border-1, #2D293C);
+}
+
+body.dark-mode .tab-button {
+  color: var(--dm-text-3, #8E8AA6);
+}
+
+body.dark-mode .tab-button:hover {
+  color: var(--dm-text-1, #EDECF3);
+}
+
+body.dark-mode .tab-button.active {
+  background: var(--dm-surface-1, #1F1E30);
+  color: var(--dm-accent, #9D7AEA);
+  box-shadow: var(--dm-shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.4));
+}
+
+body.dark-mode .transfer-content {
+  background: var(--dm-surface-1, #1F1E30);
+  border: 1px solid var(--dm-border-1, #2D293C);
+  box-shadow: var(--dm-shadow-md, 0 4px 12px rgba(0, 0, 0, 0.5));
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .domain-data-transfer {
+    padding: 16px;
+  }
+
+  .transfer-header h1 {
+    font-size: 24px;
+  }
+
+  .domain-data-transfer > .back-button {
+    margin-bottom: 16px;
+  }
+
+  .tab-button {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+
+  .tab-button span {
+    display: none;
+  }
+}

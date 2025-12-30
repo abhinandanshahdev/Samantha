@@ -1,0 +1,222 @@
+/* Department of Finance - Official Typography */
+@import url('https://fonts.googleapis.com/css2?family=Markazi+Text:wght@400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+/* Body styles are now in index.css following DoF guidelines */
+
+/* CSS Variables updated with DoF brand colors */
+:root {
+  --primary-color: var(--dof-primary-gold);
+  --secondary-color: var(--dof-official-gold);
+  --accent-color: var(--dof-light-blue);
+  --neutral-color: var(--dof-accent-gold);
+  --dark-color: var(--dof-primary-dark-gold);
+  --text-dark: var(--dof-gray-dark);
+  --text-light: var(--dof-gray-medium);
+  --background-light: var(--dof-gray-light);
+  --white: var(--dof-white);
+  --border-color: #e1e5e9;
+  --success-color: var(--dof-success);
+  --warning-color: var(--dof-warning);
+  --error-color: var(--dof-error);
+  --info-color: var(--dof-info);
+}
+
+.App {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--background-light) 0%, #ffffff 100%);
+  overflow-x: hidden;
+}
+
+/* Main content animation */
+.main-content {
+  position: relative;
+  z-index: 1;
+  will-change: transform;
+}
+
+/* Slide menu styles */
+.slide-menu {
+  overflow-y: auto;
+  will-change: right;
+}
+
+/* Prevent body scroll when menu is open */
+.App.menu-open {
+  overflow: hidden;
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+  .slide-menu {
+    width: 280px !important;
+  }
+  
+  .main-content.menu-open {
+    transform: translateX(-280px) !important;
+  }
+  
+  .slide-menu.open {
+    right: 0 !important;
+  }
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Reset button styles */
+button {
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Focus styles for accessibility */
+button:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Common utility classes */
+.text-primary { color: var(--primary-color); }
+.text-secondary { color: var(--secondary-color); }
+.text-accent { color: var(--accent-color); }
+.text-dark { color: var(--dark-color); }
+.text-light { color: var(--text-light); }
+
+.bg-primary { background-color: var(--primary-color); }
+.bg-secondary { background-color: var(--secondary-color); }
+.bg-accent { background-color: var(--accent-color); }
+.bg-neutral { background-color: var(--neutral-color); }
+.bg-dark { background-color: var(--dark-color); }
+
+/* Button styles */
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #6bb8b8;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #d18a3a;
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-dark);
+}
+
+.btn-outline:hover {
+  background-color: var(--background-light);
+  border-color: var(--primary-color);
+}
+
+/* Card styles */
+.card {
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Form styles */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(127, 205, 205, 0.1);
+}
+
+.form-group input.error,
+.form-group textarea.error,
+.form-group select.error {
+  border-color: var(--error-color);
+}
+
+.error-message {
+  color: var(--error-color);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Badge styles */
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .btn {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+  
+  .card {
+    border-radius: 8px;
+  }
+}

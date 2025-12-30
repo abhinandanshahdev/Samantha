@@ -1,0 +1,23 @@
+-- Rollback: Remove Multi-Domain Support
+-- Description: Removes domain tables and reverts tables to single-domain state
+-- Date: 2025-10-27
+-- WARNING: This will remove all domain-specific data except for domain_id=1 data
+
+-- Step 1: Remove foreign key constraints first
+ALTER TABLE use_cases DROP FOREIGN KEY IF EXISTS fk_use_cases_domain;
+ALTER TABLE strategic_pillars DROP FOREIGN KEY IF EXISTS fk_strategic_pillars_domain;
+ALTER TABLE categories DROP FOREIGN KEY IF EXISTS fk_categories_domain;
+ALTER TABLE outcome_metrics DROP FOREIGN KEY IF EXISTS fk_outcome_metrics_domain;
+
+-- Step 2: Remove domain_id columns
+ALTER TABLE use_cases DROP COLUMN IF EXISTS domain_id;
+ALTER TABLE strategic_pillars DROP COLUMN IF EXISTS domain_id;
+ALTER TABLE categories DROP COLUMN IF EXISTS domain_id;
+ALTER TABLE outcome_metrics DROP COLUMN IF EXISTS domain_id;
+
+-- Step 3: Drop domain-related tables
+DROP TABLE IF EXISTS domain_users;
+DROP TABLE IF EXISTS domains;
+
+-- Rollback complete
+-- Note: Any data created in domains other than domain_id=1 will remain but will no longer be domain-scoped

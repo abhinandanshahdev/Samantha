@@ -1,0 +1,671 @@
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.initiative-card {
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid #e1e5e9;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: visible;
+  animation: cardFadeIn 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+.initiative-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: var(--primary-color);
+}
+
+/* Frosted glass cards with gradients for grid view only */
+.initiative-card.grid-view {
+  background:
+    linear-gradient(135deg, rgba(0, 167, 157, 0.08) 0%, transparent 50%, rgba(198, 141, 109, 0.08) 100%),
+    rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(220, 220, 220, 0.5);
+  box-shadow:
+    0 8px 32px rgba(31, 38, 135, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+
+.initiative-card.grid-view:hover {
+  background:
+    linear-gradient(135deg, rgba(0, 167, 157, 0.12) 0%, transparent 50%, rgba(198, 141, 109, 0.12) 100%),
+    rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px) saturate(200%);
+  -webkit-backdrop-filter: blur(20px) saturate(200%);
+  border-color: rgba(183, 149, 70, 0.5);
+  box-shadow:
+    0 12px 40px rgba(31, 38, 135, 0.12),
+    0 4px 16px rgba(183, 149, 70, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Status dot indicator */
+.status-dot {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 999998;
+  cursor: help;
+}
+
+.status-dot:hover {
+  z-index: 9999999;
+}
+
+/* Tooltip styles - use fixed positioning to escape all parent boundaries */
+.tooltip-trigger {
+  position: relative;
+  z-index: 1;
+}
+
+.tooltip-trigger:hover {
+  z-index: 999999;
+}
+
+/* Tooltip bubble - appears to the right for metadata icons */
+.metadata-icon.tooltip-trigger::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 12px;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 99999999;
+}
+
+/* Tooltip arrow - points left for metadata icons */
+.metadata-icon.tooltip-trigger::before {
+  content: '';
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 6px;
+  border: 6px solid transparent;
+  border-right-color: rgba(0, 0, 0, 0.9);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 99999999;
+}
+
+/* Status dot tooltip - appears on top */
+.status-dot.tooltip-trigger::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 99999999;
+}
+
+/* Status dot tooltip arrow - points down */
+.status-dot.tooltip-trigger::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 2px;
+  border: 6px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.9);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 99999999;
+}
+
+.tooltip-trigger:hover::after,
+.tooltip-trigger:hover::before {
+  opacity: 1;
+}
+
+/* Card content wrapper */
+.card-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 8px;
+}
+
+/* Card title */
+.card-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4B5563;
+  line-height: 1.3;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  margin-right: 20px;
+  text-overflow: ellipsis;
+}
+
+/* Card description */
+.card-description {
+  font-size: 0.85rem;
+  color: var(--dof-grey-80);
+  line-height: 1.4;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  flex: 1;
+  text-overflow: ellipsis;
+}
+
+/* Footer row with metadata and engagement */
+.card-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid #E5E7EB;
+  overflow: visible;
+}
+
+/* Metadata icons row */
+.card-metadata-icons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: visible;
+}
+
+.metadata-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9CA3AF;
+  font-size: 14px;
+  cursor: help;
+  transition: color 0.2s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.metadata-icon:hover {
+  color: var(--dof-primary-gold);
+  z-index: 999999;
+}
+
+/* Adaptive text clipping for different card sizes */
+
+/* Large cards (2x2) - More content */
+.use-cases-container.grid-view .initiative-card:nth-child(11n) .card-title {
+  -webkit-line-clamp: 3;
+  font-size: 1rem;
+}
+
+.use-cases-container.grid-view .initiative-card:nth-child(11n) .card-description {
+  -webkit-line-clamp: 4;
+  font-size: 0.9rem;
+}
+
+/* Tall cards (1x2) - More description */
+.use-cases-container.grid-view .initiative-card:nth-child(5n + 1) .card-description,
+.use-cases-container.grid-view .initiative-card:nth-child(7n) .card-description {
+  -webkit-line-clamp: 3;
+}
+
+/* Wide cards (2x1) - Slightly more title space */
+.use-cases-container.grid-view .initiative-card:nth-child(3n) .card-title {
+  -webkit-line-clamp: 2;
+}
+
+.use-cases-container.grid-view .initiative-card:nth-child(3n) .card-description {
+  -webkit-line-clamp: 2;
+}
+
+/* Table view styles */
+.table-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-bottom: 1px solid #e1e5e9;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  background: white;
+  height: 70px;
+  min-height: 70px;
+  max-height: 70px;
+  overflow: visible;
+  position: relative;
+  animation: cardFadeIn 0.4s ease-out forwards;
+  opacity: 0;
+}
+
+.table-row:hover {
+  background-color: rgba(183, 149, 70, 0.05);
+  z-index: 10;
+}
+
+.table-cell {
+  padding: 0 10px;
+  font-size: 0.8rem;
+  color: #374151;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+}
+
+.table-cell.title-col {
+  flex: 0 0 320px;
+  min-width: 320px;
+  max-width: 320px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--dof-metal-grey);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table-cell.desc-col {
+  flex: 1;
+  min-width: 300px;
+  white-space: normal;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-height: 1.35;
+  font-size: 0.8rem;
+}
+
+.table-cell.dept-col,
+.table-cell.cat-col,
+.table-cell.impact-col {
+  flex: 0 0 60px;
+  min-width: 60px;
+  text-align: center;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.table-cell.dept-col .metadata-icon,
+.table-cell.cat-col .metadata-icon,
+.table-cell.impact-col .metadata-icon {
+  color: #9CA3AF;
+  cursor: help;
+  transition: color 0.2s ease;
+  font-size: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.table-cell.dept-col .metadata-icon:hover,
+.table-cell.cat-col .metadata-icon:hover,
+.table-cell.impact-col .metadata-icon:hover {
+  color: var(--dof-primary-gold);
+  z-index: 999999;
+}
+
+.table-cell.status-col {
+  flex: 0 0 60px;
+  min-width: 60px;
+  text-align: center;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 6px;
+  overflow: visible;
+}
+
+.status-dot-table {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  cursor: help;
+  position: relative;
+  z-index: 1;
+}
+
+.status-dot-table:hover {
+  z-index: 999999;
+}
+
+/* Tooltip for status dot in table */
+.status-dot-table.tooltip-trigger::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 99999999;
+}
+
+.status-dot-table.tooltip-trigger::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 2px;
+  border: 6px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.9);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 99999999;
+}
+
+.status-dot-table.tooltip-trigger:hover::after,
+.status-dot-table.tooltip-trigger:hover::before {
+  opacity: 1;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: white;
+  text-align: center;
+}
+
+/* Action buttons */
+.action-buttons {
+  position: absolute;
+  top: 8px;
+  right: 32px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 3;
+}
+
+.initiative-card:hover .action-buttons {
+  opacity: 1;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 12px;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+}
+
+.edit-btn {
+  background-color: #f0f8ff;
+  color: #1976d2;
+}
+
+.edit-btn:hover {
+  background-color: #1976d2;
+  color: white;
+}
+
+.delete-btn {
+  background-color: #fff5f5;
+  color: #dc3545;
+}
+
+.delete-btn:hover {
+  background-color: #dc3545;
+  color: white;
+}
+
+/* Old styles removed - using new minimalist design */
+
+/* Social engagement section */
+.card-social-engagement {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.engagement-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.85rem;
+  color: #6B7280;
+  transition: all 0.2s ease;
+}
+
+.engagement-item.liked .engagement-icon {
+  color: #DC2626;
+}
+
+.engagement-item.liked .engagement-count {
+  color: #DC2626;
+  font-weight: 600;
+}
+
+.engagement-icon {
+  font-size: 0.9rem;
+  color: #9CA3AF;
+  transition: color 0.2s ease;
+}
+
+.engagement-count {
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.8rem;
+}
+
+.engagement-item:hover .engagement-icon {
+  color: var(--dof-primary-gold);
+  transform: scale(1.1);
+}
+
+.engagement-item.liked:hover .engagement-icon {
+  color: #B91C1C;
+}
+
+/* Staggered animation for cards */
+.initiative-card:nth-child(1) { animation-delay: 0.05s; }
+.initiative-card:nth-child(2) { animation-delay: 0.1s; }
+.initiative-card:nth-child(3) { animation-delay: 0.15s; }
+.initiative-card:nth-child(4) { animation-delay: 0.2s; }
+.initiative-card:nth-child(5) { animation-delay: 0.25s; }
+.initiative-card:nth-child(6) { animation-delay: 0.3s; }
+.initiative-card:nth-child(7) { animation-delay: 0.35s; }
+.initiative-card:nth-child(8) { animation-delay: 0.4s; }
+.initiative-card:nth-child(9) { animation-delay: 0.45s; }
+.initiative-card:nth-child(10) { animation-delay: 0.5s; }
+.initiative-card:nth-child(11) { animation-delay: 0.55s; }
+.initiative-card:nth-child(12) { animation-delay: 0.6s; }
+.initiative-card:nth-child(n+13) { animation-delay: 0.65s; }
+
+/* Staggered animation for table rows */
+.table-row:nth-child(1) { animation-delay: 0.05s; }
+.table-row:nth-child(2) { animation-delay: 0.1s; }
+.table-row:nth-child(3) { animation-delay: 0.15s; }
+.table-row:nth-child(4) { animation-delay: 0.2s; }
+.table-row:nth-child(5) { animation-delay: 0.25s; }
+.table-row:nth-child(6) { animation-delay: 0.3s; }
+.table-row:nth-child(7) { animation-delay: 0.35s; }
+.table-row:nth-child(8) { animation-delay: 0.4s; }
+.table-row:nth-child(9) { animation-delay: 0.45s; }
+.table-row:nth-child(10) { animation-delay: 0.5s; }
+.table-row:nth-child(n+11) { animation-delay: 0.55s; }
+
+@media (max-width: 768px) {
+  .initiative-card {
+    padding: 14px;
+  }
+
+  .initiative-card.grid-view {
+    height: auto !important;
+    min-height: 160px;
+  }
+
+  .card-title {
+    font-size: 0.9rem;
+    margin-right: 12px;
+  }
+
+  .card-description {
+    font-size: 0.8rem;
+  }
+
+  .metadata-icon {
+    font-size: 12px;
+  }
+
+  /* Table row mobile adjustments */
+  .table-row {
+    height: auto;
+    min-height: 48px;
+    max-height: none;
+    padding: 10px 12px;
+    min-width: 0;
+    border-bottom: 1px solid #e1e5e9;
+    align-items: flex-start;
+  }
+
+  .table-row:last-child {
+    margin-bottom: 60px;
+  }
+
+  .table-cell.title-col {
+    flex: 0 0 40% !important;
+    width: 40% !important;
+    min-width: 40% !important;
+    max-width: 40% !important;
+    font-size: 0.75rem;
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 1.35;
+    padding-top: 2px;
+  }
+
+  .table-cell.desc-col {
+    flex: 0 0 60% !important;
+    width: 60% !important;
+    min-width: 60% !important;
+    max-width: 60% !important;
+    font-size: 0.7rem;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 1.35;
+    color: #6B7280;
+  }
+
+  .table-cell.dept-col,
+  .table-cell.cat-col,
+  .table-cell.impact-col,
+  .table-cell.status-col {
+    display: none !important;
+  }
+
+  /* Action buttons on mobile */
+  .action-buttons {
+    opacity: 1;
+    position: relative;
+    top: auto;
+    right: auto;
+    margin-top: 8px;
+  }
+
+  /* Card footer on mobile */
+  .card-footer-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .card-metadata-icons {
+    gap: 8px;
+  }
+
+  .card-social-engagement {
+    gap: 8px;
+  }
+
+  .engagement-item {
+    font-size: 0.75rem;
+  }
+
+  .engagement-icon {
+    font-size: 0.8rem;
+  }
+
+  /* Status dot adjustments */
+  .status-dot {
+    top: 8px;
+    right: 8px;
+    width: 10px;
+    height: 10px;
+  }
+} 

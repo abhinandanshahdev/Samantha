@@ -1,0 +1,91 @@
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0;
+  margin-bottom: 24px;
+}
+
+.stepper-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 100px;
+}
+
+.stepper-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  background: #e1e5e9;
+  color: #6b7280;
+  transition: all 0.3s ease;
+}
+
+.stepper-step.active .stepper-circle {
+  background: var(--dof-primary-gold, #D4AF37);
+  color: white;
+}
+
+.stepper-step.completed .stepper-circle {
+  background: #28a745;
+  color: white;
+}
+
+.stepper-label {
+  font-size: 13px;
+  color: #6b7280;
+  text-align: center;
+  font-weight: 500;
+}
+
+.stepper-step.active .stepper-label {
+  color: var(--dof-primary-gold, #D4AF37);
+  font-weight: 600;
+}
+
+.stepper-step.completed .stepper-label {
+  color: #28a745;
+}
+
+.stepper-connector {
+  flex: 1;
+  height: 2px;
+  background: #e1e5e9;
+  margin: 0 12px;
+  margin-bottom: 24px;
+  max-width: 80px;
+  transition: background 0.3s ease;
+}
+
+.stepper-connector.active {
+  background: var(--dof-primary-gold, #D4AF37);
+}
+
+/* Dark mode support */
+[data-theme="dark"] .stepper-circle {
+  background: #374151;
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .stepper-label {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .stepper-connector {
+  background: #374151;
+}
+
+[data-theme="dark"] .stepper-step.active .stepper-label {
+  color: var(--dof-primary-gold, #D4AF37);
+}
+
+[data-theme="dark"] .stepper-step.completed .stepper-label {
+  color: #28a745;
+}

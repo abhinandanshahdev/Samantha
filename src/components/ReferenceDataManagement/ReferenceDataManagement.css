@@ -1,0 +1,546 @@
+.reference-data-management {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px;
+  background: transparent;
+  min-height: calc(100vh - 70px);
+}
+
+.reference-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e8ecef;
+}
+
+.back-button {
+  background: none;
+  border: 1px solid #d1d9e0;
+  color: #495057;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.back-button:hover {
+  background: #f8f9fa;
+  border-color: #adb5bd;
+}
+
+.reference-header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #212529;
+  letter-spacing: -0.5px;
+}
+
+.reference-tabs {
+  display: inline-flex;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 32px;
+  border: 1px solid #e9ecef;
+}
+
+.tab-button {
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6c757d;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  white-space: nowrap;
+  position: relative;
+}
+
+.tab-button:hover {
+  color: #495057;
+}
+
+.tab-button.active {
+  color: #212529;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+}
+
+.reference-content {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.content-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #212529;
+  letter-spacing: -0.25px;
+}
+
+.create-button {
+  background: var(--dof-gold);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.create-button:hover {
+  background: #B8941F;
+}
+
+.loading {
+  padding: 32px;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.data-list {
+  padding: 0;
+}
+
+.data-item {
+  border-bottom: 1px solid #e9ecef;
+  transition: background-color 0.15s ease;
+}
+
+.data-item:last-child {
+  border-bottom: none;
+}
+
+.data-item:hover {
+  background: #f8f9fa;
+}
+
+.item-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 32px;
+}
+
+.item-info {
+  flex: 1;
+  text-align: left;
+}
+
+.item-info h3 {
+  display: block;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #212529;
+  line-height: 1.4;
+}
+
+.item-description {
+  display: block;
+  margin: 4px 0 0 0;
+  color: #6c757d;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.item-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.edit-button,
+.delete-button {
+  background: var(--dof-gold);
+  border: 1px solid var(--dof-gold);
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+}
+
+.edit-button:hover {
+  background: #B8941F;
+  border-color: #B8941F;
+}
+
+.delete-button {
+  background: var(--dof-metal-grey);
+  border: 1px solid var(--dof-metal-grey);
+}
+
+.delete-button:hover {
+  background: #495057;
+  border-color: #495057;
+}
+
+.edit-form {
+  padding: 24px 32px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+}
+
+.create-form {
+  margin: 24px 32px;
+  padding: 24px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group:last-of-type {
+  margin-bottom: 24px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--dof-gold);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+}
+
+.save-button,
+.cancel-button {
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.save-button {
+  background: var(--dof-gold);
+  color: white;
+  border: 1px solid var(--dof-gold);
+}
+
+.save-button:hover {
+  background: #B8941F;
+  border-color: #B8941F;
+}
+
+.cancel-button {
+  background: white;
+  color: #6c757d;
+  border: 1px solid #d1d5db;
+}
+
+.cancel-button:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.empty-state {
+  padding: 32px;
+  color: #6c757d;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .reference-data-management {
+    padding: 20px;
+  }
+  
+  .reference-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .reference-header h1 {
+    font-size: 24px;
+  }
+
+  .reference-tabs {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .tab-button {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .content-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+    padding: 20px;
+  }
+
+  .create-button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .item-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px 20px;
+  }
+  
+  .item-actions {
+    align-self: flex-end;
+  }
+
+  .edit-form,
+  .create-form {
+    margin: 20px;
+    padding: 20px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .save-button,
+  .cancel-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .empty-state {
+    padding: 48px 20px;
+  }
+}
+
+/* Dark Mode Support - Using dm- variables from dark-mode.css */
+body.dark-mode .reference-header {
+  border-bottom-color: var(--dm-border-1, #2D293C);
+}
+
+body.dark-mode .reference-header h1 {
+  color: var(--dm-text-1, #EDECF3);
+}
+
+body.dark-mode .back-button {
+  background: var(--dm-surface-1, #1F1E30);
+  border-color: var(--dm-border-1, #2D293C);
+  color: var(--dm-text-2, #C2C0D1);
+}
+
+body.dark-mode .back-button:hover {
+  background: var(--dm-surface-2, #252034);
+  border-color: var(--dm-accent, #9D7AEA);
+  color: var(--dm-accent, #9D7AEA);
+}
+
+body.dark-mode .reference-tabs {
+  background: var(--dm-surface-2, #252034);
+  border-color: var(--dm-border-1, #2D293C);
+}
+
+body.dark-mode .tab-button {
+  color: var(--dm-text-3, #8E8AA6);
+}
+
+body.dark-mode .tab-button:hover {
+  color: var(--dm-text-1, #EDECF3);
+}
+
+body.dark-mode .tab-button.active {
+  background: var(--dm-surface-1, #1F1E30);
+  color: var(--dm-accent, #9D7AEA);
+  box-shadow: var(--dm-shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.4));
+}
+
+body.dark-mode .reference-content {
+  background: var(--dm-surface-1, #1F1E30);
+  border-color: var(--dm-border-1, #2D293C);
+  box-shadow: var(--dm-shadow-md, 0 4px 12px rgba(0, 0, 0, 0.5));
+}
+
+body.dark-mode .content-header {
+  border-bottom-color: var(--dm-border-1, #2D293C);
+}
+
+body.dark-mode .content-header h2 {
+  color: var(--dm-text-1, #EDECF3);
+}
+
+body.dark-mode .loading {
+  color: var(--dm-text-2, #C2C0D1);
+}
+
+body.dark-mode .data-item {
+  border-bottom-color: var(--dm-border-1, #2D293C);
+}
+
+body.dark-mode .data-item:hover {
+  background: var(--dm-surface-2, #252034);
+}
+
+body.dark-mode .item-info h3 {
+  color: var(--dm-text-1, #EDECF3);
+}
+
+body.dark-mode .item-description {
+  color: var(--dm-text-2, #C2C0D1);
+}
+
+body.dark-mode .edit-form,
+body.dark-mode .create-form {
+  background: var(--dm-surface-2, #252034);
+  border-color: var(--dm-border-1, #2D293C);
+}
+
+body.dark-mode .form-group label {
+  color: var(--dm-text-2, #C2C0D1);
+}
+
+body.dark-mode .form-group input,
+body.dark-mode .form-group textarea {
+  background: var(--dm-surface-1, #1F1E30);
+  border-color: var(--dm-border-1, #2D293C);
+  color: var(--dm-text-1, #EDECF3);
+}
+
+body.dark-mode .form-group input:focus,
+body.dark-mode .form-group textarea:focus {
+  border-color: var(--dm-accent, #9D7AEA);
+  box-shadow: 0 0 0 3px rgba(157, 122, 234, 0.2);
+}
+
+body.dark-mode .form-group input::placeholder,
+body.dark-mode .form-group textarea::placeholder {
+  color: var(--dm-text-muted, #6B6882);
+}
+
+body.dark-mode .cancel-button {
+  background: var(--dm-surface-2, #252034);
+  border-color: var(--dm-border-1, #2D293C);
+  color: var(--dm-text-2, #C2C0D1);
+}
+
+body.dark-mode .cancel-button:hover {
+  background: var(--dm-surface-3, #2A2840);
+  color: var(--dm-text-1, #EDECF3);
+}
+
+body.dark-mode .empty-state {
+  color: var(--dm-text-2, #C2C0D1);
+}
+
+body.dark-mode .save-button {
+  background: var(--dm-accent, #9D7AEA);
+  border-color: var(--dm-accent, #9D7AEA);
+  color: var(--dm-accent-text, #1F1E30);
+}
+
+body.dark-mode .save-button:hover {
+  background: var(--dm-accent-hover, #C9B8F8);
+  border-color: var(--dm-accent-hover, #C9B8F8);
+}
+
+body.dark-mode .create-button {
+  background: var(--dm-accent, #9D7AEA);
+  color: var(--dm-accent-text, #1F1E30);
+}
+
+body.dark-mode .create-button:hover {
+  background: var(--dm-accent-hover, #C9B8F8);
+}
+
+body.dark-mode .edit-button {
+  background: var(--dm-accent, #9D7AEA);
+  border-color: var(--dm-accent, #9D7AEA);
+  color: var(--dm-accent-text, #1F1E30);
+}
+
+body.dark-mode .edit-button:hover {
+  background: var(--dm-accent-hover, #C9B8F8);
+  border-color: var(--dm-accent-hover, #C9B8F8);
+}
+
+body.dark-mode .delete-button {
+  background: var(--dm-surface-2, #252034);
+  border-color: var(--dm-border-2, #3A3650);
+  color: var(--dm-text-2, #C2C0D1);
+}
+
+body.dark-mode .delete-button:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: var(--dm-error, #ef4444);
+  color: var(--dm-error, #ef4444);
+}

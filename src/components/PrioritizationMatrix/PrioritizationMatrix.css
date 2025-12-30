@@ -1,0 +1,302 @@
+.prioritization-matrix {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.prioritization-matrix h3 {
+  margin: 0 0 20px 0;
+  color: #4d75a3;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+}
+
+.matrix-container {
+  position: relative;
+}
+
+.matrix-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 2px;
+  background: #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  min-height: 300px;
+}
+
+.matrix-quadrant {
+  background: white;
+  padding: 16px;
+  position: relative;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.matrix-quadrant:hover {
+  background: #f8f9fa;
+  transform: scale(1.02);
+  z-index: 10;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.quadrant-0-0 {
+  border-top-left-radius: 8px;
+  background: linear-gradient(135deg, #7FCDCD20, #7FCDCD10);
+}
+
+.quadrant-1-0 {
+  border-top-right-radius: 8px;
+  background: linear-gradient(135deg, #e29c4a20, #e29c4a10);
+}
+
+.quadrant-0-1 {
+  border-bottom-left-radius: 8px;
+  background: linear-gradient(135deg, #4A90E220, #4A90E210);
+}
+
+.quadrant-1-1 {
+  border-bottom-right-radius: 8px;
+  background: linear-gradient(135deg, #dab78e20, #dab78e10);
+}
+
+.quadrant-header h4 {
+  margin: 0 0 8px 0;
+  color: #4d75a3;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.quadrant-description {
+  margin: 0 0 12px 0;
+  color: #666;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.use-case-count {
+  display: inline-block;
+  background: #7FCDCD;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.quadrant-use-cases {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  margin-top: 8px;
+}
+
+.quadrant-use-cases h5 {
+  margin: 0 0 12px 0;
+  color: #4d75a3;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.quadrant-use-cases ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.quadrant-use-cases li {
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  font-size: 13px;
+}
+
+.quadrant-use-cases li:last-child {
+  border-bottom: none;
+}
+
+.quadrant-use-cases li:hover {
+  color: #7FCDCD;
+}
+
+.matrix-axes {
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #666;
+}
+
+.x-axis {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  position: absolute;
+  left: -40px;
+  top: 0;
+  bottom: 0;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+.matrix-3d-container {
+  width: 100%;
+  height: 400px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.matrix-tooltip {
+  position: absolute;
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  pointer-events: none;
+  display: none;
+  z-index: 1000;
+  max-width: 300px;
+}
+
+.matrix-tooltip h4 {
+  margin: 0 0 8px 0;
+  color: #4d75a3;
+  font-size: 16px;
+}
+
+.matrix-tooltip p {
+  margin: 4px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.matrix-legend {
+  margin-top: 16px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.matrix-legend p {
+  margin: 4px 0;
+}
+
+@media (max-width: 768px) {
+  .prioritization-matrix {
+    padding: 16px;
+  }
+  
+  .matrix-grid {
+    min-height: 250px;
+  }
+  
+  .quadrant-use-cases {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 400px;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+  
+  .y-axis {
+    display: none;
+  }
+
+  .matrix-3d-container {
+    height: 300px;
+  }
+}
+
+/* Dark Mode Support - Using dm- variables from dark-mode.css */
+body.dark-mode .prioritization-matrix {
+  background: var(--dm-surface-1, #1F1E30);
+  box-shadow: var(--dm-shadow-md, 0 4px 12px rgba(0, 0, 0, 0.5));
+}
+
+body.dark-mode .prioritization-matrix h3 {
+  color: var(--dm-text-1, #EDECF3) !important;
+}
+
+body.dark-mode .matrix-legend {
+  background: var(--dm-surface-2, #252034);
+  color: var(--dm-text-2, #C2C0D1);
+}
+
+body.dark-mode .matrix-legend p {
+  color: var(--dm-text-2, #C2C0D1);
+}
+
+body.dark-mode .matrix-legend strong {
+  color: var(--dm-text-1, #EDECF3);
+}
+
+/* Debug table dark mode - override inline styles */
+body.dark-mode .debug-table-container {
+  color: var(--dm-text-2, #C2C0D1);
+}
+
+body.dark-mode .debug-table-container table {
+  border-color: var(--dm-border-1, #2D293C) !important;
+}
+
+body.dark-mode .debug-table-container thead tr {
+  background-color: var(--dm-surface-2, #252034) !important;
+}
+
+body.dark-mode .debug-table-container th {
+  background-color: var(--dm-surface-2, #252034) !important;
+  color: var(--dm-text-1, #EDECF3) !important;
+  border-color: var(--dm-border-1, #2D293C) !important;
+}
+
+body.dark-mode .debug-table-container td {
+  color: var(--dm-text-2, #C2C0D1) !important;
+  border-color: var(--dm-border-1, #2D293C) !important;
+}
+
+body.dark-mode .debug-table-container tbody tr:nth-child(odd) {
+  background-color: var(--dm-surface-1, #1F1E30) !important;
+}
+
+body.dark-mode .debug-table-container tbody tr:nth-child(even) {
+  background-color: var(--dm-surface-2, #252034) !important;
+}
+
+body.dark-mode .debug-table-container tbody tr:hover {
+  background-color: rgba(157, 122, 234, 0.1) !important;
+}
+
+body.dark-mode .debug-table-container p {
+  color: var(--dm-text-3, #8E8AA6) !important;
+}
+
+body.dark-mode .debug-table-container strong {
+  color: var(--dm-text-2, #C2C0D1) !important;
+} 

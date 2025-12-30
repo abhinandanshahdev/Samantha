@@ -1,0 +1,138 @@
+/* Import DoF Brand Guidelines */
+@import './styles/brand-colors.css';
+@import './styles/dof-brand.css';
+@import './styles/dark-mode.css';
+
+/* Typography - Following DoF Guidelines */
+body {
+  margin: 0;
+  font-family: 'Helvetica LT Pro', 'Helvetica', 'Calibri', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 300; /* Light weight for body text as per guidelines */
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background-color: var(--surface-secondary);
+}
+
+/* Headings - Using Helvetica as primary */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Helvetica LT Pro', 'Helvetica', 'Calibri', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700; /* Bold for headings */
+  color: var(--dof-gold);
+  margin-top: 0;
+}
+
+h1 {
+  font-size: 2.25rem;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: 1.875rem;
+  line-height: 1.3;
+}
+
+h3 {
+  font-size: 1.5rem;
+  line-height: 1.4;
+}
+
+h4 {
+  font-size: 1.25rem;
+  line-height: 1.5;
+}
+
+/* Internal communication text - Markazi Text */
+.internal-heading {
+  font-family: 'Markazi Text', Georgia, serif;
+  font-weight: 700;
+  font-size: 18pt;
+  text-transform: uppercase;
+}
+
+.internal-subheading {
+  font-family: 'Markazi Text', Georgia, serif;
+  font-weight: 500;
+  font-size: 22pt;
+}
+
+/* Code blocks */
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  background-color: var(--dof-grey-20);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+/* Links */
+a {
+  color: var(--dof-gold);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--dof-gold-80);
+  text-decoration: underline;
+}
+
+/* Selection */
+::selection {
+  background-color: var(--dof-gold-40);
+  color: var(--text-primary);
+}
+
+/* Focus styles */
+:focus {
+  outline: 2px solid var(--dof-gold);
+  outline-offset: 2px;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--dof-grey-20);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--dof-metal-grey);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--dof-grey-80);
+}
+
+/* Button reset and base styles */
+button {
+  font-family: 'Helvetica LT Pro', 'Helvetica', 'Calibri', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Input and form elements */
+input, textarea, select {
+  font-family: 'Helvetica LT Pro', 'Helvetica', 'Calibri', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 300;
+}
+
+/* Utility classes */
+.text-gold { color: var(--dof-gold); }
+.text-grey { color: var(--dof-metal-grey); }
+.text-green { color: var(--dof-sea-green); }
+.text-brown { color: var(--dof-earthy-brown); }
+.text-yellow { color: var(--dof-sunset-yellow); }
+
+.bg-gold { background-color: var(--dof-gold); }
+.bg-grey { background-color: var(--dof-metal-grey); }
+.bg-green { background-color: var(--dof-sea-green); }
+.bg-brown { background-color: var(--dof-earthy-brown); }
+.bg-yellow { background-color: var(--dof-sunset-yellow); }

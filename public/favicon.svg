@@ -1,0 +1,22 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#D4AF37;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B8860B;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="32" height="32" rx="6" fill="url(#bgGradient)"/>
+  
+  <!-- DoF symbol - stylized building/columns -->
+  <rect x="8" y="12" width="3" height="16" fill="white" opacity="0.9"/>
+  <rect x="13" y="10" width="3" height="18" fill="white" opacity="0.9"/>
+  <rect x="18" y="12" width="3" height="16" fill="white" opacity="0.9"/>
+  
+  <!-- Top bar representing government -->
+  <rect x="6" y="8" width="20" height="2" fill="white" opacity="0.9"/>
+  
+  <!-- Base -->
+  <rect x="6" y="26" width="20" height="2" fill="white" opacity="0.9"/>
+</svg>
