@@ -22,7 +22,6 @@ router.get('/use-cases/:useCaseId/associations', verifyToken, requireConsumerOrA
       uc.description,
       uc.status,
       c.name as category_name,
-      d.name as department_name,
       uca.created_date,
       u.name as created_by_name
     FROM use_case_associations uca
@@ -31,7 +30,6 @@ router.get('/use-cases/:useCaseId/associations', verifyToken, requireConsumerOrA
       OR (uca.related_use_case_id = ? AND uca.use_case_id = uc.id)
     )
     LEFT JOIN categories c ON uc.category_id = c.id
-    LEFT JOIN departments d ON uc.department_id = d.id
     LEFT JOIN users u ON uca.created_by = u.id
     WHERE uca.use_case_id = ? OR uca.related_use_case_id = ?
     ORDER BY uca.created_date DESC
@@ -50,7 +48,6 @@ router.get('/use-cases/:useCaseId/associations', verifyToken, requireConsumerOrA
       description: row.description,
       status: row.status,
       category: row.category_name,
-      department: row.department_name,
       created_date: row.created_date,
       created_by_name: row.created_by_name
     }));
@@ -129,13 +126,11 @@ router.post('/use-cases/:useCaseId/associations', verifyToken, requireConsumerOr
             uc.description,
             uc.status,
             c.name as category_name,
-            d.name as department_name,
             uca.created_date,
             u.name as created_by_name
           FROM use_case_associations uca
           JOIN use_cases uc ON uca.related_use_case_id = uc.id
           LEFT JOIN categories c ON uc.category_id = c.id
-          LEFT JOIN departments d ON uc.department_id = d.id
           LEFT JOIN users u ON uca.created_by = u.id
           WHERE uca.id = ?
         `;
@@ -154,7 +149,6 @@ router.post('/use-cases/:useCaseId/associations', verifyToken, requireConsumerOr
             description: row.description,
             status: row.status,
             category: row.category_name,
-            department: row.department_name,
             created_date: row.created_date,
             created_by_name: row.created_by_name
           };

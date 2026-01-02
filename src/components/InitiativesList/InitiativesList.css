@@ -674,17 +674,17 @@
 }
 
 .table-header-cell.title-col {
-  flex: 0 0 240px !important;
-  min-width: 240px !important;
-  max-width: 240px !important;
+  flex: 0 0 280px !important;
+  min-width: 280px !important;
+  max-width: 280px !important;
 }
 
 .table-header-cell.status-col {
   flex: 0 0 140px !important;
   min-width: 140px !important;
   max-width: 140px !important;
-  justify-content: flex-start !important;
-  text-align: left !important;
+  justify-content: center !important;
+  text-align: center !important;
 }
 
 .table-header-cell.desc-col {

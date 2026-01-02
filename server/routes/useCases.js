@@ -1617,10 +1617,14 @@ router.get('/:id/strategic-goals', verifyToken, requireConsumerOrAdmin, (req, re
 
   const query = `
     SELECT
-      sg.*,
-      sp.name as pillar_name,
+      ucga.use_case_id,
+      ucga.strategic_goal_id,
       ucga.alignment_strength,
-      ucga.rationale
+      ucga.rationale,
+      ucga.created_date,
+      sg.title as goal_title,
+      sg.description as goal_description,
+      sp.name as pillar_name
     FROM use_case_goal_alignments ucga
     JOIN strategic_goals sg ON ucga.strategic_goal_id = sg.id
     LEFT JOIN strategic_pillars sp ON sg.strategic_pillar_id = sp.id

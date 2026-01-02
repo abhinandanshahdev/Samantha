@@ -52,14 +52,14 @@ router.get('/use-cases/:useCaseId/comments', verifyToken, requireConsumerOrAdmin
   });
 });
 
-// Get all comments for an agent (threaded)
-router.get('/agents/:agentId/comments', verifyToken, requireConsumerOrAdmin, (req, res) => {
-  const { agentId } = req.params;
+// Get all comments for a task (threaded)
+router.get('/tasks/:taskId/comments', verifyToken, requireConsumerOrAdmin, (req, res) => {
+  const { taskId } = req.params;
 
   const query = `
     SELECT
       c.id,
-      c.agent_id,
+      c.task_id,
       c.user_id,
       c.parent_comment_id,
       c.content,
@@ -70,20 +70,20 @@ router.get('/agents/:agentId/comments', verifyToken, requireConsumerOrAdmin, (re
       u.email as user_email
     FROM comments c
     LEFT JOIN users u ON c.user_id = u.id
-    WHERE c.agent_id = ?
+    WHERE c.task_id = ?
     ORDER BY c.created_date ASC
   `;
 
-  db.query(query, [agentId], (err, results) => {
+  db.query(query, [taskId], (err, results) => {
     if (err) {
-      console.error('Error fetching agent comments:', err);
+      console.error('Error fetching task comments:', err);
       return res.status(500).json({ error: 'Failed to fetch comments' });
     }
 
     // Transform results to include user info
     const comments = results.map(row => ({
       id: row.id,
-      agent_id: row.agent_id,
+      task_id: row.task_id,
       user_id: row.user_id,
       user_name: row.user_name,
       user_email: row.user_email,
@@ -100,17 +100,17 @@ router.get('/agents/:agentId/comments', verifyToken, requireConsumerOrAdmin, (re
 
 // Create a new comment
 router.post('/comments', verifyToken, requireConsumerOrAdmin, (req, res) => {
-  const { use_case_id, agent_id, parent_comment_id, content } = req.body;
+  const { use_case_id, task_id, parent_comment_id, content } = req.body;
   const user_id = req.user.id;
 
-  // Must have either use_case_id or agent_id
-  if ((!use_case_id && !agent_id) || !content) {
-    return res.status(400).json({ error: 'Either use_case_id or agent_id is required, along with content' });
+  // Must have either use_case_id or task_id
+  if ((!use_case_id && !task_id) || !content) {
+    return res.status(400).json({ error: 'Either use_case_id or task_id is required, along with content' });
   }
 
   // Cannot have both
-  if (use_case_id && agent_id) {
-    return res.status(400).json({ error: 'Cannot specify both use_case_id and agent_id' });
+  if (use_case_id && task_id) {
+    return res.status(400).json({ error: 'Cannot specify both use_case_id and task_id' });
   }
 
   const verifyEntity = (callback) => {
@@ -126,15 +126,15 @@ router.post('/comments', verifyToken, requireConsumerOrAdmin, (req, res) => {
         }
         callback();
       });
-    } else if (agent_id) {
-      // Verify agent exists
-      db.query('SELECT id FROM agents WHERE id = ?', [agent_id], (err, results) => {
+    } else if (task_id) {
+      // Verify task exists
+      db.query('SELECT id FROM tasks WHERE id = ?', [task_id], (err, results) => {
         if (err) {
-          console.error('Error checking agent:', err);
-          return res.status(500).json({ error: 'Failed to verify agent' });
+          console.error('Error checking task:', err);
+          return res.status(500).json({ error: 'Failed to verify task' });
         }
         if (results.length === 0) {
-          return res.status(404).json({ error: 'Agent not found' });
+          return res.status(404).json({ error: 'Task not found' });
         }
         callback();
       });
@@ -163,11 +163,11 @@ router.post('/comments', verifyToken, requireConsumerOrAdmin, (req, res) => {
     function insertComment() {
       const commentId = uuidv4();
       const insertQuery = `
-        INSERT INTO comments (id, use_case_id, agent_id, user_id, parent_comment_id, content)
+        INSERT INTO comments (id, use_case_id, task_id, user_id, parent_comment_id, content)
         VALUES (?, ?, ?, ?, ?, ?)
       `;
 
-      db.query(insertQuery, [commentId, use_case_id || null, agent_id || null, user_id, parent_comment_id || null, content], (err, result) => {
+      db.query(insertQuery, [commentId, use_case_id || null, task_id || null, user_id, parent_comment_id || null, content], (err, result) => {
         if (err) {
           console.error('Error creating comment:', err);
           return res.status(500).json({ error: 'Failed to create comment' });
@@ -180,10 +180,10 @@ router.post('/comments', verifyToken, requireConsumerOrAdmin, (req, res) => {
               console.error('Error updating use case updated_date:', updateErr);
             }
           });
-        } else if (agent_id) {
-          db.query('UPDATE agents SET updated_date = CURRENT_TIMESTAMP WHERE id = ?', [agent_id], (updateErr) => {
+        } else if (task_id) {
+          db.query('UPDATE tasks SET updated_date = CURRENT_TIMESTAMP WHERE id = ?', [task_id], (updateErr) => {
             if (updateErr) {
-              console.error('Error updating agent updated_date:', updateErr);
+              console.error('Error updating task updated_date:', updateErr);
             }
           });
         }
@@ -193,7 +193,7 @@ router.post('/comments', verifyToken, requireConsumerOrAdmin, (req, res) => {
           SELECT
             c.id,
             c.use_case_id,
-            c.agent_id,
+            c.task_id,
             c.user_id,
             c.parent_comment_id,
             c.content,
@@ -217,7 +217,7 @@ router.post('/comments', verifyToken, requireConsumerOrAdmin, (req, res) => {
           const comment = {
             id: row.id,
             use_case_id: row.use_case_id,
-            agent_id: row.agent_id,
+            task_id: row.task_id,
             user_id: row.user_id,
             user_name: row.user_name,
             user_email: row.user_email,
@@ -229,9 +229,9 @@ router.post('/comments', verifyToken, requireConsumerOrAdmin, (req, res) => {
           };
 
           // Fetch entity title and create audit log
-          const entityType = use_case_id ? 'use_case' : 'agent';
-          const entityId = use_case_id || agent_id;
-          const entityTable = use_case_id ? 'use_cases' : 'agents';
+          const entityType = use_case_id ? 'use_case' : 'task';
+          const entityId = use_case_id || task_id;
+          const entityTable = use_case_id ? 'use_cases' : 'tasks';
 
           db.query(`SELECT title FROM ${entityTable} WHERE id = ?`, [entityId], (err, entityResults) => {
             const entityTitle = entityResults && entityResults.length > 0 ? entityResults[0].title : 'Unknown';

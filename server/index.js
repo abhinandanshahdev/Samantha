@@ -69,6 +69,7 @@ const tagsRoutes = require('./routes/tags');
 const skillsRoutes = require('./routes/skills');
 const artifactsRoutes = require('./routes/artifacts');
 const analyticsRoutes = require('./routes/analytics');
+const adminUsersRoutes = require('./routes/adminUsers');
 
 // Routes
 console.log('Setting up routes...');
@@ -95,6 +96,7 @@ app.use('/api', taskLikesRoutes);
 app.use('/api/audit-logs', auditLogsRoutes);
 app.use('/api/tags', tagsRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/admin/users', adminUsersRoutes);
 console.log('Routes set up successfully');
 
 // Health check endpoint (enhanced for Azure App Service)

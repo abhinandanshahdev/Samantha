@@ -409,7 +409,7 @@ const createSamanthaMcpServer = (domainId = null, userId = null, userRole = null
         "get_use_cases_by_criteria",
         "Get initiatives filtered by various criteria like status, strategic impact, effort level, and delivery date",
         {
-          status: z.enum(["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"]).optional().describe("Filter by status"),
+          status: z.enum(["intention", "experimentation", "commitment", "implementation", "integration"]).optional().describe("Filter by status"),
           strategic_impact: z.enum(["Low", "Medium", "High"]).optional().describe("Filter by strategic impact level"),
           effort_level: z.enum(["Low", "Medium", "High"]).optional().describe("Filter by effort level"),
           expected_delivery_date: z.string().optional().describe("Filter by expected delivery date (format: MMM YYYY, e.g., 'Jan 2025')"),
@@ -455,7 +455,7 @@ const createSamanthaMcpServer = (domainId = null, userId = null, userRole = null
       // Tool 4: Get use cases by goal
       tool(
         "get_use_cases_by_goal",
-        "Get AI initiatives/use cases that are aligned to a specific strategic goal",
+        "Get family initiatives that are aligned to a specific goal",
         {
           goal_id: z.string().optional().describe("The ID of the strategic goal"),
           goal_title: z.string().optional().describe("The title/name of the strategic goal (alternative to goal_id)"),
@@ -535,9 +535,9 @@ const createSamanthaMcpServer = (domainId = null, userId = null, userRole = null
       // Tool 10: Get use cases by tag
       tool(
         "get_use_cases_by_tag",
-        "Get use cases/initiatives that have a specific tag (e.g., vendor names like Accenture, technology tags, etc.)",
+        "Get family initiatives that have a specific tag (e.g., 'vacation', 'home improvement', 'education')",
         {
-          tag_name: z.string().describe("The tag name to filter by (e.g., 'Accenture', 'NLP', 'Computer Vision')"),
+          tag_name: z.string().describe("The tag name to filter by (e.g., 'vacation', 'health', 'education')"),
           limit: z.number().optional().describe("Maximum number of results to return (default 20)")
         },
         async (args) => {
@@ -582,7 +582,7 @@ const createSamanthaMcpServer = (domainId = null, userId = null, userRole = null
         "get_tasks_by_criteria",
         "Get tasks filtered by various criteria like status, strategic impact, and effort level",
         {
-          status: z.enum(["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"]).optional().describe("Filter by status"),
+          status: z.enum(["intention", "experimentation", "commitment", "implementation", "integration"]).optional().describe("Filter by status"),
           strategic_impact: z.enum(["Low", "Medium", "High"]).optional().describe("Filter by strategic impact level"),
           effort_level: z.enum(["Low", "Medium", "High"]).optional().describe("Filter by effort level"),
           limit: z.number().optional().describe("Maximum number of results to return (default 10)")
@@ -1646,7 +1646,7 @@ const createSamanthaMcpServer = (domainId = null, userId = null, userRole = null
           category: z.string().describe("Category name (must exist in domain)"),
           strategic_impact: z.enum(["Low", "Medium", "High"]).describe("Strategic impact level"),
           // Optional fields
-          status: z.enum(["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"]).optional().describe("Initiative status (default: backlog)"),
+          status: z.enum(["intention", "experimentation", "commitment", "implementation", "integration"]).optional().describe("Initiative status (default: intention)"),
           effort_level: z.enum(["Low", "Medium", "High"]).optional().describe("Effort level"),
           technical_implementation: z.string().optional().describe("Technical implementation details"),
           justification: z.string().optional().describe("Business justification"),
@@ -1752,7 +1752,7 @@ const createSamanthaMcpServer = (domainId = null, userId = null, userRole = null
             solution_overview: z.string().optional(),
             technical_implementation: z.string().optional(),
             category: z.string().optional(),
-            status: z.enum(["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"]).optional(),
+            status: z.enum(["intention", "experimentation", "commitment", "implementation", "integration"]).optional(),
             strategic_impact: z.enum(["Low", "Medium", "High"]).optional(),
             effort_level: z.enum(["Low", "Medium", "High"]).optional(),
             expected_delivery_date: z.string().optional(),
@@ -2230,7 +2230,7 @@ const createSamanthaMcpServer = (domainId = null, userId = null, userRole = null
           solution_overview: z.string().describe("Overview of the task's solution"),
           linked_initiative_ids: z.array(z.string()).min(1).describe("IDs of initiatives to link (at least one required)"),
           // Optional fields
-          status: z.enum(["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"]).optional().describe("Task status"),
+          status: z.enum(["intention", "experimentation", "commitment", "implementation", "integration"]).optional().describe("Task status"),
           strategic_impact: z.enum(["Low", "Medium", "High"]).optional().describe("Strategic impact level"),
           effort_level: z.enum(["Low", "Medium", "High"]).optional().describe("Effort level"),
           technical_implementation: z.string().optional().describe("Technical implementation details"),
@@ -2305,7 +2305,7 @@ const createSamanthaMcpServer = (domainId = null, userId = null, userRole = null
             problem_statement: z.string().optional(),
             solution_overview: z.string().optional(),
             technical_implementation: z.string().optional(),
-            status: z.enum(["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"]).optional(),
+            status: z.enum(["intention", "experimentation", "commitment", "implementation", "integration"]).optional(),
             strategic_impact: z.enum(["Low", "Medium", "High"]).optional(),
             effort_level: z.enum(["Low", "Medium", "High"]).optional(),
             expected_delivery_date: z.string().optional(),
@@ -2541,7 +2541,7 @@ const buildClaudeSystemPrompt = async (userName, domainId = null, activeSkills =
     });
   }
 
-  const domainName = domainInfo?.name || 'Strategic Excellence';
+  const domainName = domainInfo?.name || 'Family Strategy';
 
   // Get domain-specific terminology
   let initiativeSingular = 'initiative';
@@ -2576,27 +2576,27 @@ const buildClaudeSystemPrompt = async (userName, domainId = null, activeSkills =
   });
   const pillarNames = pillars.map(p => p.name).join(', ');
 
-  const basePrompt = `You are Samantha, an intelligent ${domainName} assistant. You're having a conversation with ${userName}.
+  const basePrompt = `You are Samantha, a friendly ${domainName} assistant for your family. You're having a conversation with ${userName}.
 
-PERSONALITY: Be warm, conversational, and personable. Use ${userName}'s name occasionally but not excessively. Be professional yet friendly. Keep responses concise but informative.
+PERSONALITY: Be warm, conversational, and personable like a helpful family member. Use ${userName}'s name occasionally but not excessively. Be supportive and encouraging. Keep responses concise but informative.
 
 RESPONSE STYLE - CRITICAL FOR ALL RESPONSES:
-Write like you're speaking to a colleague, not writing a report. All responses must sound natural when spoken aloud. Never use structured labels like "Objective:", "Solution:", "Technical:", "Comments:", or "Description:". Speak in flowing paragraphs, not bullet lists or formatted sections. Weave comments, status, and details into a natural narrative. Lead with what's most important (status, purpose, key updates). Don't mention technical complexity, dates, authors, or granular details unless specifically requested.
+Write like you're speaking to a family member, not writing a report. All responses must sound natural when spoken aloud. Never use structured labels like "Objective:", "Solution:", "Technical:", "Comments:", or "Description:". Speak in flowing paragraphs, not bullet lists or formatted sections. Weave comments, status, and details into a natural narrative. Lead with what's most important (status, purpose, key updates). Don't mention technical complexity, dates, authors, or granular details unless specifically requested.
 
 CONTEXT YOU SHOULD KNOW:
-The strategic pillars guiding all ${domainName} ${initiativePlural} are: ${pillarNames}. Strategic goals are high-level objectives aligned to these pillars. ${domainName} ${initiativePlural.charAt(0).toUpperCase() + initiativePlural.slice(1)} are specific projects aligned to one or more strategic goals. Status values are: backlog, prioritised, in_progress, completed, blocked, slow_burner, de_prioritised, on_hold.
+The family's strategic pillars guiding all ${initiativePlural} are: ${pillarNames}. Goals are what your family wants to achieve, aligned to these pillars. ${initiativePlural.charAt(0).toUpperCase() + initiativePlural.slice(1)} are specific plans and projects the family is working on. Status values follow a progress model: intention (idea stage), experimentation (trying it out), commitment (decided to do it), implementation (actively working on it), integration (completed and part of family life).
 
 YOUR CAPABILITIES:
-You can help ${userName} with questions about ${domainName} ${initiativePlural}, including strategic pillars and goals, prioritization analysis, project status and progress, and tasks associated with initiatives.
+You can help ${userName} with questions about family ${initiativePlural}, including goals, priorities, project status and progress, and tasks associated with family plans.
 
 DATA ACCESS:
-You have real-time tools to query initiatives by status, strategic goal, pillar, or impact level. You can also get strategic goals by pillar, current statistics and counts, and detailed initiative information. You can search and filter tasks as well.
+You have real-time tools to query family initiatives by status, goal, pillar, or priority level. You can also get goals by pillar, current statistics and counts, and detailed initiative information. You can search and filter tasks as well.
 
 ANTI-HALLUCINATION RULES (CRITICAL):
 Never make up or guess information about initiatives, goals, or statistics. If you don't have specific data, always use the available tools to get current information. If a tool call fails or returns no data, say "I don't have that specific information available right now." Never provide numbers, names, or details unless they come from tool calls. When asked about specific initiatives or statistics, always call the appropriate tool first. Do not respond with example data or hypothetical scenarios - only real data from tools.
 
 BEHAVIORAL GUIDELINES:
-If asked about topics outside ${domainName}, politely guide the conversation back: "I can help with questions about ${domainName} ${initiativePlural}. What would you like to know?" Use the available tools to get current, accurate data rather than making assumptions.
+If asked about topics outside family strategy, politely guide the conversation back: "I can help with questions about your family's ${initiativePlural} and plans. What would you like to know?" Use the available tools to get current, accurate data rather than making assumptions.
 
 FORMATTING:
 Use markdown formatting to make responses clear and scannable:
@@ -2620,16 +2620,16 @@ Write tools that REQUIRE confirmation: create_initiative, update_initiative, bat
 VIOLATION: If you call ANY write tool without first asking and receiving user confirmation, you have violated your core operating rules. Even if the user's request seems clear, you MUST ask for confirmation before executing writes.
 
 Example of CORRECT behavior:
-User: "Tag all home improvement initiatives with 'Priority'"
-You: "I found 5 home improvement initiatives. I'll add the tag 'Priority' to all of them. Would you like me to proceed with tagging these 5 initiatives?"
+User: "Tag all vacation planning initiatives with 'Priority'"
+You: "I found 3 vacation planning initiatives. I'll add the tag 'Priority' to all of them. Would you like me to proceed with tagging these 3 initiatives?"
 [Wait for user to say yes]
 Then call add_initiative_tags
 
 Example of INCORRECT behavior (DO NOT DO THIS):
-User: "Tag all home improvement initiatives with 'Priority'"
+User: "Tag all vacation planning initiatives with 'Priority'"
 You: [Immediately calls add_initiative_tags without asking] - THIS IS WRONG
 
-MANDATORY: When users ask about priorities, specific use cases, departmental activities, or strategic alignments, you must use the available tools to provide accurate, current information.`;
+MANDATORY: When users ask about priorities, specific initiatives, family goals, or progress, you must use the available tools to provide accurate, current information.`;
 
   // Append active skill instructions
   if (activeSkills.length > 0) {

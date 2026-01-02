@@ -52,7 +52,7 @@ class DatabaseConfig {
         azure_ad_id VARCHAR(255) UNIQUE,
         name VARCHAR(255) NOT NULL,
         password_hash VARCHAR(255),
-        role ENUM('viewer', 'contributor', 'admin') DEFAULT 'viewer',
+        role ENUM('viewer', 'contributor', 'admin', 'consumer') DEFAULT 'viewer',
         status VARCHAR(20) DEFAULT 'active',
         email_verified TINYINT(1) DEFAULT 0,
         created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

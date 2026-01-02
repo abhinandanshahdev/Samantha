@@ -12,6 +12,7 @@ import ModernNavigation from './components/ModernNavigation/ModernNavigation';
 import RoadmapKanban from './components/RoadmapKanban/RoadmapKanban';
 import RoadmapTimeline from './components/RoadmapTimeline/RoadmapTimeline';
 import AuditLog from './components/AuditLog/AuditLog';
+import UserManagement from './components/UserManagement/UserManagement';
 import InitiativeDetail from './components/InitiativeDetail/InitiativeDetail';
 import TaskDetail from './components/TaskDetail/TaskDetail';
 import InitiativeForm from './components/InitiativeForm/InitiativeForm';
@@ -25,7 +26,7 @@ import ReferenceDataManagement from './components/ReferenceDataManagement/Refere
 import DomainManagement from './components/DomainManagement/DomainManagement';
 import Header from './components/Header/Header';
 import { ArtifactsBrowser } from './components/ArtifactsBrowser/ArtifactsBrowser';
-import { FaTimes, FaUserCog, FaCog, FaSignOutAlt, FaDatabase, FaGlobe, FaClipboardList, FaFileDownload, FaMoon, FaChartPie } from 'react-icons/fa';
+import { FaTimes, FaUserCog, FaCog, FaSignOutAlt, FaDatabase, FaGlobe, FaClipboardList, FaFileDownload, FaMoon, FaChartPie, FaUsers } from 'react-icons/fa';
 import './App.css';
 import './styles/brand-colors.css';
 
@@ -409,6 +410,18 @@ function App() {
       selectedStrategicGoal: null
     }));
     setShowUserMenu(false);
+  };
+
+  const handleUserManagementClick = () => {
+    if (isAdmin) {
+      setAppState(prev => ({
+        ...prev,
+        currentView: 'user_management',
+        selectedUseCase: null,
+        selectedStrategicGoal: null
+      }));
+      setShowUserMenu(false);
+    }
   };
 
   const handleUserUpdate = (updatedUser: any) => {
@@ -976,6 +989,13 @@ function App() {
             onBackToDashboard={handleBackToDashboard}
           />
         );
+      case 'user_management':
+        return isAdmin ? (
+          <UserManagement
+            user={user}
+            onBackToDashboard={handleBackToDashboard}
+          />
+        ) : null;
       case 'import_export':
         return (
           <div>
@@ -1390,6 +1410,28 @@ function App() {
               >
                 <FaGlobe style={{ fontSize: '16px', color: darkMode ? '#8E8AA6' : '#6c757d' }} />
                 Domain Management
+              </button>
+              <button
+                onClick={handleUserManagementClick}
+                style={{
+                  width: '100%',
+                  padding: '16px 20px',
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  fontSize: '14px',
+                  color: darkMode ? '#EDECF3' : '#333',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = darkMode ? '#252034' : '#f8f9fa'}
+                onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
+              >
+                <FaUsers style={{ fontSize: '16px', color: darkMode ? '#8E8AA6' : '#6c757d' }} />
+                User Management
               </button>
             </>
           )}

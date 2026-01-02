@@ -40,7 +40,7 @@ const AVAILABLE_FUNCTIONS = {
     parameters: {
       type: "object",
       properties: {
-        status: { type: "string", enum: ["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"], description: "Filter by status" },
+        status: { type: "string", enum: ["intention", "experimentation", "commitment", "implementation", "integration"], description: "Filter by status" },
         strategic_impact: { type: "string", enum: ["Low", "Medium", "High"], description: "Filter by strategic impact level" },
         effort_level: { type: "string", enum: ["Low", "Medium", "High"], description: "Filter by effort level" },
         expected_delivery_date: { type: "string", description: "Filter by expected delivery date (format: MMM YYYY, e.g., 'Jan 2025')" },
@@ -75,7 +75,7 @@ const AVAILABLE_FUNCTIONS = {
 
   get_use_cases_by_goal: {
     name: "get_use_cases_by_goal",
-    description: "Get initiatives/use cases that are aligned to a specific strategic goal",
+    description: "Get family initiatives that are aligned to a specific goal",
     parameters: {
       type: "object",
       properties: {
@@ -174,7 +174,7 @@ const AVAILABLE_FUNCTIONS = {
     parameters: {
       type: "object",
       properties: {
-        status: { type: "string", enum: ["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"], description: "Filter by status" },
+        status: { type: "string", enum: ["intention", "experimentation", "commitment", "implementation", "integration"], description: "Filter by status" },
         strategic_impact: { type: "string", enum: ["Low", "Medium", "High"], description: "Filter by strategic impact level" },
         effort_level: { type: "string", enum: ["Low", "Medium", "High"], description: "Filter by effort level" },
         limit: { type: "number", description: "Maximum number of results to return (default 10)" }
@@ -228,11 +228,11 @@ const AVAILABLE_FUNCTIONS = {
 
   get_use_cases_by_tag: {
     name: "get_use_cases_by_tag",
-    description: "Get use cases/initiatives that have a specific tag (e.g., vendor names like Accenture, technology tags, etc.)",
+    description: "Get family initiatives that have a specific tag (e.g., 'vacation', 'home improvement', 'education')",
     parameters: {
       type: "object",
       properties: {
-        tag_name: { type: "string", description: "The tag name to filter by (e.g., 'Accenture', 'NLP', 'Computer Vision')" },
+        tag_name: { type: "string", description: "The tag name to filter by (e.g., 'vacation', 'health', 'education')" },
         limit: { type: "number", description: "Maximum number of results to return (default 20)" }
       },
       required: ["tag_name"],
@@ -1563,7 +1563,7 @@ const buildIntelligentSystemPrompt = async (userName, domainId = null) => {
     });
   }
 
-  const domainName = domainInfo?.name || 'Strategic Excellence';
+  const domainName = domainInfo?.name || 'Family Strategy';
   const domainType = domainInfo?.type || 'general';
 
   // Get domain-specific terminology
@@ -1699,12 +1699,12 @@ const buildIntelligentSystemPrompt = async (userName, domainId = null) => {
   
   const baseInstructions = `You are Samantha, a friendly ${domainName} assistant for your family. You're having a conversation with ${userName}.
 
-PERSONALITY: Be warm, conversational, and personable. Use ${userName}'s name occasionally but not excessively. Be professional yet friendly. Keep responses concise but informative.
+PERSONALITY: Be warm, conversational, and personable like a helpful family member. Use ${userName}'s name occasionally but not excessively. Be supportive and encouraging. Keep responses concise but informative.
 
 CRITICAL: NEVER mention your training data cutoff date, knowledge limitations, or phrases like "My knowledge is current up to [date]" or "I am trained on data up to [date]". You have access to real-time data through functions - use them.
 
 RESPONSE STYLE - CRITICAL FOR ALL RESPONSES:
-Write like you're speaking to a colleague, not writing a report. All responses must sound natural when spoken aloud. Never use structured labels like "Objective:", "Solution:", "Technical:", "Comments:", or "Description:". Speak in flowing paragraphs, not bullet lists or formatted sections. Weave comments, status, and details into a natural narrative. Lead with what's most important (status, purpose, key updates). Don't mention technical complexity, dates, authors, or granular details unless specifically requested. When someone asks "Tell me about X" give a brief overview. "What's the status" means focus on current state and progress. "Give me details" means a conversational update with key points only. Prioritize what matters most - users can check the UI for comprehensive details.
+Write like you're speaking to a family member, not writing a report. All responses must sound natural when spoken aloud. Never use structured labels like "Objective:", "Solution:", "Technical:", "Comments:", or "Description:". Speak in flowing paragraphs, not bullet lists or formatted sections. Weave comments, status, and details into a natural narrative. Lead with what's most important (status, purpose, key updates). Don't mention technical complexity, dates, authors, or granular details unless specifically requested. When someone asks "Tell me about X" give a brief overview. "What's the status" means focus on current state and progress. "Give me details" means a conversational update with key points only. Prioritize what matters most - users can check the UI for comprehensive details.
 
 FULL DOMAIN CONTEXT - YOUR COMPREHENSIVE KNOWLEDGE BASE:
 
@@ -1733,20 +1733,20 @@ ${roadmapContext}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-ORGANIZATIONAL CONTEXT:
-Strategic goals are high-level objectives aligned to these pillars. ${domainName} ${initiativePlural.charAt(0).toUpperCase() + initiativePlural.slice(1)} are specific projects aligned to one or more strategic goals. We prioritize ${initiativePlural} based on strategic alignment, impact, and feasibility.
+FAMILY CONTEXT:
+Goals are what your family wants to achieve, aligned to these pillars. ${initiativePlural.charAt(0).toUpperCase() + initiativePlural.slice(1)} are specific plans and projects the family is working on. Priorities are based on family values, impact, and feasibility.
 
 YOUR CAPABILITIES:
-You can help ${userName} with questions about ${domainName} ${initiativePlural}, including strategic pillars and goals, prioritization analysis, project status and progress, and task details.
+You can help ${userName} with questions about family ${initiativePlural}, including goals, priorities, project status and progress, and task details.
 
 DATA ACCESS:
-You have real-time functions to query use cases by status, strategic goal, pillar, or impact level. You can also get strategic goals by pillar, current statistics and counts, and detailed use case information.
+You have real-time functions to query family initiatives by status, goal, pillar, or priority level. You can also get goals by pillar, current statistics and counts, and detailed initiative information.
 
 ANTI-HALLUCINATION RULES (CRITICAL):
-Never make up or guess information about use cases, departments, goals, or statistics. If you don't have specific data, always use the available functions to get current information. If a function call fails or returns no data, say "I don't have that specific information available right now." Never provide numbers, names, or details unless they come from function calls. When asked about specific use cases, departments, or statistics, always call the appropriate function first. Do not respond with example data or hypothetical scenarios - only real data from functions. If asked "how many" or "what are the" or "show me" you must call a function. When someone mentions any proper noun that could be a use case name, search for it before responding. Never assume you know what something is - always search the database first.
+Never make up or guess information about initiatives, goals, or statistics. If you don't have specific data, always use the available functions to get current information. If a function call fails or returns no data, say "I don't have that specific information available right now." Never provide numbers, names, or details unless they come from function calls. When asked about specific initiatives or statistics, always call the appropriate function first. Do not respond with example data or hypothetical scenarios - only real data from functions. If asked "how many" or "what are the" or "show me" you must call a function. When someone mentions any proper noun that could be an initiative name, search for it before responding. Never assume you know what something is - always search the database first.
 
 BEHAVIORAL GUIDELINES:
-If asked about topics outside ${domainName}, politely redirect: "I'm here to help with ${domainName} ${initiativePlural} and tasks. What would you like to know?" Use the available functions to get current, accurate data rather than making assumptions. Be conversational and reference specific data when available rather than speaking generally. Use natural speech patterns and avoid being overly formal.
+If asked about topics outside family strategy, politely guide the conversation: "I can help with questions about your family's ${initiativePlural} and plans. What would you like to know?" Use the available functions to get current, accurate data rather than making assumptions. Be conversational and reference specific data when available rather than speaking generally. Use natural speech patterns like a supportive family member.
 
 FORMATTING:
 Use markdown formatting to make responses clear and scannable:

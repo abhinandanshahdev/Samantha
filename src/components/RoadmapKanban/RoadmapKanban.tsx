@@ -13,8 +13,9 @@ import {
   Modifier,
 } from '@dnd-kit/core';
 import { motion } from 'framer-motion';
-import { UseCase, KanbanStatus, SearchFilters, Category } from '../../types';
-import { useCaseAPI, categoryAPI } from '../../services/apiService';
+import { UseCase, KanbanStatus, SearchFilters, TaskFilters, Category, Task } from '../../types';
+import { useCaseAPI, categoryAPI, taskAPI } from '../../services/apiService';
+import { FaListAlt, FaTasks } from 'react-icons/fa';
 import { useActiveDomainId } from '../../context/DomainContext';
 import KanbanColumn from './KanbanColumn';
 import KanbanCard from './KanbanCard';
@@ -26,9 +27,12 @@ import './RoadmapKanban.css';
 // Number of items to load per column initially and on "Load more"
 const ITEMS_PER_LOAD = 20;
 
+// View mode type
+type ViewMode = 'initiatives' | 'tasks';
+
 // Column state for grouped loading
 interface ColumnState {
-  items: UseCase[];
+  items: (UseCase | Task)[];
   totalCount: number;
   hasMore: boolean;
   isLoading: boolean;
@@ -36,6 +40,7 @@ interface ColumnState {
 
 interface RoadmapKanbanProps {
   onUseCaseClick: (useCase: UseCase) => void;
+  onTaskClick?: (task: Task) => void;
   showAIChat?: boolean;
   onCloseChatClick?: () => void;
   user?: any;
@@ -71,12 +76,19 @@ const createInitialColumnStates = (): Record<KanbanStatus, ColumnState> => ({
 
 const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
   onUseCaseClick,
+  onTaskClick,
   showAIChat = false,
   onCloseChatClick,
   user,
   searchQuery = ''
 }) => {
   const activeDomainId = useActiveDomainId();
+
+  // View mode state: initiatives or tasks
+  const [viewMode, setViewMode] = useState<ViewMode>('initiatives');
+
+  // Initiatives list for task filter dropdown (loaded separately)
+  const [initiativesForFilter, setInitiativesForFilter] = useState<UseCase[]>([]);
 
   // Load initial filters from localStorage
   const getInitialFilters = (): SearchFilters => {
@@ -93,7 +105,7 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
 
   const [isLoading, setIsLoading] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [filters, setFilters] = useState<SearchFilters>(getInitialFilters);
+  const [filters, setFilters] = useState<SearchFilters | TaskFilters>(getInitialFilters);
   const [isUpdating, setIsUpdating] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
 
@@ -105,7 +117,7 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
   const initialLoadRef = useRef<string | null>(null);
 
   // Keep a reference to all items for drag-drop and filtering purposes
-  const allItemsRef = useRef<Map<string, UseCase>>(new Map());
+  const allItemsRef = useRef<Map<string, UseCase | Task>>(new Map());
 
   // Ref for the scrollable board container (for auto-scroll during drag)
   const boardRef = useRef<HTMLDivElement>(null);
@@ -220,6 +232,32 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
     loadCategories();
   }, [activeDomainId]);
 
+  // Load initiatives for filter dropdown when in tasks mode
+  useEffect(() => {
+    if (viewMode === 'tasks') {
+      const loadInitiatives = async () => {
+        try {
+          const initiatives = await useCaseAPI.getAll({
+            domain_id: activeDomainId || undefined,
+            limit: 500 // Load enough for dropdown
+          });
+          setInitiativesForFilter(initiatives);
+        } catch (error) {
+          console.error('Failed to load initiatives for filter:', error);
+        }
+      };
+      loadInitiatives();
+    }
+  }, [viewMode, activeDomainId]);
+
+  // Reset data when view mode changes
+  useEffect(() => {
+    initialLoadRef.current = null;
+    setColumnStates(createInitialColumnStates());
+    allItemsRef.current.clear();
+    setFilters({});
+  }, [viewMode]);
+
   // Update filters when search query changes
   useEffect(() => {
     setFilters(prevFilters => ({
@@ -250,13 +288,23 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
     }));
 
     try {
-      // Filter by status instead of kanban_pillar
-      const items = await useCaseAPI.getAll({
-        ...filtersWithDomain,
-        statuses: [columnId],
-        limit: ITEMS_PER_LOAD,
-        offset
-      });
+      // Load items based on view mode
+      let items: (UseCase | Task)[];
+      if (viewMode === 'tasks') {
+        items = await taskAPI.getAll({
+          ...filtersWithDomain,
+          statuses: [columnId],
+          limit: ITEMS_PER_LOAD,
+          offset
+        });
+      } else {
+        items = await useCaseAPI.getAll({
+          ...filtersWithDomain,
+          statuses: [columnId],
+          limit: ITEMS_PER_LOAD,
+          offset
+        });
+      }
 
       // Update items reference for drag-drop
       items.forEach(item => allItemsRef.current.set(item.id, item));
@@ -284,12 +332,12 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
       }));
       return [];
     }
-  }, [filtersWithDomain]);
+  }, [filtersWithDomain, viewMode]);
 
   // Load grouped stats and initial items for all columns
   useEffect(() => {
     const loadData = async () => {
-      const filterKey = JSON.stringify({ ...filtersWithDomain });
+      const filterKey = JSON.stringify({ ...filtersWithDomain, viewMode });
 
       // Skip if already loading the same filter combination
       if (initialLoadRef.current === filterKey) return;
@@ -300,7 +348,9 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
 
       try {
         // First, get grouped counts using status as the group_by field
-        const groupedStats = await useCaseAPI.getGroupedStats('status', filtersWithDomain);
+        const groupedStats = viewMode === 'tasks'
+          ? await taskAPI.getGroupedStats('status', filtersWithDomain)
+          : await useCaseAPI.getGroupedStats('status', filtersWithDomain);
 
         setTotalCount(groupedStats.total_count);
 
@@ -321,12 +371,22 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
         const loadPromises = KANBAN_COLUMNS.map(async (col) => {
           const count = groupedStats.groups[col.id]?.count || 0;
           if (count > 0) {
-            const items = await useCaseAPI.getAll({
-              ...filtersWithDomain,
-              statuses: [col.id],
-              limit: ITEMS_PER_LOAD,
-              offset: 0
-            });
+            let items: (UseCase | Task)[];
+            if (viewMode === 'tasks') {
+              items = await taskAPI.getAll({
+                ...filtersWithDomain,
+                statuses: [col.id],
+                limit: ITEMS_PER_LOAD,
+                offset: 0
+              });
+            } else {
+              items = await useCaseAPI.getAll({
+                ...filtersWithDomain,
+                statuses: [col.id],
+                limit: ITEMS_PER_LOAD,
+                offset: 0
+              });
+            }
 
             // Store items in reference map
             items.forEach(item => allItemsRef.current.set(item.id, item));
@@ -360,7 +420,7 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
     };
 
     loadData();
-  }, [filtersWithDomain, filters, activeDomainId]);
+  }, [filtersWithDomain, filters, activeDomainId, viewMode]);
 
   // Handler for loading more items in a column
   const handleLoadMore = useCallback(async (columnId: KanbanStatus) => {
@@ -382,7 +442,7 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
 
   // Get all loaded items as arrays for backwards compatibility
   const allUseCases = useMemo(() => {
-    const items: UseCase[] = [];
+    const items: (UseCase | Task)[] = [];
     KANBAN_COLUMNS.forEach(col => {
       columnStates[col.id].items.forEach(item => {
         items.push(item);
@@ -394,7 +454,7 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
   // Filter initiatives for the dropdown - now just returns loaded items
   // In a future phase, this could use server-side search
   const filteredInitiativesForDropdown = useMemo(() => {
-    return allUseCases;
+    return allUseCases as UseCase[];
   }, [allUseCases]);
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -486,9 +546,13 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
       };
     });
 
-    // Update the backend
+    // Update the backend based on view mode
     try {
-      await useCaseAPI.updateStatus(itemId, newStatus);
+      if (viewMode === 'tasks') {
+        await taskAPI.updateStatus(itemId, newStatus);
+      } else {
+        await useCaseAPI.updateStatus(itemId, newStatus);
+      }
     } catch (error: any) {
       console.error('Failed to update kanban status:', error);
 
@@ -528,9 +592,13 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
   // Find active item for drag overlay
   const activeItem = activeId ? allItemsRef.current.get(activeId) : null;
 
-  // Handler that processes UseCase clicks
-  const handleCardClick = (item: UseCase) => {
-    onUseCaseClick(item);
+  // Handler that processes card clicks - delegates to appropriate handler based on view mode
+  const handleCardClick = (item: UseCase | Task) => {
+    if (viewMode === 'tasks' && onTaskClick) {
+      onTaskClick(item as Task);
+    } else {
+      onUseCaseClick(item as UseCase);
+    }
   };
 
   if (isLoading) {
@@ -546,13 +614,31 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
       <div className="roadmap-kanban-content">
         {/* Sidebar with Filter Panel */}
         <div className="roadmap-kanban-sidebar">
+          {/* View Mode Toggle */}
+          <div className="view-mode-toggle">
+            <button
+              className={`view-mode-btn ${viewMode === 'initiatives' ? 'active' : ''}`}
+              onClick={() => setViewMode('initiatives')}
+            >
+              <FaListAlt />
+              <span>Initiatives</span>
+            </button>
+            <button
+              className={`view-mode-btn ${viewMode === 'tasks' ? 'active' : ''}`}
+              onClick={() => setViewMode('tasks')}
+            >
+              <FaTasks />
+              <span>Tasks</span>
+            </button>
+          </div>
+
           <div className="sidebar-count">
             <div style={{
               fontSize: '16px',
               fontWeight: '600',
               color: '#374151'
             }}>
-              {`${totalCount} initiative${totalCount !== 1 ? 's' : ''} found`}
+              {`${totalCount} ${viewMode === 'tasks' ? 'task' : 'initiative'}${totalCount !== 1 ? 's' : ''} found`}
             </div>
           </div>
           <FilterPanel
@@ -562,7 +648,8 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
             onClearFilters={handleClearFilters}
             hideKanbanStatus={true}
             hideDeliveryDateFilters={true}
-            initiatives={filteredInitiativesForDropdown}
+            showTaskFilter={viewMode === 'tasks'}
+            initiatives={viewMode === 'tasks' ? initiativesForFilter : filteredInitiativesForDropdown}
           />
         </div>
 
@@ -592,7 +679,7 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
                     <KanbanColumn
                       id={column.id}
                       title={column.title}
-                      useCases={columnStates[column.id].items}
+                      useCases={columnStates[column.id].items as UseCase[]}
                       totalCount={columnStates[column.id].totalCount}
                       hasMore={columnStates[column.id].hasMore}
                       isLoadingMore={columnStates[column.id].isLoading}
@@ -605,7 +692,7 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
                 <DragOverlay modifiers={[adjustTranslate]} dropAnimation={null}>
                   {activeItem ? (
                     <div className="kanban-drag-overlay">
-                      <KanbanCard useCase={activeItem} onClick={() => {}} />
+                      <KanbanCard useCase={activeItem as UseCase} onClick={() => {}} />
                     </div>
                   ) : null}
                 </DragOverlay>
@@ -618,7 +705,7 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
       {/* AI Chat Interface */}
       {showAIChat && (
         <ChatAssistant
-          useCases={allUseCases}
+          useCases={allUseCases as UseCase[]}
           isOpen={showAIChat}
           onClose={onCloseChatClick || (() => {})}
         />

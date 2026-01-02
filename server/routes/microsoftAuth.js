@@ -48,39 +48,24 @@ async function getOrCreateMicrosoftUser(microsoftUser) {
   const email = mail || userPrincipalName;
   
   // Map roles with proper precedence order
-  let dbRole = 'consumer';  // default role
-  let dbStatus = 'pending'; // default status for users without privileges
+  // Samantha: Gated access - new users are pending until admin approves
+  let dbRole = 'viewer';    // default role (will be active once approved)
+  let dbStatus = 'pending'; // default status - must be approved by admin to access
   let roleSource = 'default'; // Track where the role came from
   
-  // PRECEDENCE 1: Check ADMIN_EMAILS environment variable (highest priority)
-  const adminEmails = process.env.ADMIN_EMAILS ? 
+  // Check ADMIN_EMAILS environment variable for admin access
+  const adminEmails = process.env.ADMIN_EMAILS ?
     process.env.ADMIN_EMAILS.split(',').map(e => e.trim().toLowerCase()) : [];
-  
+
   if (adminEmails.length > 0 && adminEmails.includes(email.toLowerCase())) {
     dbRole = 'admin';
     dbStatus = 'active';
     roleSource = 'ADMIN_EMAILS';
-    console.log(`User ${email} found in ADMIN_EMAILS, setting as active admin (source: ${roleSource})`);
-  }
-  // PRECEDENCE 2: Check Azure AD App Roles (if not overridden by ADMIN_EMAILS)
-  else {
-    console.log(`User ${email} AD roles:`, roles);
-    
-    if (roles.includes('DOF Hekmah Admins')) {
-      dbRole = 'admin';
-      dbStatus = 'active';
-      roleSource = 'AD_ROLE_ADMIN';
-      console.log(`User ${email} has DOF Hekmah Admins role, setting as active admin (source: ${roleSource})`);
-    } else if (roles.includes('DOF Hekmah Users')) {
-      dbRole = 'consumer';
-      dbStatus = 'active';
-      roleSource = 'AD_ROLE_USER';
-      console.log(`User ${email} has DOF Hekmah Users role, setting as active consumer (source: ${roleSource})`);
-    } else {
-      // PRECEDENCE 3: Default fallback
-      roleSource = 'DEFAULT_PENDING';
-      console.log(`User ${email} has no AD roles or admin override, setting as pending consumer (source: ${roleSource})`);
-    }
+    console.log(`User ${email} found in ADMIN_EMAILS, setting as active admin`);
+  } else {
+    // Default: pending viewer - must be approved by admin
+    roleSource = 'DEFAULT_PENDING';
+    console.log(`User ${email} not in ADMIN_EMAILS, setting as pending viewer (requires admin approval)`);
   }
   
   if (!email) {

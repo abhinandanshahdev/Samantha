@@ -34,7 +34,72 @@
 .sidebar-count {
   margin-bottom: 16px;
   padding: 0 4px;
-  margin-top: -24px;
+}
+
+/* View Mode Toggle */
+.roadmap-timeline-sidebar .view-mode-toggle {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 40px;
+  padding: 4px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.roadmap-timeline-sidebar .view-mode-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.roadmap-timeline-sidebar .view-mode-btn:hover {
+  color: #374151;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.roadmap-timeline-sidebar .view-mode-btn.active {
+  background: white;
+  color: #1f2937;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.roadmap-timeline-sidebar .view-mode-btn svg {
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+/* Dark mode for View Toggle */
+body.dark-mode .roadmap-timeline-sidebar .view-mode-toggle {
+  background: var(--dm-surface-2);
+}
+
+body.dark-mode .roadmap-timeline-sidebar .view-mode-btn {
+  color: var(--dm-text-3);
+}
+
+body.dark-mode .roadmap-timeline-sidebar .view-mode-btn:hover {
+  color: var(--dm-text-2);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .roadmap-timeline-sidebar .view-mode-btn.active {
+  background: var(--dm-surface-3);
+  color: var(--dm-text-1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .roadmap-timeline-main {

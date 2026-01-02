@@ -246,7 +246,7 @@ export const useCaseAPI = {
   },
 
   getAlignments: async (id: string): Promise<UseCaseGoalAlignment[]> => {
-    const response = await api.get(`/use-cases/${id}/alignments`);
+    const response = await api.get(`/use-cases/${id}/strategic-goals`);
     return response.data;
   },
 
@@ -974,6 +974,45 @@ export const analyticsAPI = {
     breakdown?: 'status' | 'impact' | 'category';
   }): Promise<VarianceData> => {
     const response = await api.get('/analytics/variance', { params });
+    return response.data;
+  }
+};
+
+// Admin Users API (admin only)
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: 'viewer' | 'contributor' | 'admin';
+  status: 'active' | 'pending' | 'suspended';
+  azure_ad_id?: string;
+  created_date: string;
+  updated_date: string;
+}
+
+export const adminUsersAPI = {
+  getAll: async (): Promise<User[]> => {
+    const response = await api.get('/admin/users');
+    return response.data;
+  },
+
+  approve: async (userId: string): Promise<{ message: string; user: User }> => {
+    const response = await api.put(`/admin/users/${userId}/approve`);
+    return response.data;
+  },
+
+  suspend: async (userId: string): Promise<{ message: string; user: User }> => {
+    const response = await api.put(`/admin/users/${userId}/suspend`);
+    return response.data;
+  },
+
+  updateRole: async (userId: string, role: string): Promise<{ message: string; user: User }> => {
+    const response = await api.put(`/admin/users/${userId}/role`, { role });
+    return response.data;
+  },
+
+  delete: async (userId: string): Promise<{ message: string }> => {
+    const response = await api.delete(`/admin/users/${userId}`);
     return response.data;
   }
 };
