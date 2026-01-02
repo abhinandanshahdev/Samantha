@@ -29,7 +29,7 @@
 }
 
 .stepper-step.active .stepper-circle {
-  background: var(--dof-primary-gold, #D4AF37);
+  background: var(--dof-primary-gold, #6366F1);
   color: white;
 }
 
@@ -46,7 +46,7 @@
 }
 
 .stepper-step.active .stepper-label {
-  color: var(--dof-primary-gold, #D4AF37);
+  color: var(--dof-primary-gold, #6366F1);
   font-weight: 600;
 }
 
@@ -65,7 +65,7 @@
 }
 
 .stepper-connector.active {
-  background: var(--dof-primary-gold, #D4AF37);
+  background: var(--dof-primary-gold, #6366F1);
 }
 
 /* Dark mode support */
@@ -83,7 +83,7 @@
 }
 
 [data-theme="dark"] .stepper-step.active .stepper-label {
-  color: var(--dof-primary-gold, #D4AF37);
+  color: var(--dof-primary-gold, #6366F1);
 }
 
 [data-theme="dark"] .stepper-step.completed .stepper-label {

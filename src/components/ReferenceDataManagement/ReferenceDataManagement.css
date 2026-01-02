@@ -117,7 +117,7 @@
 }
 
 .create-button:hover {
-  background: #B8941F;
+  background: #4F46E5;
 }
 
 .loading {
@@ -193,8 +193,8 @@
 }
 
 .edit-button:hover {
-  background: #B8941F;
-  border-color: #B8941F;
+  background: #4F46E5;
+  border-color: #4F46E5;
 }
 
 .delete-button {
@@ -253,7 +253,7 @@
 .form-group textarea:focus {
   outline: none;
   border-color: var(--dof-gold);
-  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
 .form-group textarea {
@@ -288,8 +288,8 @@
 }
 
 .save-button:hover {
-  background: #B8941F;
-  border-color: #B8941F;
+  background: #4F46E5;
+  border-color: #4F46E5;
 }
 
 .cancel-button {

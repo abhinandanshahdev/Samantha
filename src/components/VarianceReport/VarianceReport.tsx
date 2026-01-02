@@ -39,7 +39,7 @@ type TimeRange = 7 | 14 | 30 | 90;
 const COLORS = {
   initiatives: '#00A79D', // Sea Green
   tasks: '#C68D6D',       // Earthy Brown
-  gold: '#B79546',        // Primary Gold
+  gold: '#6366F1',        // Primary Gold
   positive: '#22c55e',
   negative: '#ef4444',
   neutral: '#77787B'

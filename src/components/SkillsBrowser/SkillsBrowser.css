@@ -60,7 +60,7 @@
 }
 
 .skills-browser-title svg {
-  color: #D4AF37;
+  color: #6366F1;
 }
 
 .skills-browser-header-actions {
@@ -76,7 +76,7 @@
   padding: 6px 12px;
   font-size: 12px;
   font-weight: 500;
-  background: #D4AF37;
+  background: #6366F1;
   color: white;
   border: none;
   border-radius: 6px;
@@ -149,7 +149,7 @@
   width: 32px;
   height: 32px;
   border: 3px solid #e5e7eb;
-  border-top-color: #D4AF37;
+  border-top-color: #6366F1;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -165,7 +165,7 @@
 .skills-browser-error button {
   margin-top: 12px;
   padding: 8px 16px;
-  background: #D4AF37;
+  background: #6366F1;
   color: white;
   border: none;
   border-radius: 6px;
@@ -202,7 +202,7 @@
 }
 
 .skill-card.active {
-  border-color: #D4AF37;
+  border-color: #6366F1;
   background: #FFFBEB;
 }
 
@@ -231,7 +231,7 @@
 }
 
 .skill-icon {
-  color: #D4AF37;
+  color: #6366F1;
   flex-shrink: 0;
 }
 
@@ -240,7 +240,7 @@
   align-items: center;
   gap: 3px;
   padding: 2px 8px;
-  background: #D4AF37;
+  background: #6366F1;
   color: white;
   font-size: 10px;
   font-weight: 500;
@@ -274,13 +274,13 @@
 }
 
 .skill-toggle-btn:hover {
-  border-color: #D4AF37;
-  color: #D4AF37;
+  border-color: #6366F1;
+  color: #6366F1;
 }
 
 .skill-toggle-btn.active {
-  background: #D4AF37;
-  border-color: #D4AF37;
+  background: #6366F1;
+  border-color: #6366F1;
   color: white;
 }
 

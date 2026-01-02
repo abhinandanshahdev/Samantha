@@ -128,7 +128,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         alignItems: 'center', 
         height: '100vh',
         fontSize: '18px',
-        color: '#D4AF37'
+        color: '#6366F1'
       }}>
         Loading Samantha...
       </div>

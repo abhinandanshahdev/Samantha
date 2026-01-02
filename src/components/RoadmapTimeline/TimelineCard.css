@@ -71,16 +71,16 @@
   backdrop-filter: blur(20px) saturate(200%);
   -webkit-backdrop-filter: blur(20px) saturate(200%);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15),
-              0 4px 16px rgba(183, 149, 70, 0.08),
+              0 4px 16px rgba(99, 102, 241, 0.08),
               inset 0 1px 0 rgba(255, 255, 255, 0.95),
               inset 0 -1px 0 rgba(0, 0, 0, 0.05);
   transform: translateY(-2px);
-  border-color: rgba(183, 149, 70, 0.5);
+  border-color: rgba(99, 102, 241, 0.5);
 }
 
 .timeline-card.dragging {
   box-shadow: 0 12px 40px rgba(31, 38, 135, 0.12),
-              0 4px 16px rgba(183, 149, 70, 0.08);
+              0 4px 16px rgba(99, 102, 241, 0.08);
   cursor: grabbing;
   opacity: 0.8;
 }

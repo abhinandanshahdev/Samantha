@@ -20,18 +20,18 @@
   max-height: 80vh;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   overflow: hidden;
-  border: 1px solid #E6CC7F;
+  border: 1px solid #E5E7EB;
 }
 
 .voice-chat-header {
-  background: linear-gradient(135deg, #F4E8D0 0%, #E6CC7F 100%);
+  background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
   color: #2C3E50;
   padding: 16px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 2px solid #D4AF37;
-  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.15);
+  border-bottom: 2px solid #6366F1;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
 }
 
 .voice-chat-title {
@@ -273,7 +273,7 @@
 }
 
 .message.user .message-content {
-  background: linear-gradient(135deg, #E6CC7F 0%, #D4AF37 100%);
+  background: linear-gradient(135deg, #E5E7EB 0%, #6366F1 100%);
   color: #2C3E50;
   border-bottom-right-radius: 4px;
 }
@@ -281,7 +281,7 @@
 .message.assistant .message-content {
   background: #ffffff;
   color: #2C3E50;
-  border: 1px solid #E6CC7F;
+  border: 1px solid #E5E7EB;
   border-bottom-left-radius: 4px;
 }
 
@@ -361,7 +361,7 @@
 
 .voice-settings {
   background: #f8f9fa;
-  border-bottom: 2px solid #E6CC7F;
+  border-bottom: 2px solid #E5E7EB;
   padding: 16px 20px;
 }
 
@@ -383,7 +383,7 @@
 
 .mode-btn {
   padding: 8px 16px;
-  border: 2px solid #E6CC7F;
+  border: 2px solid #E5E7EB;
   background: white;
   color: #2C3E50;
   border-radius: 20px;
@@ -396,11 +396,11 @@
 }
 
 .mode-btn:hover {
-  background: #F4E8D0;
+  background: #F3F4F6;
 }
 
 .mode-btn.active {
-  background: #E6CC7F;
+  background: #E5E7EB;
   color: white;
   font-weight: 600;
 }

@@ -27,7 +27,7 @@
   background: #FFFDF9;
   border-radius: 20px;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
-  border: 1px solid #E6CC7F;
+  border: 1px solid #E5E7EB;
   max-width: 1200px;
   width: 95%;
   max-height: 90vh;
@@ -53,10 +53,10 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px 32px;
-  background: linear-gradient(135deg, #F4E8D0 0%, #E6CC7F 100%);
+  background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
   backdrop-filter: blur(10px);
-  border-bottom: 2px solid #D4AF37;
-  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.15);
+  border-bottom: 2px solid #6366F1;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
   border-radius: 20px 20px 0 0;
 }
 
@@ -122,14 +122,14 @@
 }
 
 .prompt-button {
-  background-color: #B79546;  /* DoF Gold */
+  background-color: #6366F1;  /* DoF Gold */
   color: white;
 }
 
 .prompt-button:hover {
   background-color: #A07D36;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(183, 149, 70, 0.3);
+  box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
 }
 
 .autogen-button {
@@ -405,7 +405,7 @@
 
 .status-slow_burner {
   background-color: #FEF3C7;
-  color: #F6BD60;
+  color: #F59E0B;
 }
 
 .status-de_prioritised {
@@ -415,7 +415,7 @@
 
 .status-on_hold {
   background-color: #FEF3C7;
-  color: #B79546;
+  color: #6366F1;
 }
 
 .action-links {

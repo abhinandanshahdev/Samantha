@@ -34,7 +34,7 @@ body.dark-mode {
 
   /* Status colors (adjusted for dark) */
   --dm-success: #22c55e;
-  --dm-warning: #F6BD60;
+  --dm-warning: #F59E0B;
   --dm-error: #ef4444;
   --dm-info: #8E8AA6;
 
@@ -961,9 +961,9 @@ body.dark-mode .ai-chat-skills-btn:hover {
 }
 
 body.dark-mode .ai-chat-skills-btn.has-active {
-  background: rgba(212, 175, 55, 0.2);
-  border-color: rgba(212, 175, 55, 0.4);
-  color: #D4AF37;
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.4);
+  color: #6366F1;
 }
 
 body.dark-mode .ai-chat-messages {
@@ -2116,8 +2116,8 @@ body.dark-mode .skill-card:hover {
 }
 
 body.dark-mode .skill-card.active {
-  border-color: #D4AF37;
-  background: rgba(212, 175, 55, 0.1);
+  border-color: #6366F1;
+  background: rgba(99, 102, 241, 0.1);
 }
 
 body.dark-mode .skill-card-title {
@@ -2135,13 +2135,13 @@ body.dark-mode .skill-toggle-btn {
 }
 
 body.dark-mode .skill-toggle-btn:hover {
-  border-color: #D4AF37;
-  color: #D4AF37;
+  border-color: #6366F1;
+  color: #6366F1;
 }
 
 body.dark-mode .skill-toggle-btn.active {
-  background: #D4AF37;
-  border-color: #D4AF37;
+  background: #6366F1;
+  border-color: #6366F1;
   color: #1a1a2e;
 }
 
@@ -2650,11 +2650,27 @@ body.dark-mode .table-view-wrapper {
 body.dark-mode .table-header {
   background: var(--dm-surface-2) !important;
   border-color: var(--dm-border-1) !important;
-  color: var(--dm-text-1) !important;
+  color: var(--dm-text-2) !important;
 }
 
 body.dark-mode .table-header-cell {
+  color: var(--dm-text-2) !important;
+}
+
+body.dark-mode .table-header-cell.sortable:hover {
   color: var(--dm-text-1) !important;
+}
+
+body.dark-mode .table-header-cell.sortable.active {
+  color: var(--dm-text-1) !important;
+}
+
+body.dark-mode .table-header-cell .sort-icon {
+  color: var(--dm-text-3) !important;
+}
+
+body.dark-mode .table-header-cell .sort-icon.active {
+  color: #A78BFA !important;
 }
 
 body.dark-mode .table-body {
@@ -3812,8 +3828,8 @@ body.dark-mode .related-list-badge {
 }
 
 body.dark-mode .related-list-badge--category {
-  background: rgba(183, 149, 70, 0.2) !important;
-  color: #d4af37 !important;
+  background: rgba(99, 102, 241, 0.2) !important;
+  color: #A78BFA !important;
 }
 
 body.dark-mode .related-list-badge--type {
@@ -4027,7 +4043,7 @@ body.dark-mode .close-button:hover {
   }
 
   body.dark-mode .kanban-column-header {
-    background: linear-gradient(135deg, rgba(95, 158, 160, 0.15) 0%, rgba(160, 120, 90, 0.15) 100%) !important;
+    background: var(--dm-surface-2) !important;
     border-bottom-color: var(--dm-border-1) !important;
   }
 
@@ -4257,6 +4273,10 @@ body.dark-mode .news-masthead {
   border-bottom-color: var(--dm-border-1) !important;
 }
 
+body.dark-mode .news-combined-section {
+  border-top-color: rgba(55, 65, 81, 0.4) !important;
+}
+
 body.dark-mode .news-masthead-title {
   color: var(--dm-text-1) !important;
 }
@@ -4279,17 +4299,34 @@ body.dark-mode .news-section-desc {
 }
 
 /* Outcomes - Dark Mode */
-body.dark-mode .news-outcome-number {
-  background: var(--dm-accent) !important;
-  color: var(--dm-accent-text) !important;
+body.dark-mode .news-outcome-icon {
+  color: #A78BFA !important;
 }
 
-body.dark-mode .news-outcome-title {
-  color: var(--dm-text-1) !important;
+body.dark-mode .news-outcome-title,
+body.dark-mode .news-outcome-title-inline {
+  color: #F3F4F6 !important;
 }
 
 body.dark-mode .news-outcome-measure {
   color: var(--dm-text-2) !important;
+}
+
+body.dark-mode .news-outcome-label {
+  color: var(--dm-text-3) !important;
+}
+
+/* Maturity Dots - Dark Mode */
+body.dark-mode .news-maturity-dot {
+  background: #374151 !important;
+}
+
+body.dark-mode .news-maturity-dot.filled {
+  background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%) !important;
+}
+
+body.dark-mode .news-maturity-label {
+  color: #9CA3AF !important;
 }
 
 /* Progress Bar - Dark Mode */
@@ -4305,16 +4342,15 @@ body.dark-mode .news-progress-label {
   color: var(--dm-text-2) !important;
 }
 
-/* Pillar Labels - Dark Mode */
-body.dark-mode .news-pillar-label {
-  background: var(--dm-text-1) !important;
-  color: var(--dm-bg-app) !important;
+/* Pillar Icons - Dark Mode */
+body.dark-mode .news-pillar-icon {
+  color: #4ADE80 !important;
 }
 
 /* Goal Numbers - Dark Mode */
 body.dark-mode .news-goal-number {
-  background: var(--dm-surface-3) !important;
-  color: var(--dm-text-2) !important;
+  background: #374151 !important;
+  color: #D1D5DB !important;
 }
 
 /* Goals - Dark Mode */
@@ -4339,25 +4375,6 @@ body.dark-mode .news-goal-date::before {
   background: var(--dm-border-2) !important;
 }
 
-/* Activity Bars - Dark Mode */
-body.dark-mode .news-bar {
-  background: var(--dm-surface-3) !important;
-}
-
-body.dark-mode .news-activity-low .news-bar-1 {
-  background: #FBBF24 !important;
-}
-
-body.dark-mode .news-activity-medium .news-bar-1,
-body.dark-mode .news-activity-medium .news-bar-2 {
-  background: #FB923C !important;
-}
-
-body.dark-mode .news-activity-high .news-bar-1,
-body.dark-mode .news-activity-high .news-bar-2,
-body.dark-mode .news-activity-high .news-bar-3 {
-  background: #4ADE80 !important;
-}
 
 /* Inputs - Dark Mode */
 body.dark-mode .news-input {

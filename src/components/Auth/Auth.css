@@ -4,8 +4,8 @@
   padding: 32px;
   background: var(--dof-white);
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(139, 105, 20, 0.15);
-  border: 1px solid var(--dof-accent-gold);
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
+  border: 1px solid #E5E7EB;
 }
 
 .auth-container h2 {
@@ -45,8 +45,8 @@
 
 .form-group input:focus,
 .form-group select:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(127, 205, 205, 0.1);
+  border-color: #6366F1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .error-message {
@@ -70,7 +70,7 @@
 
 .auth-button:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(127, 205, 205, 0.3);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 .auth-button:disabled {

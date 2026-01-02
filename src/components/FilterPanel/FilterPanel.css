@@ -19,7 +19,7 @@
   align-items: center;
   margin-bottom: 12px;
   padding-bottom: 10px;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.15);
 }
 
 .filter-title {
@@ -48,7 +48,7 @@
 
 .clear-all-btn {
   background: transparent;
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  border: 1px solid rgba(99, 102, 241, 0.3);
   color: var(--dof-primary-gold);
   padding: 4px 12px;
   border-radius: 6px;
@@ -59,7 +59,7 @@
 }
 
 .clear-all-btn:hover {
-  background: rgba(212, 175, 55, 0.1);
+  background: rgba(99, 102, 241, 0.1);
   border-color: var(--dof-primary-gold);
 }
 
@@ -83,7 +83,7 @@
 .filter-search .search-input {
   width: 100%;
   padding: 10px 40px 10px 40px;
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  border: 1px solid rgba(99, 102, 241, 0.3);
   border-radius: 8px;
   font-size: 0.9rem;
   color: var(--dof-gray-dark);
@@ -94,7 +94,7 @@
 .filter-search .search-input:focus {
   outline: none;
   border-color: var(--dof-primary-gold);
-  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .filter-search .search-input::placeholder {
@@ -153,13 +153,13 @@
 
 .dropdown-trigger:hover {
   border-color: var(--dof-primary-gold);
-  background: rgba(212, 175, 55, 0.03);
+  background: rgba(99, 102, 241, 0.03);
 }
 
 .dropdown-trigger.active {
   border-color: var(--dof-primary-gold);
-  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
-  background: rgba(212, 175, 55, 0.05);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  background: rgba(99, 102, 241, 0.05);
 }
 
 .dropdown-label {
@@ -250,7 +250,7 @@
 }
 
 .dropdown-option:hover {
-  background: rgba(212, 175, 55, 0.08);
+  background: rgba(99, 102, 241, 0.08);
 }
 
 .dropdown-option input[type="checkbox"] {
@@ -320,8 +320,8 @@
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
-  background: rgba(212, 175, 55, 0.1);
-  border: 1px solid rgba(212, 175, 55, 0.2);
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.2);
   border-radius: 16px;
   font-size: 0.85rem;
   color: var(--dof-gray-dark);

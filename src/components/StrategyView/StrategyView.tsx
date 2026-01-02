@@ -96,8 +96,8 @@ const StrategyView: React.FC<StrategyViewProps> = ({
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return '#00A79D'; // DoF Sea Green
-      case 'completed': return '#B79546'; // DoF Gold
-      case 'draft': return '#F6BD60'; // DoF Sunset Yellow
+      case 'completed': return '#6366F1'; // DoF Gold
+      case 'draft': return '#F59E0B'; // DoF Sunset Yellow
       case 'cancelled': return '#DC2626'; // DoF Error Red
       default: return '#77787B'; // DoF Metal Grey
     }

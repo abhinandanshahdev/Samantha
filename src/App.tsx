@@ -1066,7 +1066,7 @@ function App() {
               textTransform: 'uppercase',
               fontWeight: '600',
               padding: '4px 10px',
-              background: user?.role === 'admin' ? '#D4AF37' : '#6c757d',
+              background: user?.role === 'admin' ? '#6366F1' : '#6c757d',
               borderRadius: '12px',
               display: 'inline-block',
               letterSpacing: '0.5px'
@@ -1165,7 +1165,7 @@ function App() {
               onClick={() => setPresentation(!presentation)}
               style={{
                 border: darkMode ? '1px solid #3A3650' : '1px solid #E5E7EB',
-                background: presentation ? '#B79546' : (darkMode ? '#252034' : '#fff'),
+                background: presentation ? '#6366F1' : (darkMode ? '#252034' : '#fff'),
                 width: '40px',
                 height: '22px',
                 borderRadius: '11px',
@@ -1200,7 +1200,7 @@ function App() {
             borderBottom: darkMode ? '1px solid #2D293C' : '1px solid #e9ecef'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <FaMoon style={{ fontSize: '16px', color: darkMode ? '#B79546' : '#6c757d' }} />
+              <FaMoon style={{ fontSize: '16px', color: darkMode ? '#6366F1' : '#6c757d' }} />
               <span style={{ fontSize: '14px', color: darkMode ? '#EDECF3' : '#333' }}>Dark Mode</span>
             </div>
             <button
@@ -1208,7 +1208,7 @@ function App() {
               onClick={() => setDarkMode(!darkMode)}
               style={{
                 border: darkMode ? '1px solid #3A3650' : '1px solid #E5E7EB',
-                background: darkMode ? '#B79546' : '#fff',
+                background: darkMode ? '#6366F1' : '#fff',
                 width: '40px',
                 height: '22px',
                 borderRadius: '11px',
@@ -1243,7 +1243,7 @@ function App() {
             borderBottom: darkMode ? '1px solid #2D293C' : '1px solid #e9ecef'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <FaChartPie style={{ fontSize: '16px', color: darkMode ? (goalDisplayMode === 'initiatives' ? '#B79546' : '#8E8AA6') : '#6c757d' }} />
+              <FaChartPie style={{ fontSize: '16px', color: darkMode ? (goalDisplayMode === 'initiatives' ? '#6366F1' : '#8E8AA6') : '#6c757d' }} />
               <span style={{ fontSize: '14px', color: darkMode ? '#EDECF3' : '#333' }}>Show Initiatives</span>
             </div>
             <button
@@ -1251,7 +1251,7 @@ function App() {
               onClick={handleToggleGoalDisplayMode}
               style={{
                 border: darkMode ? '1px solid #3A3650' : '1px solid #E5E7EB',
-                background: goalDisplayMode === 'initiatives' ? '#B79546' : (darkMode ? '#252034' : '#fff'),
+                background: goalDisplayMode === 'initiatives' ? '#6366F1' : (darkMode ? '#252034' : '#fff'),
                 width: '40px',
                 height: '22px',
                 borderRadius: '11px',

@@ -104,14 +104,14 @@
 }
 
 .time-range-btn.active {
-  background: #B79546;
+  background: #6366F1;
   color: white;
 }
 
 /* Export Button */
 .export-btn {
   padding: 8px 16px;
-  background: linear-gradient(135deg, #B79546 0%, #D4A857 100%);
+  background: linear-gradient(135deg, #6366F1 0%, #D4A857 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -123,7 +123,7 @@
 
 .export-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(183, 149, 70, 0.3);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 /* Close Button */
@@ -181,7 +181,7 @@
 .stat-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 40px rgba(31, 38, 135, 0.12),
-              0 4px 16px rgba(183, 149, 70, 0.08);
+              0 4px 16px rgba(99, 102, 241, 0.08);
 }
 
 .stat-label {
@@ -287,13 +287,13 @@
 }
 
 .breakdown-tab:hover {
-  border-color: #B79546;
-  color: #B79546;
+  border-color: #6366F1;
+  color: #6366F1;
 }
 
 .breakdown-tab.active {
-  background: #B79546;
-  border-color: #B79546;
+  background: #6366F1;
+  border-color: #6366F1;
   color: white;
 }
 
@@ -379,7 +379,7 @@
   width: 48px;
   height: 48px;
   border: 3px solid #e1e5e9;
-  border-top-color: #B79546;
+  border-top-color: #6366F1;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
@@ -416,7 +416,7 @@
 }
 
 .retry-button {
-  background: #B79546;
+  background: #6366F1;
   color: white;
   border: none;
 }

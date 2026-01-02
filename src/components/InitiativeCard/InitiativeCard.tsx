@@ -26,25 +26,25 @@ const InitiativeCard: React.FC<InitiativeCardProps> = ({ useCase, onClick, onEdi
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'intention':
-        return '#77787B';
+        return '#64748B'; // Slate
       case 'experimentation':
-        return '#9B59B6';
+        return '#8B5CF6'; // Violet
       case 'commitment':
-        return '#C68D6D';
+        return '#F97316'; // Orange
       case 'implementation':
-        return '#4A90E2';
+        return '#3B82F6'; // Blue
       case 'integration':
-        return '#00A79D';
+        return '#10B981'; // Emerald
       case 'blocked':
-        return '#E74C3C';
+        return '#EF4444'; // Red
       case 'slow_burner':
-        return '#F6BD60';
+        return '#F59E0B'; // Amber
       case 'de_prioritised':
-        return '#9e9e9e';
+        return '#9CA3AF'; // Grey
       case 'on_hold':
-        return '#B79546';
+        return '#6B7280'; // Dark grey
       default:
-        return '#77787B';
+        return '#64748B';
     }
   };
 
@@ -108,35 +108,8 @@ const InitiativeCard: React.FC<InitiativeCardProps> = ({ useCase, onClick, onEdi
     return (
       <div className="table-row" onClick={() => onClick(useCase)}>
         <div className="table-cell title-col">{useCase.title}</div>
+        <div className="table-cell status-col">{getStatusLabel(useCase.status)}</div>
         <div className="table-cell desc-col">{useCase.description || 'No description available'}</div>
-        <div className="table-cell cat-col">
-          <span
-            className="metadata-icon tooltip-trigger"
-            data-tooltip={useCase.category}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <FaLayerGroup />
-          </span>
-        </div>
-        <div className="table-cell impact-col">
-          <span
-            className="metadata-icon tooltip-trigger"
-            data-tooltip={`${useCase.strategic_impact} Impact`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <FaBolt />
-          </span>
-        </div>
-        <div className="table-cell status-col">
-          <div
-            className="status-dot-table tooltip-trigger"
-            style={{
-              backgroundColor: getStatusColor(useCase.status)
-            }}
-            data-tooltip={getStatusLabel(useCase.status)}
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
       </div>
     );
   }

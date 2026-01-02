@@ -30,7 +30,7 @@
 }
 
 .back-button:hover {
-  background: rgba(212, 175, 55, 0.05);
+  background: rgba(99, 102, 241, 0.05);
   border-color: var(--dof-primary-gold);
   color: var(--dof-primary-gold);
 }
@@ -129,7 +129,7 @@
 }
 
 .edit-btn:hover {
-  background: rgba(212, 175, 55, 0.1);
+  background: rgba(99, 102, 241, 0.1);
   color: var(--dof-primary-gold);
 }
 
@@ -152,7 +152,7 @@
 }
 
 .name-input:focus {
-  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .name-input:disabled {

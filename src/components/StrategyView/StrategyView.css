@@ -246,8 +246,8 @@
 }
 
 .pillar-card:hover {
-  background: rgba(183, 149, 70, 0.05);
-  border-color: rgba(183, 149, 70, 0.3);
+  background: rgba(99, 102, 241, 0.05);
+  border-color: rgba(99, 102, 241, 0.3);
 }
 
 .pillar-card input[type="checkbox"] {
@@ -267,8 +267,8 @@
 }
 
 .pillar-card input[type="checkbox"]:checked + .pillar-checkbox {
-  background: #B79546;
-  border-color: #B79546;
+  background: #6366F1;
+  border-color: #6366F1;
 }
 
 .pillar-card input[type="checkbox"]:checked + .pillar-checkbox::after {
@@ -306,8 +306,8 @@
 }
 
 .pillar-card input[type="checkbox"]:checked ~ .pillar-header .goal-count {
-  background: rgba(183, 149, 70, 0.2);
-  color: #B79546;
+  background: rgba(99, 102, 241, 0.2);
+  color: #6366F1;
 }
 
 .pillar-description {
@@ -376,7 +376,7 @@
 }
 
 .pillar-card.selected .stat-value {
-  color: #B79546;
+  color: #6366F1;
   font-weight: 700;
 }
 
@@ -410,7 +410,7 @@
 /* Scrollbar styling for goals grid */
 .goals-grid {
   scrollbar-width: thin;
-  scrollbar-color: rgba(212, 175, 55, 0.2) transparent;
+  scrollbar-color: rgba(99, 102, 241, 0.2) transparent;
 }
 
 .goals-grid::-webkit-scrollbar {
@@ -422,12 +422,12 @@
 }
 
 .goals-grid::-webkit-scrollbar-thumb {
-  background: rgba(212, 175, 55, 0.2);
+  background: rgba(99, 102, 241, 0.2);
   border-radius: 4px;
 }
 
 .goals-grid:hover::-webkit-scrollbar-thumb {
-  background: rgba(212, 175, 55, 0.4);
+  background: rgba(99, 102, 241, 0.4);
 }
 
 .goal-card {
@@ -462,10 +462,10 @@
     rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(20px) saturate(200%);
   -webkit-backdrop-filter: blur(20px) saturate(200%);
-  border-color: rgba(183, 149, 70, 0.5);
+  border-color: rgba(99, 102, 241, 0.5);
   box-shadow:
     0 12px 40px rgba(31, 38, 135, 0.12),
-    0 4px 16px rgba(183, 149, 70, 0.08),
+    0 4px 16px rgba(99, 102, 241, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.95),
     inset 0 -1px 0 rgba(0, 0, 0, 0.05);
 }
@@ -503,10 +503,10 @@
     rgba(255, 255, 255, 0.65);
   backdrop-filter: blur(18px) saturate(190%);
   -webkit-backdrop-filter: blur(18px) saturate(190%);
-  border: 1px solid rgba(183, 149, 70, 0.3);
+  border: 1px solid rgba(99, 102, 241, 0.3);
   box-shadow:
     0 8px 32px rgba(31, 38, 135, 0.1),
-    0 4px 16px rgba(183, 149, 70, 0.08),
+    0 4px 16px rgba(99, 102, 241, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.9),
     inset 0 -1px 0 rgba(0, 0, 0, 0.05);
 }
@@ -519,7 +519,7 @@
   -webkit-backdrop-filter: blur(22px) saturate(210%);
   box-shadow:
     0 12px 40px rgba(31, 38, 135, 0.15),
-    0 6px 20px rgba(183, 149, 70, 0.12),
+    0 6px 20px rgba(99, 102, 241, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.95),
     inset 0 -1px 0 rgba(0, 0, 0, 0.05);
 }
@@ -617,17 +617,17 @@
 }
 
 .pillar-badge[data-pillar*="Responsible AI Governance"] {
-  background: rgba(246, 189, 96, 0.1);
-  border-color: rgba(246, 189, 96, 0.2);
-  color: #F6BD60;
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.2);
+  color: #F59E0B;
 }
 
 /* Fallback for any other pillars */
 .pillar-badge[data-pillar*="Governance"],
 .pillar-badge[data-pillar*="governance"] {
-  background: rgba(246, 189, 96, 0.1);
-  border-color: rgba(246, 189, 96, 0.2);
-  color: #F6BD60;
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.2);
+  color: #F59E0B;
 }
 
 .pillar-badge[data-pillar*="Operations"],
@@ -707,7 +707,7 @@
 .count-number {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #B79546;
+  color: #6366F1;
   line-height: 1;
 }
 
@@ -732,14 +732,14 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(183, 149, 70, 0.3);
+  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
   width: 100%;
 }
 
 .create-goal-btn-sidebar:hover {
   background: var(--dof-primary-dark-gold);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(183, 149, 70, 0.4);
+  box-shadow: 0 4px 8px rgba(99, 102, 241, 0.4);
 }
 
 .goal-header {

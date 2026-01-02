@@ -112,7 +112,7 @@
 
 .sort-dropdown:focus {
   border-color: var(--dof-primary-gold);
-  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
 .dashboard-actions {
@@ -141,7 +141,7 @@
   background: transparent;
   color: var(--dof-gold);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(183, 149, 70, 0.25);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
 }
 
 .create-goal-button {
@@ -273,7 +273,7 @@
   background: transparent;
   color: var(--dof-primary-gold);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(183, 149, 70, 0.25);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
 }
 
 /* Scroll wrapper with visual indicators */
@@ -318,7 +318,7 @@
   left: 50%;
   transform: translateX(-50%);
   font-size: 2rem;
-  color: rgba(212, 175, 55, 0.8);
+  color: rgba(99, 102, 241, 0.8);
   font-weight: bold;
   z-index: 2;
   pointer-events: none;
@@ -355,7 +355,7 @@
 /* Hide scrollbar but keep functionality */
 .use-cases-container {
   scrollbar-width: thin;
-  scrollbar-color: rgba(212, 175, 55, 0.2) transparent;
+  scrollbar-color: rgba(99, 102, 241, 0.2) transparent;
 }
 
 .use-cases-container::-webkit-scrollbar {
@@ -367,12 +367,12 @@
 }
 
 .use-cases-container::-webkit-scrollbar-thumb {
-  background: rgba(212, 175, 55, 0.2);
+  background: rgba(99, 102, 241, 0.2);
   border-radius: 4px;
 }
 
 .use-cases-container:hover::-webkit-scrollbar-thumb {
-  background: rgba(212, 175, 55, 0.4);
+  background: rgba(99, 102, 241, 0.4);
 }
 
 /* Scroll hint indicator */
@@ -382,7 +382,7 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 2;
-  background: rgba(212, 175, 55, 0.95);
+  background: rgba(99, 102, 241, 0.95);
   color: white;
   padding: 6px 16px;
   border-radius: 20px;

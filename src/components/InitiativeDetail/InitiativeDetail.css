@@ -403,7 +403,7 @@
 /* Delivery Information Section */
 .delivery-info-section {
   background: linear-gradient(135deg, rgba(0, 167, 157, 0.05) 0%, transparent 50%, rgba(198, 141, 109, 0.05) 100%);
-  border: 1px solid rgba(183, 149, 70, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.2);
   border-radius: 12px;
   padding: 20px;
 }
@@ -497,8 +497,8 @@
 }
 
 .related-list-badge--category {
-  background: rgba(183, 149, 70, 0.1);
-  color: #B79546;
+  background: rgba(99, 102, 241, 0.1);
+  color: #6366F1;
 }
 
 .related-list-badge--type {

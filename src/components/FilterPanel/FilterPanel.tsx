@@ -207,9 +207,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     { value: 'implementation', label: 'Implementation', color: '#4A90E2' },
     { value: 'integration', label: 'Integration', color: '#00A79D' },
     { value: 'blocked', label: 'Blocked', color: '#E74C3C' },
-    { value: 'slow_burner', label: 'Slow Burner', color: '#F6BD60' },
+    { value: 'slow_burner', label: 'Slow Burner', color: '#F59E0B' },
     { value: 'de_prioritised', label: 'De-prioritised', color: '#9e9e9e' },
-    { value: 'on_hold', label: 'On Hold', color: '#B79546' }
+    { value: 'on_hold', label: 'On Hold', color: '#6366F1' }
   ];
 
   const toggleDropdown = (dropdown: string) => {

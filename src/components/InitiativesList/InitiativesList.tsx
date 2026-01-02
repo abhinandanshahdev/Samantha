@@ -1,29 +1,28 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { FixedSizeList as List } from 'react-window';
 import { UseCase, SearchFilters, Category } from '../../types';
-import { categoryAPI, useCaseAPI, likesAPI } from '../../services/apiService';
+import { categoryAPI, useCaseAPI } from '../../services/apiService';
 import { useActiveDomainId } from '../../context/DomainContext';
 import FilterPanel from '../FilterPanel/FilterPanel';
 import InitiativeCard from '../InitiativeCard/InitiativeCard';
-import PrioritizationMatrix from '../PrioritizationMatrix/PrioritizationMatrix';
 import ChatAssistant from '../ChatAssistant/ChatAssistant';
 import EmptyState from '../EmptyState/EmptyState';
 import LoadingAnimation from '../LoadingAnimation/LoadingAnimation';
 import { emptyStateMessages } from '../../data/emptyStates';
-import { FaThLarge, FaList, FaSortAmountDown, FaPlus, FaChartLine, FaBuilding, FaLayerGroup, FaBolt, FaTag } from 'react-icons/fa';
+import { FaSortAmountDown, FaPlus, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 import './InitiativesList.css';
 
-// Status colors matching new family workflow
+// Status colors - cohesive modern palette
 const STATUS_COLORS = {
-  intention: '#77787B', // Metal Grey
-  experimentation: '#9B59B6', // Purple
-  commitment: '#C68D6D', // Earthy Brown
-  implementation: '#4A90E2', // Blue
-  integration: '#00A79D', // Sea Green
-  blocked: '#E74C3C', // Red
-  slow_burner: '#F6BD60', // Sunset Yellow
-  de_prioritised: '#9e9e9e', // Grey
-  on_hold: '#B79546' // Gold
+  intention: '#94A3B8', // Slate grey
+  experimentation: '#A78BFA', // Violet
+  commitment: '#FB923C', // Orange
+  implementation: '#60A5FA', // Blue
+  integration: '#34D399', // Emerald
+  blocked: '#F87171', // Red
+  slow_burner: '#FBBF24', // Amber
+  de_prioritised: '#9CA3AF', // Grey
+  on_hold: '#6B7280' // Dark grey
 };
 
 const STATUS_LABELS = {
@@ -38,11 +37,25 @@ const STATUS_LABELS = {
   on_hold: 'On Hold'
 };
 
+// Short labels for bar chart legend
+const LEGEND_LABELS = {
+  intention: 'Intent',
+  experimentation: 'Experiment',
+  commitment: 'Commit',
+  implementation: 'Implement',
+  integration: 'Integrate',
+  blocked: 'Blocked',
+  slow_burner: 'Slow',
+  de_prioritised: 'De-pri',
+  on_hold: 'Hold'
+};
+
 interface StatusCount {
   status: string;
   count: number;
   color: string;
   label: string;
+  legendLabel: string;
 }
 
 interface InitiativesCountBarProps {
@@ -63,7 +76,8 @@ const InitiativesCountBar: React.FC<InitiativesCountBarProps> = ({ useCases }) =
       status,
       count: counts[status] || 0,
       color: STATUS_COLORS[status as keyof typeof STATUS_COLORS] || STATUS_COLORS.intention,
-      label: STATUS_LABELS[status as keyof typeof STATUS_LABELS] || status
+      label: STATUS_LABELS[status as keyof typeof STATUS_LABELS] || status,
+      legendLabel: LEGEND_LABELS[status as keyof typeof LEGEND_LABELS] || status
     }));
   }, [useCases]);
 
@@ -90,9 +104,9 @@ const InitiativesCountBar: React.FC<InitiativesCountBarProps> = ({ useCases }) =
       </div>
       <div className="status-bar-legend">
         {statusCounts.map((item) => (
-          <div key={item.status} className="status-legend-item">
+          <div key={item.status} className="status-legend-item" title={item.label}>
             <span className="status-legend-dot" style={{ backgroundColor: item.color }} />
-            <span className="status-legend-text">{item.label}</span>
+            <span className="status-legend-text">{item.legendLabel}</span>
           </div>
         ))}
       </div>
@@ -133,41 +147,16 @@ const InitiativesList: React.FC<InitiativesListProps> = ({
   const [filters, setFilters] = useState<SearchFilters>(initialFilters || {});
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'matrix'>(() => {
-    // Load saved view mode preference from localStorage
-    const savedViewMode = localStorage.getItem('ai_initiatives_view_mode');
-    return (savedViewMode as 'grid' | 'list' | 'matrix') || 'grid';
-  });
   const [sortBy, setSortBy] = useState<'created' | 'updated'>(() => {
     // Load saved sort preference from localStorage
     const savedSortBy = localStorage.getItem('ai_initiatives_sort_by');
     return (savedSortBy as 'created' | 'updated') || 'updated';
   });
+  const [sortField, setSortField] = useState<'title' | 'status' | 'date'>('date');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [hasScrolled, setHasScrolled] = useState(false);
-  const [likedUseCases, setLikedUseCases] = useState<Set<string>>(new Set());
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const containerRef = useRef<HTMLDivElement>(null);
   const virtualListRef = useRef<any>(null);
-
-  // Handle mobile detection and force list view
-  useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth <= 768;
-      setIsMobile(mobile);
-      if (mobile && viewMode !== 'list') {
-        setViewMode('list');
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    // Check on mount
-    handleResize();
-    return () => window.removeEventListener('resize', handleResize);
-  }, [viewMode]);
-
-  // Save view mode preference to localStorage when it changes
-  useEffect(() => {
-    localStorage.setItem('ai_initiatives_view_mode', viewMode);
-  }, [viewMode]);
 
   // Save sort preference to localStorage when it changes
   useEffect(() => {
@@ -227,53 +216,66 @@ const InitiativesList: React.FC<InitiativesListProps> = ({
     loadUseCases();
   }, [filters, searchQuery, activeDomainId]);
 
-  // Load liked use cases for the current user
-  useEffect(() => {
-    const loadLikedUseCases = async () => {
-      if (useCases.length === 0) return;
-
-      try {
-        const liked = new Set<string>();
-        // Check like status for each use case
-        await Promise.all(
-          useCases.map(async (useCase) => {
-            try {
-              const { liked: isLiked } = await likesAPI.check(useCase.id);
-              if (isLiked) {
-                liked.add(useCase.id);
-              }
-            } catch (error) {
-              console.error(`Failed to check like status for use case ${useCase.id}:`, error);
-            }
-          })
-        );
-        setLikedUseCases(liked);
-      } catch (error) {
-        console.error('Failed to load liked use cases:', error);
-      }
-    };
-
-    loadLikedUseCases();
-  }, [useCases]);
-
-  // Reset scroll indicator when view changes
+  // Reset scroll indicator when filters change
   useEffect(() => {
     setHasScrolled(false);
     if (containerRef.current) {
       containerRef.current.scrollTop = 0;
     }
-  }, [viewMode, filters, searchQuery]);
+  }, [filters, searchQuery]);
+
+  // Status order for sorting (Intention → Integration)
+  const STATUS_SORT_ORDER: Record<string, number> = {
+    'intention': 1,
+    'experimentation': 2,
+    'commitment': 3,
+    'implementation': 4,
+    'integration': 5,
+    'blocked': 6,
+    'slow_burner': 7,
+    'de_prioritised': 8,
+    'on_hold': 9
+  };
 
   // Sort use cases (filtering is now done server-side)
   const sortedUseCases = useMemo(() => {
     const sorted = [...useCases];
     sorted.sort((a, b) => {
-      const dateA = new Date(sortBy === 'created' ? a.created_date : a.updated_date);
-      const dateB = new Date(sortBy === 'created' ? b.created_date : b.updated_date);
-      return dateB.getTime() - dateA.getTime(); // Most recent first
+      let comparison = 0;
+
+      if (sortField === 'title') {
+        comparison = a.title.localeCompare(b.title);
+      } else if (sortField === 'status') {
+        const orderA = STATUS_SORT_ORDER[a.status] || 99;
+        const orderB = STATUS_SORT_ORDER[b.status] || 99;
+        comparison = orderA - orderB;
+      } else {
+        // Default to date sorting
+        const dateA = new Date(sortBy === 'created' ? a.created_date : a.updated_date);
+        const dateB = new Date(sortBy === 'created' ? b.created_date : b.updated_date);
+        comparison = dateA.getTime() - dateB.getTime();
+      }
+
+      return sortDirection === 'asc' ? comparison : -comparison;
     });
     return sorted;
-  }, [useCases, sortBy]);
+  }, [useCases, sortBy, sortField, sortDirection]);
+
+  const handleSort = (field: 'title' | 'status' | 'date') => {
+    if (sortField === field) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection(field === 'title' ? 'asc' : 'desc');
+    }
+  };
+
+  const getSortIcon = (field: 'title' | 'status' | 'date') => {
+    if (sortField !== field) return <FaSort className="sort-icon inactive" />;
+    return sortDirection === 'asc'
+      ? <FaSortUp className="sort-icon active" />
+      : <FaSortDown className="sort-icon active" />;
+  };
 
   // For virtual scrolling, we'll implement a threshold-based approach
   // Only virtualize when we have more than 50 items to avoid complexity for smaller lists
@@ -295,71 +297,6 @@ const InitiativesList: React.FC<InitiativesListProps> = ({
 
   const handleUseCaseClick = (useCase: UseCase) => {
     onUseCaseClick(useCase);
-  };
-
-  const handleLike = async (useCaseId: string) => {
-    try {
-      // Optimistically update the UI
-      const wasLiked = likedUseCases.has(useCaseId);
-      const newLikedUseCases = new Set(likedUseCases);
-
-      if (wasLiked) {
-        newLikedUseCases.delete(useCaseId);
-      } else {
-        newLikedUseCases.add(useCaseId);
-      }
-      setLikedUseCases(newLikedUseCases);
-
-      // Update the use case's likes_count in the local state
-      setUseCases(prevUseCases =>
-        prevUseCases.map(uc => {
-          if (uc.id === useCaseId) {
-            return {
-              ...uc,
-              likes_count: wasLiked
-                ? Math.max((uc.likes_count || 0) - 1, 0)
-                : (uc.likes_count || 0) + 1
-            };
-          }
-          return uc;
-        })
-      );
-
-      // Call the API to toggle the like
-      const result = await likesAPI.toggle(useCaseId);
-
-      // Update the use case's likes_count with the actual count from the server
-      setUseCases(prevUseCases =>
-        prevUseCases.map(uc => {
-          if (uc.id === useCaseId) {
-            return {
-              ...uc,
-              likes_count: result.count
-            };
-          }
-          return uc;
-        })
-      );
-
-      // Update liked state based on server response
-      const finalLikedUseCases = new Set(likedUseCases);
-      if (result.liked) {
-        finalLikedUseCases.add(useCaseId);
-      } else {
-        finalLikedUseCases.delete(useCaseId);
-      }
-      setLikedUseCases(finalLikedUseCases);
-    } catch (error) {
-      console.error('Failed to toggle like:', error);
-      // Revert the optimistic update on error
-      const revertedLikedUseCases = new Set(likedUseCases);
-      if (likedUseCases.has(useCaseId)) {
-        revertedLikedUseCases.delete(useCaseId);
-      } else {
-        revertedLikedUseCases.add(useCaseId);
-      }
-      setLikedUseCases(revertedLikedUseCases);
-    }
   };
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -401,32 +338,6 @@ const InitiativesList: React.FC<InitiativesListProps> = ({
             </div>
             <div className="dashboard-controls">
               <div className="view-controls">
-                {!isMobile && (
-                  <div className="view-toggle">
-                    <button
-                      className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
-                      onClick={() => setViewMode('grid')}
-                      title="Grid view"
-                    >
-                      <FaThLarge />
-                    </button>
-                    <button
-                      className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
-                      onClick={() => setViewMode('list')}
-                      title="List view"
-                    >
-                      <FaList />
-                    </button>
-                    <button
-                      className={`view-toggle-btn ${viewMode === 'matrix' ? 'active' : ''}`}
-                      onClick={() => setViewMode('matrix')}
-                      title="Matrix view"
-                    >
-                      <FaChartLine />
-                    </button>
-                  </div>
-                )}
-                
                 <div className="sort-controls">
                   <FaSortAmountDown />
                   <select 
@@ -452,7 +363,7 @@ const InitiativesList: React.FC<InitiativesListProps> = ({
           </div>
 
           {isLoading && useCases.length === 0 ? (
-            <LoadingAnimation type={viewMode === 'list' ? 'list' : 'cards'} message="Loading Initiatives..." />
+            <LoadingAnimation type="list" message="Loading Initiatives..." />
           ) : useCases.length === 0 ? (
             <EmptyState
               title={emptyStateMessages.useCases.title}
@@ -469,23 +380,23 @@ const InitiativesList: React.FC<InitiativesListProps> = ({
               onAction={handleClearFilters}
               icon="search"
             />
-          ) : viewMode === 'matrix' ? (
-            <div className="matrix-container-wrapper">
-              <PrioritizationMatrix
-                useCases={sortedUseCases}
-                onUseCaseClick={handleUseCaseClick}
-              />
-            </div>
-          ) : viewMode === 'list' ? (
+          ) : (
             <div className="table-view-wrapper">
               {/* Table Header */}
               <div className="table-header">
-                <div className="table-header-cell title-col">Initiative</div>
-                <div className="table-header-cell desc-col">What is it?</div>
-                <div className="table-header-cell dept-col"></div>
-                <div className="table-header-cell cat-col"></div>
-                <div className="table-header-cell impact-col"></div>
-                <div className="table-header-cell status-col"></div>
+                <div
+                  className={`table-header-cell title-col sortable ${sortField === 'title' ? 'active' : ''}`}
+                  onClick={() => handleSort('title')}
+                >
+                  Initiative {getSortIcon('title')}
+                </div>
+                <div
+                  className={`table-header-cell status-col sortable ${sortField === 'status' ? 'active' : ''}`}
+                  onClick={() => handleSort('status')}
+                >
+                  Status {getSortIcon('status')}
+                </div>
+                <div className="table-header-cell desc-col">Description</div>
               </div>
 
               {/* Table Body */}
@@ -530,32 +441,6 @@ const InitiativesList: React.FC<InitiativesListProps> = ({
                       viewMode="list"
                     />
                   ))}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="use-cases-scroll-wrapper">
-              {/* Regular scrolling for grid view */}
-              <div
-                ref={containerRef}
-                className="use-cases-container grid-view"
-                onScroll={handleScroll}
-              >
-                {sortedUseCases.map((useCase: UseCase) => (
-                  <InitiativeCard
-                    key={useCase.id}
-                    useCase={useCase}
-                    onClick={handleUseCaseClick}
-                    viewMode="grid"
-                    onLike={handleLike}
-                    isLiked={likedUseCases.has(useCase.id)}
-                  />
-                ))}
-              </div>
-              {sortedUseCases.length > 6 && !hasScrolled && (
-                <div className="scroll-hint">
-                  <span>Scroll for more</span>
-                  <div className="scroll-arrow">↓</div>
                 </div>
               )}
             </div>

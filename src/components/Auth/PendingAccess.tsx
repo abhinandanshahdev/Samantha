@@ -41,7 +41,7 @@ const PendingAccess: React.FC<PendingAccessProps> = ({ user, onLogout }) => {
           <h1 style={{
             fontSize: '32px',
             fontWeight: '700',
-            color: '#D4AF37',
+            color: '#6366F1',
             margin: '0 0 8px 0',
             fontFamily: 'Montserrat, sans-serif'
           }}>Samantha</h1>

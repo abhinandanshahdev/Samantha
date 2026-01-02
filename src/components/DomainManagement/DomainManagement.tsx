@@ -936,7 +936,7 @@ const DomainManagement: React.FC<DomainManagementProps> = ({ onBack }) => {
                           <div key={pillar.id} className="pillar-item">
                             <div className="pillar-info">
                               <h6>
-                                <span style={{ color: '#B79546', fontWeight: '600', marginRight: '8px' }}>
+                                <span style={{ color: '#6366F1', fontWeight: '600', marginRight: '8px' }}>
                                   #{pillar.display_order}
                                 </span>
                                 {pillar.name}

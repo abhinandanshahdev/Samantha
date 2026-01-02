@@ -128,11 +128,11 @@ const InitiativeDetail: React.FC<InitiativeDetailProps> = ({
       case 'blocked':
         return '#E74C3C'; // Red
       case 'slow_burner':
-        return '#F6BD60'; // Sunset Yellow
+        return '#F59E0B'; // Sunset Yellow
       case 'de_prioritised':
         return '#9e9e9e'; // Grey
       case 'on_hold':
-        return '#B79546'; // Gold
+        return '#6366F1'; // Gold
       default:
         return '#77787B'; // Metal Grey
     }
@@ -178,11 +178,11 @@ const InitiativeDetail: React.FC<InitiativeDetailProps> = ({
       case 'blocked':
         return '#E74C3C'; // Red
       case 'slow_burner':
-        return '#F6BD60'; // Sunset Yellow
+        return '#F59E0B'; // Sunset Yellow
       case 'de_prioritised':
         return '#9e9e9e'; // Grey
       case 'on_hold':
-        return '#B79546'; // Gold
+        return '#6366F1'; // Gold
       default:
         return '#77787B';
     }

@@ -24,9 +24,9 @@ const STATUS_COLORS: Record<KanbanStatus, string> = {
   implementation: '#4A90E2',
   integration: '#00A79D',
   blocked: '#E74C3C',
-  slow_burner: '#F6BD60',
+  slow_burner: '#F59E0B',
   de_prioritised: '#9e9e9e',
-  on_hold: '#B79546'
+  on_hold: '#6366F1'
 };
 
 const STATUS_LABELS: Record<KanbanStatus, string> = {

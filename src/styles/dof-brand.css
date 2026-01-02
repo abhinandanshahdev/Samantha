@@ -1,76 +1,76 @@
-/* Department of Finance - Brand Visual Guidelines */
+/* Samantha - Brand Visual Guidelines */
 
 :root {
   /* Primary Colors */
-  --dof-gold: #B79546;
-  --dof-gold-80: rgba(183, 149, 70, 0.8);
-  --dof-gold-60: rgba(183, 149, 70, 0.6);
-  --dof-gold-40: rgba(183, 149, 70, 0.4);
-  --dof-gold-20: rgba(183, 149, 70, 0.2);
-  
-  --dof-metal-grey: #77787B;
-  --dof-metal-grey-80: rgba(119, 120, 123, 0.8);
-  --dof-metal-grey-60: rgba(119, 120, 123, 0.6);
-  --dof-metal-grey-40: rgba(119, 120, 123, 0.4);
-  --dof-metal-grey-20: rgba(119, 120, 123, 0.2);
-  
-  /* Secondary Colors (Internal Use) */
-  --dof-sea-green: #00A79D;
-  --dof-sea-green-80: rgba(0, 167, 157, 0.8);
-  --dof-sea-green-60: rgba(0, 167, 157, 0.6);
-  --dof-sea-green-40: rgba(0, 167, 157, 0.4);
-  --dof-sea-green-20: rgba(0, 167, 157, 0.2);
-  
-  --dof-earthy-brown: #C68D6D;
-  --dof-earthy-brown-80: rgba(198, 141, 109, 0.8);
-  --dof-earthy-brown-60: rgba(198, 141, 109, 0.6);
-  --dof-earthy-brown-40: rgba(198, 141, 109, 0.4);
-  --dof-earthy-brown-20: rgba(198, 141, 109, 0.2);
-  
-  --dof-sunset-yellow: #F6BD60;
-  --dof-sunset-yellow-80: rgba(246, 189, 96, 0.8);
-  --dof-sunset-yellow-60: rgba(246, 189, 96, 0.6);
-  --dof-sunset-yellow-40: rgba(246, 189, 96, 0.4);
-  --dof-sunset-yellow-20: rgba(246, 189, 96, 0.2);
-  
+  --dof-gold: #6366F1;  /* Indigo-500 - Primary accent */
+  --dof-gold-80: rgba(99, 102, 241, 0.8);
+  --dof-gold-60: rgba(99, 102, 241, 0.6);
+  --dof-gold-40: rgba(99, 102, 241, 0.4);
+  --dof-gold-20: rgba(99, 102, 241, 0.2);
+
+  --dof-metal-grey: #6B7280;  /* Gray-500 */
+  --dof-metal-grey-80: rgba(107, 114, 128, 0.8);
+  --dof-metal-grey-60: rgba(107, 114, 128, 0.6);
+  --dof-metal-grey-40: rgba(107, 114, 128, 0.4);
+  --dof-metal-grey-20: rgba(107, 114, 128, 0.2);
+
+  /* Secondary Colors */
+  --dof-sea-green: #10B981;  /* Emerald-500 */
+  --dof-sea-green-80: rgba(16, 185, 129, 0.8);
+  --dof-sea-green-60: rgba(16, 185, 129, 0.6);
+  --dof-sea-green-40: rgba(16, 185, 129, 0.4);
+  --dof-sea-green-20: rgba(16, 185, 129, 0.2);
+
+  --dof-earthy-brown: #78716C;  /* Stone-500 */
+  --dof-earthy-brown-80: rgba(120, 113, 108, 0.8);
+  --dof-earthy-brown-60: rgba(120, 113, 108, 0.6);
+  --dof-earthy-brown-40: rgba(120, 113, 108, 0.4);
+  --dof-earthy-brown-20: rgba(120, 113, 108, 0.2);
+
+  --dof-sunset-yellow: #F59E0B;  /* Amber-500 */
+  --dof-sunset-yellow-80: rgba(245, 158, 11, 0.8);
+  --dof-sunset-yellow-60: rgba(245, 158, 11, 0.6);
+  --dof-sunset-yellow-40: rgba(245, 158, 11, 0.4);
+  --dof-sunset-yellow-20: rgba(245, 158, 11, 0.2);
+
   /* Semantic Colors */
   --primary-color: var(--dof-gold);
   --secondary-color: var(--dof-metal-grey);
   --accent-color: var(--dof-sea-green);
   --warning-color: var(--dof-sunset-yellow);
   --neutral-color: var(--dof-earthy-brown);
-  
+
   /* Text Colors */
-  --text-primary: #2C3E50;
+  --text-primary: #1F2937;  /* Gray-800 */
   --text-secondary: var(--dof-metal-grey);
-  --text-light: #6C757D;
+  --text-light: #6B7280;
   --text-on-gold: #FFFFFF;
   --text-on-dark: #FFFFFF;
-  
+
   /* Background Colors */
   --bg-primary: #FFFFFF;
-  --bg-secondary: #F8F9FA;
+  --bg-secondary: #F9FAFB;
   --bg-tertiary: var(--dof-metal-grey-20);
   --bg-accent: var(--dof-gold-20);
-  
+
   /* Border Colors */
   --border-light: var(--dof-metal-grey-20);
   --border-medium: var(--dof-metal-grey-40);
   --border-dark: var(--dof-metal-grey-60);
-  
-  /* Gradient (Internal Digital Communications) */
-  --dof-gradient: linear-gradient(135deg, var(--dof-sea-green) 0%, var(--dof-sunset-yellow) 100%);
-  
+
+  /* Gradient */
+  --dof-gradient: linear-gradient(135deg, var(--dof-sea-green) 0%, #8B5CF6 100%);
+
   /* Typography - Modern Plus Jakarta Sans font */
   --font-primary: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   --font-secondary: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  
+
   /* Font Weights */
   --font-light: 300;
   --font-regular: 400;
   --font-medium: 500;
   --font-bold: 700;
-  
+
   /* Font Sizes */
   --font-size-xs: 0.75rem;    /* 12px */
   --font-size-sm: 0.875rem;   /* 14px */
@@ -80,7 +80,7 @@
   --font-size-2xl: 1.5rem;    /* 24px */
   --font-size-3xl: 1.875rem;  /* 30px */
   --font-size-4xl: 2.25rem;   /* 36px */
-  
+
   /* Spacing */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
@@ -88,20 +88,20 @@
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
   --spacing-2xl: 3rem;
-  
+
   /* Border Radius */
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
   --radius-rounded: 50%;
-  
+
   /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(119, 120, 123, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(119, 120, 123, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(119, 120, 123, 0.1);
-  --shadow-xl: 0 20px 25px -5px rgba(119, 120, 123, 0.1);
-  
+  --shadow-sm: 0 1px 2px 0 rgba(107, 114, 128, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(107, 114, 128, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(107, 114, 128, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(107, 114, 128, 0.1);
+
   /* Transitions */
   --transition-fast: 150ms ease-in-out;
   --transition-base: 250ms ease-in-out;
@@ -112,7 +112,7 @@
 .dof-heading-primary {
   font-family: var(--font-primary);
   font-weight: var(--font-bold);
-  color: var(--dof-gold);
+  color: var(--text-primary);  /* Changed from gold to dark text */
 }
 
 .dof-heading-secondary {
@@ -151,8 +151,8 @@
 }
 
 .dof-button-primary:hover {
-  background-color: var(--dof-gold-80);
-  border-color: var(--dof-gold-80);
+  background-color: #4F46E5;  /* Indigo-600 */
+  border-color: #4F46E5;
 }
 
 .dof-button-secondary {
@@ -206,11 +206,11 @@
   background-size: 60px 60px;
   background-repeat: repeat;
   opacity: 0.08;
-  filter: hue-rotate(30deg) saturate(0.8) brightness(1.2);
+  filter: hue-rotate(200deg) saturate(0.8) brightness(1.2);  /* Adjusted for indigo */
   pointer-events: none;
 }
 
-/* Gradient Background (Internal Use) */
+/* Gradient Background */
 .dof-gradient-bg {
   background: var(--dof-gradient);
 }
@@ -242,6 +242,6 @@
 }
 
 .dof-link:hover {
-  color: var(--dof-gold-80);
+  color: #4F46E5;  /* Indigo-600 */
   text-decoration: underline;
 }

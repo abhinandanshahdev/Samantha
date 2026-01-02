@@ -26,13 +26,13 @@
   max-width: 1200px;
   height: 90vh;
   max-height: 900px;
-  background: #FFFDF9;
+  background: #FFFFFF;
   border-radius: 20px;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
   z-index: 10001;
   display: flex;
   flex-direction: column;
-  border: 1px solid #E6CC7F;
+  border: 1px solid #E5E7EB;
   animation: slideUp 0.3s ease;
 }
 
@@ -59,12 +59,12 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #F4E8D0 0%, #E6CC7F 100%);
+  background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
   backdrop-filter: blur(10px);
   color: #2C3E50;
   border-radius: 20px 20px 0 0;
-  border-bottom: 2px solid #D4AF37;
-  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.15);
+  border-bottom: 2px solid #6366F1;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
 }
 
 .ai-chat-title {
@@ -172,7 +172,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background: linear-gradient(to bottom, #FDFBF7 0%, #FAF6F0 100%);
+  background: linear-gradient(to bottom, #FFFFFF 0%, #F9FAFB 100%);
 }
 
 /* Custom scrollbar */
@@ -485,7 +485,7 @@
 }
 
 .ai-chat-message.user .ai-chat-message-content {
-  background: linear-gradient(135deg, #D4AF37 0%, #B8941F 100%);
+  background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
   color: white;
   border-bottom-right-radius: 6px;
 }
@@ -518,7 +518,7 @@
 .ai-chat-typing span {
   width: 10px;
   height: 10px;
-  background: #D4AF37;
+  background: #6366F1;
   border-radius: 50%;
   animation: typing 1.4s infinite ease-in-out;
 }
@@ -554,7 +554,7 @@
 .ai-streaming-dot {
   width: 8px;
   height: 8px;
-  background: #D4AF37;
+  background: #6366F1;
   border-radius: 50%;
   animation: streamPulse 1.2s infinite ease-in-out;
 }
@@ -573,7 +573,7 @@
   flex-direction: column;
   gap: 4px;
   padding-left: 16px;
-  border-left: 2px solid #E6CC7F;
+  border-left: 2px solid #E5E7EB;
   margin-top: 8px;
 }
 
@@ -587,7 +587,7 @@
 }
 
 .ai-streaming-tool.running {
-  color: #D4AF37;
+  color: #6366F1;
 }
 
 .ai-streaming-tool.done {
@@ -620,18 +620,18 @@
 
 .ai-chat-limit-warning {
   padding: 10px 20px;
-  background: rgba(212, 175, 55, 0.1);
-  color: #B8941F;
+  background: rgba(99, 102, 241, 0.1);
+  color: #4F46E5;
   text-align: center;
   font-size: 14px;
   font-weight: 500;
-  border-top: 1px solid rgba(212, 175, 55, 0.2);
+  border-top: 1px solid rgba(99, 102, 241, 0.2);
 }
 
 .ai-chat-input {
   padding: 20px 24px;
-  border-top: 1px solid #E6CC7F;
-  background: linear-gradient(to top, #F4E8D0 0%, #FAF6F0 100%);
+  border-top: 1px solid #E5E7EB;
+  background: linear-gradient(to top, #F3F4F6 0%, #F9FAFB 100%);
   border-radius: 0 0 20px 20px;
   display: flex;
   gap: 16px;
@@ -652,8 +652,8 @@
 }
 
 .ai-chat-textarea:focus {
-  border-color: #D4AF37;
-  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+  border-color: #6366F1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
   background: white;
 }
 
@@ -664,7 +664,7 @@
 }
 
 .ai-chat-send-button {
-  background: linear-gradient(135deg, #D4AF37 0%, #B8941F 100%);
+  background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
   color: white;
   border: none;
   border-radius: 16px;
@@ -674,13 +674,13 @@
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 .ai-chat-send-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
-  background: linear-gradient(135deg, #E6CC7F 0%, #D4AF37 100%);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+  background: linear-gradient(135deg, #E5E7EB 0%, #6366F1 100%);
 }
 
 .ai-chat-send-button:active:not(:disabled) {
@@ -864,7 +864,7 @@
   right: 30px;
   width: 64px;
   height: 64px;
-  background: linear-gradient(135deg, #D4AF37 0%, #B8941F 100%);
+  background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
   border: none;
   border-radius: 50%;
   cursor: pointer;
@@ -873,7 +873,7 @@
   justify-content: center;
   font-size: 28px;
   color: white;
-  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
   transition: all 0.3s ease;
   z-index: 998;
   animation: pulse 2s infinite;
@@ -881,20 +881,20 @@
 
 @keyframes pulse {
   0% {
-    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4);
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
   }
   50% {
-    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.6), 0 0 0 15px rgba(212, 175, 55, 0.1);
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.6), 0 0 0 15px rgba(99, 102, 241, 0.1);
   }
   100% {
-    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4);
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
   }
 }
 
 .ai-float-button:hover {
   transform: scale(1.1);
-  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.5);
-  background: linear-gradient(135deg, #E6CC7F 0%, #D4AF37 100%);
+  box-shadow: 0 10px 30px rgba(99, 102, 241, 0.5);
+  background: linear-gradient(135deg, #E5E7EB 0%, #6366F1 100%);
 }
 
 .ai-float-button:active {
@@ -995,9 +995,9 @@
 /* Thinking Chain Styles */
 .ai-thinking-chain {
   margin-top: 8px;
-  border: 1px solid #E6CC7F;
+  border: 1px solid #E5E7EB;
   border-radius: 6px;
-  background: #FFFEF9;
+  background: #FFFFFF;
   padding: 0;
   font-size: 12px;
 }
@@ -1014,7 +1014,7 @@
 }
 
 .ai-thinking-summary:hover {
-  background: #FFF9E6;
+  background: #F3F4F6;
 }
 
 .ai-thinking-content {
@@ -1043,7 +1043,7 @@
   justify-content: center;
   min-width: 20px;
   height: 20px;
-  background: #D4AF37;
+  background: #6366F1;
   color: white;
   border-radius: 50%;
   font-size: 11px;
@@ -1053,7 +1053,7 @@
 .ai-thinking-thought {
   margin: 6px 0;
   padding: 6px 10px;
-  background: #F8F6F0;
+  background: #F3F4F6;
   border-radius: 4px;
   color: #4A4A4A;
   line-height: 1.5;
@@ -1092,7 +1092,7 @@
   gap: 8px;
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid #E6CC7F;
+  border-top: 1px solid #E5E7EB;
 }
 
 .artifact-download-btn {
@@ -1100,8 +1100,8 @@
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  background: linear-gradient(135deg, #F4E8D0 0%, #FAF6F0 100%);
-  border: 1px solid #E6CC7F;
+  background: linear-gradient(135deg, #F3F4F6 0%, #F9FAFB 100%);
+  border: 1px solid #E5E7EB;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1110,9 +1110,9 @@
 }
 
 .artifact-download-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #E6CC7F 0%, #F4E8D0 100%);
+  background: linear-gradient(135deg, #E5E7EB 0%, #F3F4F6 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
 }
 
 .artifact-download-btn:active:not(:disabled) {
@@ -1126,7 +1126,7 @@
 
 .artifact-download-btn > svg:first-child {
   font-size: 24px;
-  color: #B8941F;
+  color: #4F46E5;
   flex-shrink: 0;
 }
 
@@ -1154,7 +1154,7 @@
 
 .artifact-download-btn > svg:last-child {
   font-size: 16px;
-  color: #D4AF37;
+  color: #6366F1;
   flex-shrink: 0;
   transition: transform 0.3s ease;
 }
@@ -1171,9 +1171,9 @@
 /* Progress Timeline Styles */
 .ai-progress-timeline {
   margin: 0 0 12px 0;
-  border: 1px solid #E6CC7F;
+  border: 1px solid #E5E7EB;
   border-radius: 6px;
-  background: #FFFEF9;
+  background: #FFFFFF;
 }
 
 .ai-progress-summary {
@@ -1274,7 +1274,7 @@ details[open].ai-progress-timeline > .ai-progress-summary::before {
 .ai-progress-icon.in_progress .ai-streaming-dot {
   width: 8px;
   height: 8px;
-  background: #D4AF37;
+  background: #6366F1;
   border-radius: 50%;
   animation: streamPulse 1.2s infinite ease-in-out;
 }
@@ -1303,9 +1303,9 @@ details[open].ai-progress-timeline > .ai-progress-summary::before {
 
 /* Thinking Ticker - Compact auto-scrolling reasoning display */
 .ai-thinking-ticker {
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.08) 0%, rgba(74, 155, 155, 0.04) 100%);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(74, 155, 155, 0.04) 100%);
   border-radius: 8px;
-  border: 1px solid rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.15);
   overflow: hidden;
   animation: fadeIn 0.3s ease-out;
 }
@@ -1315,8 +1315,8 @@ details[open].ai-progress-timeline > .ai-progress-summary::before {
   align-items: center;
   gap: 5px;
   padding: 6px 10px;
-  background: rgba(212, 175, 55, 0.1);
-  border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+  background: rgba(99, 102, 241, 0.1);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.1);
   font-size: 10px;
   font-weight: 600;
   color: #9a8a3e;
@@ -1325,7 +1325,7 @@ details[open].ai-progress-timeline > .ai-progress-summary::before {
 }
 
 .ai-thinking-ticker-icon {
-  color: #D4AF37;
+  color: #6366F1;
   animation: thinkingPulse 1.5s infinite ease-in-out;
 }
 
@@ -1459,7 +1459,7 @@ details[open].ai-progress-timeline > .ai-progress-summary::before {
 .ai-progress-timeline-live .ai-progress-icon.in_progress .ai-streaming-dot {
   width: 6px;
   height: 6px;
-  background: #D4AF37;
+  background: #6366F1;
   border-radius: 50%;
   animation: streamPulse 1.2s infinite ease-in-out;
 }
@@ -1561,7 +1561,7 @@ details[open].ai-progress-timeline-completed > .ai-progress-summary-completed::b
 }
 
 .ai-thinking-subpanel-toggle:hover {
-  background: rgba(212, 175, 55, 0.08);
+  background: rgba(99, 102, 241, 0.08);
 }
 
 .ai-thinking-subpanel-toggle:focus {
@@ -1602,7 +1602,7 @@ details[open].ai-thinking-subpanel > .ai-thinking-subpanel-toggle::before {
 }
 
 .ai-thinking-subpanel-content::-webkit-scrollbar-thumb {
-  background: rgba(212, 175, 55, 0.3);
+  background: rgba(99, 102, 241, 0.3);
   border-radius: 2px;
 }
 

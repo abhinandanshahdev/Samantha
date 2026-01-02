@@ -65,7 +65,7 @@ const MicrosoftLogin: React.FC<MicrosoftLoginProps> = ({ onSuccess }) => {
           <h1 style={{
             fontSize: '32px',
             fontWeight: '700',
-            color: '#D4AF37',
+            color: '#6366F1',
             margin: '0 0 8px 0',
             fontFamily: 'Montserrat, sans-serif'
           }}>Samantha</h1>
@@ -74,7 +74,7 @@ const MicrosoftLogin: React.FC<MicrosoftLoginProps> = ({ onSuccess }) => {
             fontSize: '18px',
             margin: '0',
             fontWeight: '600'
-          }}>Family Management</p>
+          }}>Family Strategy AI</p>
         </div>
 
         {msalConfigured ? (
@@ -94,7 +94,7 @@ const MicrosoftLogin: React.FC<MicrosoftLoginProps> = ({ onSuccess }) => {
               style={{
                 width: '100%',
                 padding: '16px 24px',
-                backgroundColor: isLoading ? '#ccc' : '#D4AF37',
+                backgroundColor: isLoading ? '#ccc' : '#6366F1',
                 color: 'white',
                 border: 'none',
                 borderRadius: '12px',
@@ -107,20 +107,20 @@ const MicrosoftLogin: React.FC<MicrosoftLoginProps> = ({ onSuccess }) => {
                 gap: '12px',
                 transition: 'all 0.3s ease',
                 fontFamily: 'Montserrat, sans-serif',
-                boxShadow: '0 4px 12px rgba(212, 175, 55, 0.3)'
+                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
               }}
               onMouseEnter={(e) => {
                 if (!isLoading) {
-                  (e.target as HTMLElement).style.backgroundColor = '#B8860B';
+                  (e.target as HTMLElement).style.backgroundColor = '#4F46E5';
                   (e.target as HTMLElement).style.transform = 'translateY(-2px)';
-                  (e.target as HTMLElement).style.boxShadow = '0 6px 20px rgba(212, 175, 55, 0.4)';
+                  (e.target as HTMLElement).style.boxShadow = '0 6px 20px rgba(99, 102, 241, 0.4)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isLoading) {
-                  (e.target as HTMLElement).style.backgroundColor = '#D4AF37';
+                  (e.target as HTMLElement).style.backgroundColor = '#6366F1';
                   (e.target as HTMLElement).style.transform = 'translateY(0px)';
-                  (e.target as HTMLElement).style.boxShadow = '0 4px 12px rgba(212, 175, 55, 0.3)';
+                  (e.target as HTMLElement).style.boxShadow = '0 4px 12px rgba(99, 102, 241, 0.3)';
                 }
               }}
             >
@@ -217,7 +217,7 @@ const MicrosoftLogin: React.FC<MicrosoftLoginProps> = ({ onSuccess }) => {
             fontSize: '14px',
             margin: '0'
           }}>
-            &copy; 2024 Samantha Family Management. All rights reserved.
+            &copy; 2026 Abhinandan Shah. All rights reserved.
           </p>
         </div>
       </div>

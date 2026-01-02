@@ -101,7 +101,8 @@ export default function ValueFlowDashboard({
       const outcome = outcomes.find(o => o.id === outcomeId);
       if (!outcome) return;
 
-      const usesMaturity = outcome.outcome_key === 'sustainability';
+      // Use maturity scale if outcome has maturity value, otherwise use percentage
+      const usesMaturity = outcome.maturity !== null && outcome.maturity !== undefined;
 
       if (usesMaturity) {
         const maturity = Number(editValues.maturity) || 1;
@@ -148,29 +149,91 @@ export default function ValueFlowDashboard({
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
-  // Convert index to letter (0 -> A, 1 -> B, etc.)
-  const indexToLetter = (index: number) => String.fromCharCode(65 + index);
 
-  // Calculate activity level for a specific pillar based on its goals
-  const calculatePillarActivityLevel = (pillarId: number): 'low' | 'medium' | 'high' => {
-    const goals = pillarGoals[pillarId] || [];
-    let totalInitiatives = 0;
-    let recentUpdates = 0;
-    const now = new Date();
+  // Render outcome KPI visual
+  const renderOutcomeKPI = (outcome: Outcome, outcomeIndex: number) => {
+    const isEditing = editingOutcome === outcome.id;
+    const currentMaturity = isEditing && editValues?.maturity !== undefined ? editValues.maturity : outcome.maturity;
+    const currentProgress = isEditing && editValues?.progress !== undefined ? editValues.progress : outcome.progress;
+    const progress = currentMaturity ? Math.round((currentMaturity / 5) * 100) : currentProgress ?? 0;
+    const usesMaturity = outcome.maturity !== null && outcome.maturity !== undefined;
 
-    goals.forEach(goal => {
-      totalInitiatives += goal.alignedCount || 0;
-      if (goal.updatedAt) {
-        const updateDate = new Date(goal.updatedAt);
-        const diffDays = Math.floor((now.getTime() - updateDate.getTime()) / (1000 * 60 * 60 * 24));
-        if (diffDays <= 7) recentUpdates++;
-      }
-    });
-
-    // Determine activity level for this pillar
-    if (recentUpdates >= 2 || totalInitiatives >= 5) return 'high';
-    if (recentUpdates >= 1 || totalInitiatives >= 2) return 'medium';
-    return 'low';
+    return (
+      <div className="news-outcome-inline" key={outcome.outcome_key}>
+        <div className="news-outcome-header">
+          <span className="news-outcome-icon">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path d="M8 1L10 6H15L11 9.5L12.5 15L8 11.5L3.5 15L5 9.5L1 6H6L8 1Z" fill="currentColor" opacity="0.15"/>
+              <path d="M8 1L10 6H15L11 9.5L12.5 15L8 11.5L3.5 15L5 9.5L1 6H6L8 1Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+            </svg>
+          </span>
+          <div className="news-outcome-info">
+            <span className="news-outcome-label">Key Outcome</span>
+            <h3 className="news-outcome-title-inline">{outcome.title}</h3>
+            {outcome.measure && (
+              <p className="news-outcome-measure">{outcome.measure}</p>
+            )}
+          </div>
+        </div>
+        <div className="news-outcome-kpi">
+          {isEditing ? (
+            <div className="news-outcome-edit">
+              <input
+                type="number"
+                min={usesMaturity ? 1 : 0}
+                max={usesMaturity ? 5 : 100}
+                value={usesMaturity ? (editValues?.maturity || 1) : (editValues?.progress || 0)}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value);
+                  if (usesMaturity) {
+                    if (!isNaN(value) && value >= 1 && value <= 5) {
+                      setEditValues(prev => ({ ...prev, maturity: value }));
+                    }
+                  } else {
+                    if (!isNaN(value) && value >= 0 && value <= 100) {
+                      setEditValues(prev => ({ ...prev, progress: value }));
+                    }
+                  }
+                }}
+                className="news-input"
+              />
+              <span className="news-input-label">{usesMaturity ? '/5' : '%'}</span>
+              <button className="news-btn-save" onClick={() => handleSaveOutcome(outcome.id!)}>Save</button>
+              <button className="news-btn-cancel" onClick={handleCancelEdit}>Cancel</button>
+            </div>
+          ) : usesMaturity ? (
+            <div className="news-maturity-container">
+              <div className="news-maturity-dots">
+                {[1, 2, 3, 4, 5].map((level) => (
+                  <span
+                    key={level}
+                    className={`news-maturity-dot ${level <= (currentMaturity || 0) ? 'filled' : ''}`}
+                  />
+                ))}
+              </div>
+              <div className="news-maturity-meta">
+                <span className="news-maturity-label">Level {currentMaturity}/5</span>
+                {userRole === 'admin' && (
+                  <button className="news-btn-edit" onClick={() => handleEditOutcome(outcome.id!)}>Edit</button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="news-progress-container">
+              <div className="news-progress-bar">
+                <div className="news-progress-fill" style={{ width: `${progress}%` }}></div>
+              </div>
+              <div className="news-progress-meta">
+                <span className="news-progress-label">{progress}%</span>
+                {userRole === 'admin' && (
+                  <button className="news-btn-edit" onClick={() => handleEditOutcome(outcome.id!)}>Edit</button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -181,103 +244,36 @@ export default function ValueFlowDashboard({
         {hero.subtitle && <p className="news-masthead-subtitle">{hero.subtitle}</p>}
       </header>
 
-      {/* Outcomes Section */}
-      {outcomes.length > 0 && (
-        <section className="news-section">
-          <h2 className="news-section-label">Key Outcomes</h2>
-          <div className="news-outcomes">
-            {outcomes.map((outcome, outcomeIndex) => {
-              const isEditing = editingOutcome === outcome.id;
-              const currentMaturity = isEditing && editValues?.maturity !== undefined ? editValues.maturity : outcome.maturity;
-              const currentProgress = isEditing && editValues?.progress !== undefined ? editValues.progress : outcome.progress;
-              const progress = currentMaturity ? Math.round((currentMaturity / 5) * 100) : currentProgress ?? 0;
-              const usesMaturity = outcome.outcome_key === 'sustainability';
-
-              return (
-                <article key={outcome.outcome_key} className="news-outcome">
-                  <span className="news-outcome-number">{outcomeIndex + 1}</span>
-                  <div className="news-outcome-content">
-                    <h3 className="news-outcome-title">{outcome.title}</h3>
-                    {outcome.measure && (
-                      <p className="news-outcome-measure">{outcome.measure}</p>
-                    )}
-                    {/* Progress Bar */}
-                    <div className="news-progress-container">
-                      {isEditing ? (
-                        <div className="news-outcome-edit">
-                          <input
-                            type="number"
-                            min={usesMaturity ? 1 : 0}
-                            max={usesMaturity ? 5 : 100}
-                            value={usesMaturity ? (editValues?.maturity || 1) : (editValues?.progress || 0)}
-                            onChange={(e) => {
-                              const value = parseInt(e.target.value);
-                              if (usesMaturity) {
-                                if (!isNaN(value) && value >= 1 && value <= 5) {
-                                  setEditValues(prev => ({ ...prev, maturity: value }));
-                                }
-                              } else {
-                                if (!isNaN(value) && value >= 0 && value <= 100) {
-                                  setEditValues(prev => ({ ...prev, progress: value }));
-                                }
-                              }
-                            }}
-                            className="news-input"
-                          />
-                          <span className="news-input-label">{usesMaturity ? '/5' : '%'}</span>
-                          <button className="news-btn-save" onClick={() => handleSaveOutcome(outcome.id!)}>Save</button>
-                          <button className="news-btn-cancel" onClick={handleCancelEdit}>Cancel</button>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="news-progress-bar">
-                            <div className="news-progress-fill" style={{ width: `${progress}%` }}></div>
-                          </div>
-                          <div className="news-progress-meta">
-                            <span className="news-progress-label">
-                              {usesMaturity ? `${currentMaturity}/5 Maturity` : `${progress}%`}
-                            </span>
-                            {userRole === 'admin' && (
-                              <button className="news-btn-edit" onClick={() => handleEditOutcome(outcome.id!)}>
-                                Edit
-                              </button>
-                            )}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      {/* Pillars as Sections with A, B, C labels */}
+      {/* Combined Outcome + Pillar Sections */}
       {Array.isArray(dynamicPillars) && dynamicPillars.map((pillar, pillarIndex) => {
         const goals = pillarGoals[pillar.id] || [];
         if (goals.length === 0) return null;
-        const activityLevel = calculatePillarActivityLevel(pillar.id);
+        // Match outcome by index (outcome 1 -> pillar A, outcome 2 -> pillar B, etc.)
+        const pairedOutcome = outcomes[pillarIndex];
 
         return (
-          <section key={pillar.id} className="news-section news-pillar-section">
+          <section key={pillar.id} className="news-section news-combined-section">
+            {/* Paired Outcome KPI */}
+            {pairedOutcome && renderOutcomeKPI(pairedOutcome, pillarIndex)}
+
+            {/* Pillar Header */}
             <div className="news-pillar-header">
-              <span className="news-pillar-label">{indexToLetter(pillarIndex)}</span>
+              <span className="news-pillar-icon">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 13L13 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <path d="M6 3H13V10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
               <div className="news-pillar-text">
-                <div className="news-pillar-title-row">
-                  <h2 className="news-section-title">{pillar.name}</h2>
-                  <div className={`news-activity-bars news-activity-${activityLevel}`} title={`Activity: ${activityLevel}`}>
-                    <span className="news-bar news-bar-1"></span>
-                    <span className="news-bar news-bar-2"></span>
-                    <span className="news-bar news-bar-3"></span>
-                  </div>
-                </div>
+                <span className="news-pillar-type-label">Strategic Action</span>
+                <h2 className="news-section-title">{pillar.name}</h2>
                 {pillar.description && (
                   <p className="news-section-desc">{pillar.description}</p>
                 )}
               </div>
             </div>
+
+            {/* Goals Grid */}
             <div className="news-goals">
               {goals.map((goal, idx) => {
                 const showCompletion = goalDisplayMode === 'completion' && goal.completionPercentage !== undefined;

@@ -260,7 +260,7 @@ export const MsalAuthProvider: React.FC<MsalAuthProviderProps> = ({ children }) 
         alignItems: 'center', 
         height: '100vh',
         fontSize: '18px',
-        color: '#D4AF37',
+        color: '#6366F1',
         flexDirection: 'column',
         gap: '10px'
       }}>

@@ -433,13 +433,13 @@
 }
 
 .completion-badge {
-  background: linear-gradient(135deg, #B79546 0%, #D4A857 100%);
+  background: linear-gradient(135deg, #6366F1 0%, #D4A857 100%);
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 600;
-  box-shadow: 0 1px 3px rgba(183, 149, 70, 0.3);
+  box-shadow: 0 1px 3px rgba(99, 102, 241, 0.3);
 }
 
 .goal-actions {

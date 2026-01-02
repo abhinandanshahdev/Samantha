@@ -38,11 +38,11 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, onEdit, onDelete, sh
       case 'blocked':
         return '#E74C3C';
       case 'slow_burner':
-        return '#F6BD60';
+        return '#F59E0B';
       case 'de_prioritised':
         return '#9e9e9e';
       case 'on_hold':
-        return '#B79546';
+        return '#6366F1';
       default:
         return '#77787B';
     }

@@ -34,8 +34,8 @@
 }
 
 .drop-zone.dragging {
-  border-color: var(--dof-primary-gold, #D4AF37);
-  background: rgba(212, 175, 55, 0.05);
+  border-color: var(--dof-primary-gold, #6366F1);
+  background: rgba(99, 102, 241, 0.05);
 }
 
 .drop-zone.has-file {
@@ -63,7 +63,7 @@
 .btn-browse {
   display: inline-block;
   padding: 10px 24px;
-  background: var(--dof-primary-gold, #D4AF37);
+  background: var(--dof-primary-gold, #6366F1);
   color: white;
   border-radius: 8px;
   cursor: pointer;
@@ -143,7 +143,7 @@
   width: 40px;
   height: 40px;
   border: 3px solid var(--border-color, #e1e5e9);
-  border-top-color: var(--dof-primary-gold, #D4AF37);
+  border-top-color: var(--dof-primary-gold, #6366F1);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -195,7 +195,7 @@
 .count-value {
   font-size: 24px;
   font-weight: 700;
-  color: var(--dof-primary-gold, #D4AF37);
+  color: var(--dof-primary-gold, #6366F1);
 }
 
 .count-label {
@@ -245,7 +245,7 @@
 }
 
 .mapping-item .mapped {
-  color: var(--dof-primary-gold, #D4AF37);
+  color: var(--dof-primary-gold, #6366F1);
   font-weight: 500;
 }
 
@@ -261,7 +261,7 @@
   padding: 16px;
   background: var(--bg-secondary, #f9fafb);
   border-radius: 8px;
-  border-left: 4px solid var(--dof-primary-gold, #D4AF37);
+  border-left: 4px solid var(--dof-primary-gold, #6366F1);
 }
 
 .domain-item.skipped {
@@ -381,7 +381,7 @@
 }
 
 .progress-icon {
-  color: var(--dof-primary-gold, #D4AF37);
+  color: var(--dof-primary-gold, #6366F1);
   margin-bottom: 16px;
 }
 
@@ -407,7 +407,7 @@
 
 .progress-fill {
   height: 100%;
-  background: var(--dof-primary-gold, #D4AF37);
+  background: var(--dof-primary-gold, #6366F1);
   transition: width 0.3s ease;
 }
 
@@ -447,8 +447,8 @@
   align-items: flex-start;
   gap: 10px;
   padding: 12px 16px;
-  background: rgba(212, 175, 55, 0.1);
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.3);
   border-radius: 8px;
   margin-bottom: 20px;
   max-width: 500px;
@@ -458,7 +458,7 @@
 .switch-domain-hint svg {
   flex-shrink: 0;
   margin-top: 2px;
-  color: var(--dof-primary-gold, #D4AF37);
+  color: var(--dof-primary-gold, #6366F1);
 }
 
 .switch-domain-hint span {
@@ -597,7 +597,7 @@
 }
 
 .btn-primary {
-  background: var(--dof-primary-gold, #D4AF37);
+  background: var(--dof-primary-gold, #6366F1);
   color: white;
   border: none;
 }

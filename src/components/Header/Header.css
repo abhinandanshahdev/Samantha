@@ -49,7 +49,7 @@
 }
 
 .menu-trigger:hover {
-  background: rgba(212, 175, 55, 0.1);
+  background: rgba(99, 102, 241, 0.1);
   color: var(--dof-primary-gold);
 }
 
@@ -136,7 +136,7 @@
 .search-field:focus {
   background: white;
   border-color: var(--dof-primary-gold);
-  box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
 }
 
 .header-search.focused .search-icon {
@@ -219,7 +219,7 @@
 }
 
 .action-button:hover {
-  background: rgba(212, 175, 55, 0.1);
+  background: rgba(99, 102, 241, 0.1);
   color: var(--dof-primary-gold);
 }
 
@@ -292,8 +292,8 @@
 }
 
 .user-button:hover {
-  background: rgba(212, 175, 55, 0.08);
-  border-color: rgba(212, 175, 55, 0.2);
+  background: rgba(99, 102, 241, 0.08);
+  border-color: rgba(99, 102, 241, 0.2);
 }
 
 .user-avatar {
@@ -354,7 +354,7 @@
 .login-button:hover {
   background: var(--dof-primary-dark-gold);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 /* Mobile Search Overlay */
@@ -477,7 +477,7 @@
   }
 
   .mobile-menu-trigger:hover {
-    background: rgba(212, 175, 55, 0.1);
+    background: rgba(99, 102, 241, 0.1);
     color: var(--dof-primary-gold);
   }
 

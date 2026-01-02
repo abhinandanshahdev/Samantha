@@ -86,7 +86,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin': return '#D4AF37';
+      case 'admin': return '#6366F1';
       case 'consumer': return '#6c757d';
       default: return '#6c757d';
     }

@@ -81,7 +81,7 @@
 
 .tab-button.active {
   background: white;
-  color: var(--dof-primary-gold, #D4AF37);
+  color: var(--dof-primary-gold, #6366F1);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 

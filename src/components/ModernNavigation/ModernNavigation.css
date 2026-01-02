@@ -49,8 +49,8 @@
 
 .modern-navigation-item.active {
   color: #1f2937;
-  border-bottom-color: #d97706;
-  background-color: rgba(217, 119, 6, 0.05);
+  border-bottom-color: #6366F1;
+  background-color: rgba(99, 102, 241, 0.05);
 }
 
 .modern-navigation-item.active::after {
@@ -60,7 +60,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: #d97706;
+  background: #6366F1;
   border-radius: 1px 1px 0 0;
 }
 
@@ -152,7 +152,7 @@
   }
 
   .modern-navigation-item.active {
-    background-color: rgba(217, 119, 6, 0.1);
+    background-color: rgba(99, 102, 241, 0.1);
     border-bottom-color: transparent;
   }
 

@@ -31,7 +31,7 @@ const AuthLoadingScreen: React.FC = () => {
         <h1 style={{
           fontSize: '28px',
           fontWeight: '700',
-          color: '#D4AF37',
+          color: '#6366F1',
           margin: '0 0 10px 0',
           fontFamily: 'Montserrat, sans-serif'
         }}>
@@ -44,7 +44,7 @@ const AuthLoadingScreen: React.FC = () => {
           margin: '0 0 40px 0',
           fontWeight: '500'
         }}>
-          Strategic Initiative Repository
+          Family Strategy AI
         </p>
 
         {/* Elegant Loading Animation */}
@@ -62,7 +62,7 @@ const AuthLoadingScreen: React.FC = () => {
                 width: '8px',
                 height: '8px',
                 borderRadius: '50%',
-                backgroundColor: '#D4AF37',
+                backgroundColor: '#6366F1',
                 animation: `authPulse 1.4s ease-in-out ${index * 0.2}s infinite both`,
                 opacity: 0.7
               }}
