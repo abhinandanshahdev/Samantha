@@ -4245,6 +4245,164 @@ body.dark-mode .matrix-container-wrapper {
 }
 
 /* =============================================
+   NEWS DASHBOARD - Newspaper Style
+   ============================================= */
+
+body.dark-mode .news-dashboard {
+  background: transparent;
+}
+
+/* Masthead - Dark Mode */
+body.dark-mode .news-masthead {
+  border-bottom-color: var(--dm-border-1) !important;
+}
+
+body.dark-mode .news-masthead-title {
+  color: var(--dm-text-1) !important;
+}
+
+body.dark-mode .news-masthead-subtitle {
+  color: var(--dm-text-2) !important;
+}
+
+/* Sections - Dark Mode */
+body.dark-mode .news-section-label {
+  color: var(--dm-text-3) !important;
+}
+
+body.dark-mode .news-section-title {
+  color: var(--dm-text-1) !important;
+}
+
+body.dark-mode .news-section-desc {
+  color: var(--dm-text-2) !important;
+}
+
+/* Outcomes - Dark Mode */
+body.dark-mode .news-outcome-number {
+  background: var(--dm-accent) !important;
+  color: var(--dm-accent-text) !important;
+}
+
+body.dark-mode .news-outcome-title {
+  color: var(--dm-text-1) !important;
+}
+
+body.dark-mode .news-outcome-measure {
+  color: var(--dm-text-2) !important;
+}
+
+/* Progress Bar - Dark Mode */
+body.dark-mode .news-progress-bar {
+  background: var(--dm-surface-3) !important;
+}
+
+body.dark-mode .news-progress-fill {
+  background: linear-gradient(90deg, var(--dm-accent), #A78BFA) !important;
+}
+
+body.dark-mode .news-progress-label {
+  color: var(--dm-text-2) !important;
+}
+
+/* Pillar Labels - Dark Mode */
+body.dark-mode .news-pillar-label {
+  background: var(--dm-text-1) !important;
+  color: var(--dm-bg-app) !important;
+}
+
+/* Goal Numbers - Dark Mode */
+body.dark-mode .news-goal-number {
+  background: var(--dm-surface-3) !important;
+  color: var(--dm-text-2) !important;
+}
+
+/* Goals - Dark Mode */
+body.dark-mode .news-goal:hover .news-goal-title {
+  color: var(--dm-accent) !important;
+  text-decoration-color: rgba(167, 139, 250, 0.3) !important;
+}
+
+body.dark-mode .news-goal-title {
+  color: var(--dm-text-1) !important;
+}
+
+body.dark-mode .news-goal-stat {
+  color: var(--dm-text-2) !important;
+}
+
+body.dark-mode .news-goal-date {
+  color: var(--dm-text-3) !important;
+}
+
+body.dark-mode .news-goal-date::before {
+  background: var(--dm-border-2) !important;
+}
+
+/* Activity Bars - Dark Mode */
+body.dark-mode .news-bar {
+  background: var(--dm-surface-3) !important;
+}
+
+body.dark-mode .news-activity-low .news-bar-1 {
+  background: #FBBF24 !important;
+}
+
+body.dark-mode .news-activity-medium .news-bar-1,
+body.dark-mode .news-activity-medium .news-bar-2 {
+  background: #FB923C !important;
+}
+
+body.dark-mode .news-activity-high .news-bar-1,
+body.dark-mode .news-activity-high .news-bar-2,
+body.dark-mode .news-activity-high .news-bar-3 {
+  background: #4ADE80 !important;
+}
+
+/* Inputs - Dark Mode */
+body.dark-mode .news-input {
+  background: var(--dm-surface-2) !important;
+  border-color: var(--dm-border-1) !important;
+  color: var(--dm-text-1) !important;
+}
+
+body.dark-mode .news-input:focus {
+  border-color: var(--dm-accent) !important;
+}
+
+body.dark-mode .news-input-label {
+  color: var(--dm-text-2) !important;
+}
+
+/* Buttons - Dark Mode */
+body.dark-mode .news-btn-edit {
+  color: var(--dm-accent) !important;
+  text-decoration-color: rgba(167, 139, 250, 0.3) !important;
+}
+
+body.dark-mode .news-btn-edit:hover {
+  color: #C4B5FD !important;
+  text-decoration-color: rgba(196, 181, 253, 0.5) !important;
+}
+
+body.dark-mode .news-btn-save {
+  background: var(--dm-accent) !important;
+  color: var(--dm-accent-text) !important;
+}
+
+body.dark-mode .news-btn-save:hover {
+  background: var(--dm-accent-hover) !important;
+}
+
+body.dark-mode .news-btn-cancel {
+  color: var(--dm-text-3) !important;
+}
+
+body.dark-mode .news-btn-cancel:hover {
+  color: var(--dm-text-2) !important;
+}
+
+/* =============================================
    TRANSITIONS
    ============================================= */
 

@@ -43,11 +43,11 @@ interface RoadmapKanbanProps {
 }
 
 const KANBAN_COLUMNS: { id: KanbanStatus; title: string }[] = [
-  { id: 'intention', title: 'Intention' },
-  { id: 'experimentation', title: 'Experimentation' },
+  { id: 'intention', title: 'Intent' },
+  { id: 'experimentation', title: 'Experiment' },
   { id: 'commitment', title: 'Commitment' },
-  { id: 'implementation', title: 'Implementation' },
-  { id: 'integration', title: 'Integration' },
+  { id: 'implementation', title: 'Implement' },
+  { id: 'integration', title: 'Integrate' },
   { id: 'blocked', title: 'Blocked' },
   { id: 'slow_burner', title: 'Slow Burner' },
   { id: 'de_prioritised', title: 'De-prioritised' },

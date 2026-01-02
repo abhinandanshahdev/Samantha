@@ -88,7 +88,7 @@
 
 .roadmap-kanban-board {
   display: grid;
-  grid-template-columns: repeat(8, 240px);
+  grid-template-columns: repeat(9, 240px);
   gap: 16px;
   align-items: start;
   min-width: min-content;
@@ -300,7 +300,7 @@
   }
 
   .roadmap-kanban-board {
-    grid-template-columns: repeat(8, 280px);
+    grid-template-columns: repeat(9, 280px);
     gap: 12px;
   }
 
