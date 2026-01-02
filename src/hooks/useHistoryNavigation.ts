@@ -4,7 +4,7 @@ import { UseCase, StrategicGoal } from '../types';
 export type ViewType = 'value_dashboard' | 'dashboard' | 'detail' | 'create' | 'edit' | 'login' | 'register' |
   'password_reset' | 'create_goal' | 'edit_goal' | 'goal_detail' |
   'strategic_goals' | 'import_export' | 'reference_data' | 'profile' | 'roadmap' | 'roadmap_timeline' | 'domain_management' |
-  'agents' | 'agent_detail' | 'agent_create' | 'agent_edit' | 'audit_log';
+  'tasks' | 'task_detail' | 'task_create' | 'task_edit' | 'audit_log';
 
 interface NavigationState {
   view: ViewType;

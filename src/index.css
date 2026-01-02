@@ -3,24 +3,24 @@
 @import './styles/dof-brand.css';
 @import './styles/dark-mode.css';
 
-/* Typography - Following DoF Guidelines */
+/* Typography - Modern Plus Jakarta Sans font */
 body {
   margin: 0;
-  font-family: 'Helvetica LT Pro', 'Helvetica', 'Calibri', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-weight: 300; /* Light weight for body text as per guidelines */
+  font-weight: 400;
   font-size: 16px;
   line-height: 1.6;
   color: var(--text-primary);
   background-color: var(--surface-secondary);
 }
 
-/* Headings - Using Helvetica as primary */
+/* Headings */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Helvetica LT Pro', 'Helvetica', 'Calibri', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-weight: 700; /* Bold for headings */
-  color: var(--dof-gold);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 600;
+  color: var(--text-primary);
   margin-top: 0;
 }
 
@@ -44,16 +44,16 @@ h4 {
   line-height: 1.5;
 }
 
-/* Internal communication text - Markazi Text */
+/* Internal communication text */
 .internal-heading {
-  font-family: 'Markazi Text', Georgia, serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 700;
   font-size: 18pt;
   text-transform: uppercase;
 }
 
 .internal-subheading {
-  font-family: 'Markazi Text', Georgia, serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 500;
   font-size: 22pt;
 }
@@ -112,16 +112,16 @@ a:hover {
 
 /* Button reset and base styles */
 button {
-  font-family: 'Helvetica LT Pro', 'Helvetica', 'Calibri', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-weight: 400;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 /* Input and form elements */
 input, textarea, select {
-  font-family: 'Helvetica LT Pro', 'Helvetica', 'Calibri', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-weight: 300;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 400;
 }
 
 /* Utility classes */
@@ -130,7 +130,6 @@ input, textarea, select {
 .text-green { color: var(--dof-sea-green); }
 .text-brown { color: var(--dof-earthy-brown); }
 .text-yellow { color: var(--dof-sunset-yellow); }
-
 .bg-gold { background-color: var(--dof-gold); }
 .bg-grey { background-color: var(--dof-metal-grey); }
 .bg-green { background-color: var(--dof-sea-green); }

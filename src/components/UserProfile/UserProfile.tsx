@@ -112,7 +112,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
         <div className="profile-header">
           <button className="back-button" onClick={onBack}>
             <FaArrowLeft />
-            <span>Back to Dashboard</span>
+            <span>Back to Family Goals</span>
           </button>
         </div>
 

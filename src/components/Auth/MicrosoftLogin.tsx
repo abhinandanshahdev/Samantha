@@ -53,9 +53,9 @@ const MicrosoftLogin: React.FC<MicrosoftLoginProps> = ({ onSuccess }) => {
       }}>
         {/* Logo and Header */}
         <div style={{ marginBottom: '40px' }}>
-          <img 
-            src="/assets/DoFLogo.png" 
-            alt="Department of Finance Abu Dhabi Logo" 
+          <img
+            src="/logo-samantha.svg"
+            alt="Samantha Logo"
             style={{
               height: '64px',
               width: 'auto',
@@ -68,13 +68,13 @@ const MicrosoftLogin: React.FC<MicrosoftLoginProps> = ({ onSuccess }) => {
             color: '#D4AF37',
             margin: '0 0 8px 0',
             fontFamily: 'Montserrat, sans-serif'
-          }}>Hekmah</h1>
+          }}>Samantha</h1>
           <p style={{
             color: '#2C3E50',
             fontSize: '18px',
             margin: '0',
             fontWeight: '600'
-          }}>AI for AI @ DoF</p>
+          }}>Family Management</p>
         </div>
 
         {msalConfigured ? (
@@ -85,7 +85,7 @@ const MicrosoftLogin: React.FC<MicrosoftLoginProps> = ({ onSuccess }) => {
               marginBottom: '32px',
               lineHeight: '1.5'
             }}>
-              Sign in with your Microsoft account to access Hekmah
+              Sign in with your Microsoft account to access Samantha
             </p>
             
             <button
@@ -217,7 +217,7 @@ const MicrosoftLogin: React.FC<MicrosoftLoginProps> = ({ onSuccess }) => {
             fontSize: '14px',
             margin: '0'
           }}>
-            &copy; 2024 Department of Finance Abu Dhabi. All rights reserved.
+            &copy; 2024 Samantha Family Management. All rights reserved.
           </p>
         </div>
       </div>

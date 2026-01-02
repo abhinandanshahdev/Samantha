@@ -19,7 +19,7 @@
   max-width: 1440px;
   margin: 0 auto;
   padding: 0 0 0 24px;
-  height: 72px;
+  height: 88px;
   display: flex;
   align-items: center;
   gap: 20px;
@@ -60,13 +60,15 @@
 }
 
 .brand-logo {
-  height: 64px;
-  width: auto;
+  height: 72px;
+  width: 72px;
+  min-width: 72px;
+  min-height: 72px;
 }
 
 .brand-divider {
   width: 1px;
-  height: 28px;
+  height: 32px;
   background: rgba(0, 0, 0, 0.12);
 }
 
@@ -425,7 +427,10 @@
   }
 
   .brand-logo {
-    height: 36px;
+    height: 48px;
+    width: 48px;
+    min-width: 48px;
+    min-height: 48px;
   }
 
   .brand-divider {
@@ -437,7 +442,7 @@
   }
 
   .brand-subtitle {
-    display: none;
+    font-size: 0.65rem;
   }
 
   /* Hide search on mobile */
@@ -513,7 +518,6 @@
     transform: translateY(0);
   }
 }
-
 .header-content {
   max-width: 1200px;
   margin: 0 auto;

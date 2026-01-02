@@ -9,10 +9,9 @@ interface NavigationItem {
 }
 
 const NAVIGATION_ITEMS: NavigationItem[] = [
-  { id: 'value-dashboard', label: 'Dashboard', view: 'value_dashboard' },
-  { id: 'strategy', label: 'Strategy', view: 'strategic_goals' },
+  { id: 'value-dashboard', label: 'Family Goals', view: 'value_dashboard' },
   { id: 'initiatives', label: 'Initiatives', view: 'dashboard' },
-  { id: 'agents', label: 'Agents', view: 'agents' },
+  { id: 'tasks', label: 'Tasks', view: 'tasks' },
   { id: 'kanban', label: 'Kanban', view: 'roadmap' },
   { id: 'roadmap-timeline', label: 'Roadmap', view: 'roadmap_timeline' }
 ];
@@ -48,21 +47,14 @@ const ModernNavigation: React.FC<ModernNavigationProps> = ({ currentView, onNavi
     setMobileMenuOpen(false);
   };
 
-  // Filter navigation items based on user role and mobile state
+  // Filter navigation items based on user role
   const getVisibleItems = () => {
-    let items = NAVIGATION_ITEMS;
-
-    // Hide Strategy tab on mobile
-    if (isMobile) {
-      items = items.filter(item => item.id !== 'strategy');
-    }
-
     // Users without proper roles (null/undefined) can only see Dashboard
     if (!userRole || (userRole !== 'admin' && userRole !== 'consumer')) {
-      return items.filter(item => item.view === 'value_dashboard');
+      return NAVIGATION_ITEMS.filter(item => item.view === 'value_dashboard');
     }
-    // Admin and consumer users see filtered tabs
-    return items;
+    // Admin and consumer users see all tabs
+    return NAVIGATION_ITEMS;
   };
 
   const visibleItems = getVisibleItems();

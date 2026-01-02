@@ -1,37 +1,37 @@
 import React, { useEffect, useState } from 'react';
-import { Agent, User, AgentInitiativeAssociation, UseCase, InitiativeAgentAssociation } from '../../types';
-import { agentAssociationsAPI, agentAPI } from '../../services/apiService';
+import { Task, User, TaskInitiativeAssociation, InitiativeTaskAssociation, KanbanStatus } from '../../types';
+import { taskAssociationsAPI, taskAPI } from '../../services/apiService';
 import { motion } from 'framer-motion';
 import CommentThread from '../CommentThread/CommentThread';
-import './AgentDetail.css';
+import './TaskDetail.css';
 import { FaHeart } from 'react-icons/fa';
 import { ViewType } from '../../hooks/useHistoryNavigation';
 
-interface AgentDetailProps {
-  agent: Agent;
+interface TaskDetailProps {
+  task: Task;
   onBack: () => void;
-  onEdit: (agent: Agent) => void;
-  onDelete: (agent: Agent) => void;
+  onEdit: (task: Task) => void;
+  onDelete: (task: Task) => void;
   canEdit: boolean;
   user?: User;
   onInitiativeClick?: (initiativeId: string) => void;
-  onAgentClick?: (agent: Agent) => void;
+  onTaskClick?: (task: Task) => void;
   previousView?: ViewType;
 }
 
-const AgentDetail: React.FC<AgentDetailProps> = ({
-  agent,
+const TaskDetail: React.FC<TaskDetailProps> = ({
+  task,
   onBack,
   onEdit,
   onDelete,
   canEdit,
   user,
   onInitiativeClick,
-  onAgentClick,
+  onTaskClick,
   previousView
 }) => {
-  const [relatedInitiatives, setRelatedInitiatives] = useState<AgentInitiativeAssociation[]>([]);
-  const [siblingAgents, setSiblingAgents] = useState<InitiativeAgentAssociation[]>([]);
+  const [relatedInitiatives, setRelatedInitiatives] = useState<TaskInitiativeAssociation[]>([]);
+  const [siblingTasks, setSiblingTasks] = useState<InitiativeTaskAssociation[]>([]);
   const [loadingRelated, setLoadingRelated] = useState(true);
   const [loadingSiblings, setLoadingSiblings] = useState(true);
 
@@ -41,10 +41,10 @@ const AgentDetail: React.FC<AgentDetailProps> = ({
 
   useEffect(() => {
     const loadRelatedInitiatives = async () => {
-      if (agent.id) {
+      if (task.id) {
         try {
           setLoadingRelated(true);
-          const associations = await agentAssociationsAPI.getInitiativesForAgent(agent.id);
+          const associations = await taskAssociationsAPI.getInitiativesForTask(task.id);
           setRelatedInitiatives(associations);
         } catch (error) {
           console.error('Failed to load related initiatives:', error);
@@ -56,51 +56,51 @@ const AgentDetail: React.FC<AgentDetailProps> = ({
     };
 
     loadRelatedInitiatives();
-  }, [agent.id]);
+  }, [task.id]);
 
   useEffect(() => {
-    const loadSiblingAgents = async () => {
+    const loadSiblingTasks = async () => {
       if (relatedInitiatives.length === 0) {
-        setSiblingAgents([]);
+        setSiblingTasks([]);
         setLoadingSiblings(false);
         return;
       }
 
       try {
         setLoadingSiblings(true);
-        const allAgents: InitiativeAgentAssociation[] = [];
+        const allTasks: InitiativeTaskAssociation[] = [];
 
-        // Fetch agents for each related initiative
+        // Fetch tasks for each related initiative
         for (const initiative of relatedInitiatives) {
           try {
-            const agents = await agentAssociationsAPI.getAgentsForInitiative(initiative.use_case_id);
-            allAgents.push(...agents);
+            const tasks = await taskAssociationsAPI.getTasksForInitiative(initiative.use_case_id);
+            allTasks.push(...tasks);
           } catch (error) {
-            console.error(`Failed to load agents for initiative ${initiative.use_case_id}:`, error);
+            console.error(`Failed to load tasks for initiative ${initiative.use_case_id}:`, error);
           }
         }
 
-        // Remove duplicates and current agent
-        const uniqueAgents = allAgents.reduce((acc: InitiativeAgentAssociation[], current) => {
-          const isDuplicate = acc.some(agent => agent.agent_id === current.agent_id);
-          const isCurrentAgent = current.agent_id === agent.id;
-          if (!isDuplicate && !isCurrentAgent) {
+        // Remove duplicates and current task
+        const uniqueTasks = allTasks.reduce((acc: InitiativeTaskAssociation[], current) => {
+          const isDuplicate = acc.some(t => t.task_id === current.task_id);
+          const isCurrentTask = current.task_id === task.id;
+          if (!isDuplicate && !isCurrentTask) {
             acc.push(current);
           }
           return acc;
         }, []);
 
-        setSiblingAgents(uniqueAgents);
+        setSiblingTasks(uniqueTasks);
       } catch (error) {
-        console.error('Failed to load sibling agents:', error);
-        setSiblingAgents([]);
+        console.error('Failed to load sibling tasks:', error);
+        setSiblingTasks([]);
       } finally {
         setLoadingSiblings(false);
       }
     };
 
-    loadSiblingAgents();
-  }, [relatedInitiatives, agent.id]);
+    loadSiblingTasks();
+  }, [relatedInitiatives, task.id]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -112,50 +112,66 @@ const AgentDetail: React.FC<AgentDetailProps> = ({
     });
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: KanbanStatus) => {
     switch (status) {
-      case 'concept':
+      case 'intention':
         return '#77787B';
-      case 'proof_of_concept':
+      case 'experimentation':
+        return '#9B59B6';
+      case 'commitment':
         return '#C68D6D';
-      case 'validation':
-        return '#F6BD60';
-      case 'pilot':
+      case 'implementation':
+        return '#4A90E2';
+      case 'integration':
         return '#00A79D';
-      case 'production':
+      case 'blocked':
+        return '#E74C3C';
+      case 'slow_burner':
+        return '#F6BD60';
+      case 'de_prioritised':
+        return '#9e9e9e';
+      case 'on_hold':
         return '#B79546';
       default:
         return '#77787B';
     }
   };
 
-  const getStatusLabel = (status: string) => {
+  const getStatusLabel = (status: KanbanStatus) => {
     switch (status) {
-      case 'concept':
-        return 'Concept';
-      case 'proof_of_concept':
-        return 'Proof of Concept';
-      case 'validation':
-        return 'Validation';
-      case 'pilot':
-        return 'Pilot';
-      case 'production':
-        return 'Production';
+      case 'intention':
+        return 'Intention';
+      case 'experimentation':
+        return 'Experimentation';
+      case 'commitment':
+        return 'Commitment';
+      case 'implementation':
+        return 'Implementation';
+      case 'integration':
+        return 'Integration';
+      case 'blocked':
+        return 'Blocked';
+      case 'slow_burner':
+        return 'Slow Burner';
+      case 'de_prioritised':
+        return 'De-prioritised';
+      case 'on_hold':
+        return 'On Hold';
       default:
         return status;
     }
   };
 
   const getBackButtonText = () => {
-    if (previousView === 'dashboard') return '← Back to Agents';
-    if (previousView === 'roadmap') return '← Back to Kanban';
-    if (previousView === 'roadmap_timeline') return '← Back to Timeline';
-    return '← Back to Agents';
+    if (previousView === 'dashboard') return '<- Back to Tasks';
+    if (previousView === 'roadmap') return '<- Back to Kanban';
+    if (previousView === 'roadmap_timeline') return '<- Back to Timeline';
+    return '<- Back to Tasks';
   };
 
   const handleDelete = () => {
-    if (window.confirm(`Are you sure you want to delete "${agent.title}"?`)) {
-      onDelete(agent);
+    if (window.confirm(`Are you sure you want to delete "${task.title}"?`)) {
+      onDelete(task);
     }
   };
 
@@ -182,7 +198,7 @@ const AgentDetail: React.FC<AgentDetailProps> = ({
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                onEdit(agent);
+                onEdit(task);
               }}
             >
               Edit
@@ -205,106 +221,95 @@ const AgentDetail: React.FC<AgentDetailProps> = ({
       <div className="detail-content">
         <div className="detail-main">
           <div className="detail-title-section">
-            <h1 className="detail-title">{agent.title}</h1>
+            <h1 className="detail-title">{task.title}</h1>
             <div
               className="detail-status"
-              style={{ backgroundColor: getStatusColor(agent.status) }}
+              style={{ backgroundColor: getStatusColor(task.status) }}
             >
-              {getStatusLabel(agent.status)}
+              {getStatusLabel(task.status)}
             </div>
           </div>
 
           <div className="detail-meta">
-            <div className="meta-item">
-              <span className="meta-label">Agent Type:</span>
-              <span className="meta-value">{agent.agent_type}</span>
-            </div>
-            <div className="meta-item">
-              <span className="meta-label">Department:</span>
-              <span className="meta-value">{agent.department}</span>
-            </div>
-            {(agent.owner_name || agent.owner_email) && (
+            {(task.owner_name || task.owner_email) && (
               <div className="meta-item">
-                <span className="meta-label">Agent Owner:</span>
+                <span className="meta-label">Task Owner:</span>
                 <span className="meta-value">
-                  {agent.owner_name}
-                  {agent.owner_email && ` (${agent.owner_email})`}
+                  {task.owner_name}
+                  {task.owner_email && ` (${task.owner_email})`}
                 </span>
               </div>
             )}
             <div className="meta-item">
               <span className="meta-label">Author:</span>
-              <span className="meta-value">{agent.author_name}</span>
+              <span className="meta-value">{task.author_name}</span>
             </div>
             <div className="meta-item">
+              <span className="meta-label">Strategic Impact:</span>
+              <span className="meta-value">{task.strategic_impact}</span>
+            </div>
+            {task.effort_level && (
+              <div className="meta-item">
+                <span className="meta-label">Effort Level:</span>
+                <span className="meta-value">{task.effort_level}</span>
+              </div>
+            )}
+            {task.expected_delivery_date && (
+              <div className="meta-item">
+                <span className="meta-label">Expected Delivery:</span>
+                <span className="meta-value">{task.expected_delivery_date}</span>
+              </div>
+            )}
+            <div className="meta-item">
               <span className="meta-label">Created:</span>
-              <span className="meta-value">{formatDate(agent.created_date)}</span>
+              <span className="meta-value">{formatDate(task.created_date)}</span>
             </div>
             <div className="meta-item">
               <span className="meta-label">Last Updated:</span>
-              <span className="meta-value">{formatDate(agent.updated_date)}</span>
+              <span className="meta-value">{formatDate(task.updated_date)}</span>
             </div>
           </div>
 
           <div className="detail-description">
             <h2>Description</h2>
-            <p>{agent.description}</p>
+            <p>{task.description}</p>
           </div>
 
           <div className="detail-section">
             <h2>Problem Statement</h2>
-            <p>{agent.problem_statement}</p>
+            <p>{task.problem_statement}</p>
           </div>
 
           <div className="detail-section">
             <h2>Solution Overview</h2>
-            <p>{agent.solution_overview}</p>
+            <p>{task.solution_overview}</p>
           </div>
 
-          {agent.technical_implementation && (
+          {task.technical_implementation && (
             <div className="detail-section">
               <h2>Technical Implementation</h2>
-              <p>{agent.technical_implementation}</p>
+              <p>{task.technical_implementation}</p>
             </div>
           )}
 
-          {agent.results_metrics && (
+          {task.results_metrics && (
             <div className="detail-section">
               <h2>Results & Metrics</h2>
-              <p>{agent.results_metrics}</p>
+              <p>{task.results_metrics}</p>
             </div>
           )}
 
-          {agent.lessons_learned && (
+          {task.lessons_learned && (
             <div className="detail-section">
               <h2>Lessons Learned</h2>
-              <p>{agent.lessons_learned}</p>
+              <p>{task.lessons_learned}</p>
             </div>
           )}
 
-          <div className="detail-section">
-            <h2>Complexity Analysis</h2>
-            <div className="complexity-grid">
-              <div className="complexity-item">
-                <strong>Data Complexity:</strong> {agent.complexity.data_complexity}
-              </div>
-              <div className="complexity-item">
-                <strong>Integration Complexity:</strong> {agent.complexity.integration_complexity}
-              </div>
-              <div className="complexity-item">
-                <strong>Intelligence Complexity:</strong> {agent.complexity.intelligence_complexity}
-              </div>
-              <div className="complexity-item">
-                <strong>Functional Complexity:</strong> {agent.complexity.functional_complexity}
-              </div>
-            </div>
-          </div>
-
-          {agent.justification && (
+          {task.justification && (
             <div className="detail-section">
-              <h2>Strategic Impact</h2>
-              <div><strong>Impact:</strong> {agent.strategic_impact}</div>
-              <div><strong>Justification:</strong> {agent.justification}</div>
+              <h2>Strategic Justification</h2>
+              <p>{task.justification}</p>
             </div>
           )}
 
@@ -334,7 +339,6 @@ const AgentDetail: React.FC<AgentDetailProps> = ({
                     />
                     <div className="related-list-title">{initiative.title}</div>
                     <div className="related-list-badge related-list-badge--category">{initiative.category}</div>
-                    <div className="related-list-badge related-list-badge--dept">{initiative.department}</div>
                   </motion.div>
                 ))}
               </div>
@@ -344,42 +348,40 @@ const AgentDetail: React.FC<AgentDetailProps> = ({
           </div>
 
           <div className="detail-section">
-            <h2>Sibling Agents</h2>
+            <h2>Sibling Tasks</h2>
             {loadingSiblings ? (
-              <div className="loading-message">Loading sibling agents...</div>
-            ) : siblingAgents.length > 0 ? (
+              <div className="loading-message">Loading sibling tasks...</div>
+            ) : siblingTasks.length > 0 ? (
               <div className="related-list-table">
-                {siblingAgents.map((agentAssoc, idx) => (
+                {siblingTasks.map((taskAssoc, idx) => (
                   <motion.div
-                    key={agentAssoc.association_id}
-                    className="related-list-row related-list-row--agent"
+                    key={taskAssoc.association_id}
+                    className="related-list-row related-list-row--task"
                     initial={{ y: 8, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.03 * idx, duration: 0.2 }}
                     onClick={async () => {
-                      if (onAgentClick) {
+                      if (onTaskClick) {
                         try {
-                          const fullAgent = await agentAPI.getById(agentAssoc.agent_id);
-                          onAgentClick(fullAgent);
+                          const fullTask = await taskAPI.getById(taskAssoc.task_id);
+                          onTaskClick(fullTask);
                         } catch (error) {
-                          console.error('Failed to load agent:', error);
+                          console.error('Failed to load task:', error);
                         }
                       }
                     }}
                   >
                     <div
                       className="related-list-status"
-                      style={{ backgroundColor: getStatusColor(agentAssoc.status) }}
-                      title={getStatusLabel(agentAssoc.status)}
+                      style={{ backgroundColor: getStatusColor(taskAssoc.status) }}
+                      title={getStatusLabel(taskAssoc.status)}
                     />
-                    <div className="related-list-title">{agentAssoc.title}</div>
-                    <div className="related-list-badge related-list-badge--type">{agentAssoc.agent_type}</div>
-                    <div className="related-list-badge related-list-badge--dept">{agentAssoc.department}</div>
+                    <div className="related-list-title">{taskAssoc.title}</div>
                   </motion.div>
                 ))}
               </div>
             ) : (
-              <div className="no-alignments">No sibling agents found.</div>
+              <div className="no-alignments">No sibling tasks found.</div>
             )}
           </div>
 
@@ -387,8 +389,8 @@ const AgentDetail: React.FC<AgentDetailProps> = ({
 
         <div className="detail-sidebar">
           <CommentThread
-            entityId={agent.id}
-            entityType="agent"
+            entityId={task.id}
+            entityType="task"
             currentUserId={currentUserId}
             currentUserName={currentUserName}
           />
@@ -398,4 +400,4 @@ const AgentDetail: React.FC<AgentDetailProps> = ({
   );
 };
 
-export default AgentDetail;
+export default TaskDetail;

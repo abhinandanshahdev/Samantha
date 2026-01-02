@@ -177,19 +177,10 @@ export const MsalAuthProvider: React.FC<MsalAuthProviderProps> = ({ children }) 
 
       console.log('Starting MSAL login...');
       const loginRequest = await getLoginRequest();
-      
-      try {
-        // Try redirect login
-        await msalInstance.loginRedirect(loginRequest);
-        return true;
-      } catch (redirectError) {
-        console.warn('Redirect login failed, trying popup:', redirectError);
-        
-        // Fallback to popup
-        const response = await msalInstance.loginPopup(loginRequest);
-        await handleAuthenticationResult(response);
-        return true;
-      }
+
+      // Use redirect login (more reliable, no popup blocker issues)
+      await msalInstance.loginRedirect(loginRequest);
+      return true;
     } catch (error) {
       console.error('MSAL login error:', error);
       return false;

@@ -122,8 +122,8 @@ class ConfigService {
         microsoftAuth: false
       },
       app: {
-        name: 'Hekmah',
-        tagline: 'AI for AI @ DoF',
+        name: 'Samantha',
+        tagline: 'Family Management',
         environment: 'error'
       }
     };

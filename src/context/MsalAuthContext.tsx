@@ -264,7 +264,7 @@ export const MsalAuthProvider: React.FC<MsalAuthProviderProps> = ({ children }) 
         flexDirection: 'column',
         gap: '10px'
       }}>
-        <div>Loading Hekmah...</div>
+        <div>Loading Samantha...</div>
         {!msalConfigured && (
           <div style={{ fontSize: '14px', color: '#666', textAlign: 'center', maxWidth: '400px' }}>
             Microsoft authentication is not configured. Please check your environment variables.

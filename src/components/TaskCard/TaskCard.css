@@ -9,7 +9,7 @@
   }
 }
 
-.agent-card {
+.task-card {
   border-radius: 12px;
   padding: 16px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -25,14 +25,14 @@
   opacity: 0;
 }
 
-.agent-card:hover {
+.task-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   border-color: var(--primary-color);
 }
 
-/* Frosted glass cards with gradients for grid view only - Agent-specific purple/blue tones */
-.agent-card.grid-view {
+/* Frosted glass cards with gradients for grid view only - Task-specific purple/blue tones */
+.task-card.grid-view {
   background:
     linear-gradient(135deg, rgba(102, 126, 234, 0.16) 0%, transparent 50%, rgba(118, 75, 162, 0.16) 100%),
     rgba(255, 255, 255, 0.55);
@@ -45,7 +45,7 @@
     inset 0 -1px 0 rgba(0, 0, 0, 0.05);
 }
 
-.agent-card.grid-view:hover {
+.task-card.grid-view:hover {
   background:
     linear-gradient(135deg, rgba(102, 126, 234, 0.22) 0%, transparent 50%, rgba(118, 75, 162, 0.22) 100%),
     rgba(255, 255, 255, 0.65);
@@ -339,7 +339,7 @@
 
 /* Mobile responsive styles */
 @media (max-width: 768px) {
-  .agent-card {
+  .task-card {
     padding: 14px;
   }
 

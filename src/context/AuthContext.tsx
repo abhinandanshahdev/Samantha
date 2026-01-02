@@ -130,7 +130,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         fontSize: '18px',
         color: '#D4AF37'
       }}>
-        Loading Hekmah...
+        Loading Samantha...
       </div>
     );
   }

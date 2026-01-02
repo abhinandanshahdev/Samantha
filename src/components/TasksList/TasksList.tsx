@@ -1,53 +1,61 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { FixedSizeList as List } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
-import { Agent, AgentFilters, AgentType, UseCase, InitiativeAgentAssociation } from '../../types';
-import { agentAPI, agentTypeAPI, agentLikesAPI, useCaseAPI, agentAssociationsAPI } from '../../services/apiService';
+import { Task, TaskFilters, UseCase, InitiativeTaskAssociation, KanbanStatus } from '../../types';
+import { taskAPI, taskLikesAPI, useCaseAPI, taskAssociationsAPI } from '../../services/apiService';
 import { useActiveDomainId } from '../../context/DomainContext';
 import FilterPanel from '../FilterPanel/FilterPanel';
-import AgentCard from '../AgentCard/AgentCard';
+import TaskCard from '../TaskCard/TaskCard';
 import InitiativeCard from '../InitiativeCard/InitiativeCard';
 import ChatAssistant from '../ChatAssistant/ChatAssistant';
 import EmptyState from '../EmptyState/EmptyState';
 import LoadingAnimation from '../LoadingAnimation/LoadingAnimation';
 import { emptyStateMessages } from '../../data/emptyStates';
 import { FaThLarge, FaList, FaSortAmountDown, FaPlus, FaProjectDiagram, FaChevronDown, FaChevronUp, FaHeart, FaComment } from 'react-icons/fa';
-import './AgentsList.css';
+import './TasksList.css';
 
 const BUFFER_SIZE = 50; // Number of items to load per batch
 const ITEM_HEIGHT_LIST = 70; // Height of list row
 
-const STATUS_COLORS = {
-  concept: '#77787B',
-  proof_of_concept: '#C68D6D',
-  validation: '#F6BD60',
-  pilot: '#00A79D',
-  production: '#B79546'
+const STATUS_COLORS: Record<KanbanStatus, string> = {
+  intention: '#77787B',
+  experimentation: '#9B59B6',
+  commitment: '#C68D6D',
+  implementation: '#4A90E2',
+  integration: '#00A79D',
+  blocked: '#E74C3C',
+  slow_burner: '#F6BD60',
+  de_prioritised: '#9e9e9e',
+  on_hold: '#B79546'
 };
 
-const STATUS_LABELS = {
-  concept: 'Concept',
-  proof_of_concept: 'PoC',
-  validation: 'Validation',
-  pilot: 'Pilot',
-  production: 'Production'
+const STATUS_LABELS: Record<KanbanStatus, string> = {
+  intention: 'Intention',
+  experimentation: 'Experimentation',
+  commitment: 'Commitment',
+  implementation: 'Implementation',
+  integration: 'Integration',
+  blocked: 'Blocked',
+  slow_burner: 'Slow Burner',
+  de_prioritised: 'De-prioritised',
+  on_hold: 'On Hold'
 };
 
-const STATUS_ORDER = ['concept', 'proof_of_concept', 'validation', 'pilot', 'production'];
+const STATUS_ORDER: KanbanStatus[] = ['intention', 'experimentation', 'commitment', 'implementation', 'integration'];
 
-interface AgentsCountBarProps {
+interface TasksCountBarProps {
   statusBreakdown: Record<string, number>;
   totalCount: number;
 }
 
-const AgentsCountBar: React.FC<AgentsCountBarProps> = ({ statusBreakdown, totalCount }) => {
+const TasksCountBar: React.FC<TasksCountBarProps> = ({ statusBreakdown, totalCount }) => {
   const statusCounts = useMemo(() => {
     // Always return all statuses in fixed order
     return STATUS_ORDER.map(status => ({
       status,
       count: statusBreakdown[status] || 0,
-      color: STATUS_COLORS[status as keyof typeof STATUS_COLORS] || STATUS_COLORS.concept,
-      label: STATUS_LABELS[status as keyof typeof STATUS_LABELS] || status
+      color: STATUS_COLORS[status] || STATUS_COLORS.intention,
+      label: STATUS_LABELS[status] || status
     }));
   }, [statusBreakdown]);
 
@@ -82,8 +90,8 @@ const AgentsCountBar: React.FC<AgentsCountBarProps> = ({ statusBreakdown, totalC
   );
 };
 
-interface AgentsListProps {
-  onAgentClick: (agent: Agent) => void;
+interface TasksListProps {
+  onTaskClick: (task: Task) => void;
   onUseCaseClick?: (useCase: UseCase) => void;
   onCreateClick: () => void;
   onSearch: (query: string) => void;
@@ -95,12 +103,12 @@ interface AgentsListProps {
   };
   showAIChat?: boolean;
   onCloseChatClick?: () => void;
-  initialFilters?: AgentFilters;
-  onFiltersChange?: (filters: AgentFilters) => void;
+  initialFilters?: TaskFilters;
+  onFiltersChange?: (filters: TaskFilters) => void;
 }
 
-const AgentsList: React.FC<AgentsListProps> = ({
-  onAgentClick,
+const TasksList: React.FC<TasksListProps> = ({
+  onTaskClick,
   onUseCaseClick,
   onCreateClick,
   onSearch,
@@ -113,23 +121,22 @@ const AgentsList: React.FC<AgentsListProps> = ({
   onFiltersChange
 }) => {
   const activeDomainId = useActiveDomainId();
-  const [agents, setAgents] = useState<Agent[]>([]);
-  const [filters, setFilters] = useState<AgentFilters>(initialFilters || {});
-  const [agentTypes, setAgentTypes] = useState<AgentType[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [filters, setFilters] = useState<TaskFilters>(initialFilters || {});
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'usecase'>(() => {
-    const savedViewMode = localStorage.getItem('ai_agents_view_mode');
-    return (savedViewMode as 'grid' | 'list' | 'usecase') || 'grid';
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'initiative'>(() => {
+    const savedViewMode = localStorage.getItem('tasks_view_mode');
+    return (savedViewMode as 'grid' | 'list' | 'initiative') || 'grid';
   });
   const [sortBy, setSortBy] = useState<'created' | 'updated'>(() => {
-    const savedSortBy = localStorage.getItem('ai_agents_sort_by');
+    const savedSortBy = localStorage.getItem('tasks_sort_by');
     return (savedSortBy as 'created' | 'updated') || 'updated';
   });
   const [hasScrolled, setHasScrolled] = useState(false);
-  const [likedAgents, setLikedAgents] = useState<Set<string>>(new Set());
+  const [likedTasks, setLikedTasks] = useState<Set<string>>(new Set());
   const [useCases, setUseCases] = useState<UseCase[]>([]);
-  const [useCaseAgents, setUseCaseAgents] = useState<Record<string, InitiativeAgentAssociation[]>>({});
+  const [useCaseTasks, setUseCaseTasks] = useState<Record<string, InitiativeTaskAssociation[]>>({});
   const [expandedUseCases, setExpandedUseCases] = useState<Set<string>>(new Set());
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -157,11 +164,11 @@ const AgentsList: React.FC<AgentsListProps> = ({
   }, [viewMode]);
 
   useEffect(() => {
-    localStorage.setItem('ai_agents_view_mode', viewMode);
+    localStorage.setItem('tasks_view_mode', viewMode);
   }, [viewMode]);
 
   useEffect(() => {
-    localStorage.setItem('ai_agents_sort_by', sortBy);
+    localStorage.setItem('tasks_sort_by', sortBy);
   }, [sortBy]);
 
   // Update filters when initialFilters prop changes
@@ -173,21 +180,6 @@ const AgentsList: React.FC<AgentsListProps> = ({
       return () => clearTimeout(timer);
     }
   }, [initialFilters]);
-
-  useEffect(() => {
-    const loadAgentTypes = async () => {
-      try {
-        const types = await agentTypeAPI.getAll(activeDomainId || undefined);
-        setAgentTypes(types);
-      } catch (error) {
-        console.error('Error loading agent types:', error);
-      }
-    };
-
-    if (activeDomainId) {
-      loadAgentTypes();
-    }
-  }, [activeDomainId]);
 
   // Combine filters with active domain for API calls
   const filtersWithDomain = useMemo(() => {
@@ -204,12 +196,12 @@ const AgentsList: React.FC<AgentsListProps> = ({
       if (!activeDomainId) return;
 
       try {
-        const stats = await agentAPI.getStatsWithFilters(filtersWithDomain);
+        const stats = await taskAPI.getStatsWithFilters(filtersWithDomain);
         setTotalCount(stats.total_count);
         setStatusBreakdown(stats.status_breakdown);
         setHasNextPage(stats.total_count > 0);
       } catch (error) {
-        console.error('Error loading agent statistics:', error);
+        console.error('Error loading task statistics:', error);
         setTotalCount(0);
         setStatusBreakdown({});
       }
@@ -220,7 +212,7 @@ const AgentsList: React.FC<AgentsListProps> = ({
 
   // Clear data when filters or domain change
   useEffect(() => {
-    setAgents([]);
+    setTasks([]);
     setHasNextPage(true);
     loadedRanges.current.clear();
 
@@ -250,45 +242,45 @@ const AgentsList: React.FC<AgentsListProps> = ({
     loadedRanges.current.add(rangeKey);
 
     try {
-      const newAgents = await agentAPI.getAll({
+      const newTasks = await taskAPI.getAll({
         ...filtersWithDomain,
         limit: stopIndex - startIndex + 1,
         offset: startIndex
       });
 
-      setAgents(prevAgents => {
-        const updatedAgents = [...prevAgents];
+      setTasks(prevTasks => {
+        const updatedTasks = [...prevTasks];
 
         // Insert new items at correct positions
-        newAgents.forEach((agent, index) => {
-          updatedAgents[startIndex + index] = agent;
+        newTasks.forEach((task, index) => {
+          updatedTasks[startIndex + index] = task;
         });
 
-        return updatedAgents;
+        return updatedTasks;
       });
 
-      // Batch load like status for newly loaded agents
-      if (newAgents.length > 0) {
+      // Batch load like status for newly loaded tasks
+      if (newTasks.length > 0) {
         try {
-          const agentIds = newAgents.map(a => a.id);
-          const { liked_ids } = await agentLikesAPI.batchCheckLiked(agentIds);
-          setLikedAgents(prev => {
+          const taskIds = newTasks.map(t => t.id);
+          const { liked_ids } = await taskLikesAPI.batchCheckLiked(taskIds);
+          setLikedTasks(prev => {
             const newSet = new Set(prev);
             liked_ids.forEach(id => newSet.add(id));
             return newSet;
           });
         } catch (error) {
-          console.error('Error batch loading liked agents:', error);
+          console.error('Error batch loading liked tasks:', error);
         }
       }
 
       // Update hasNextPage based on whether we got fewer items than expected
-      if (newAgents.length < (stopIndex - startIndex + 1)) {
+      if (newTasks.length < (stopIndex - startIndex + 1)) {
         setHasNextPage(false);
       }
 
     } catch (error) {
-      console.error('Error loading agents:', error);
+      console.error('Error loading tasks:', error);
       // Remove the range from loaded ranges so we can retry
       loadedRanges.current.delete(rangeKey);
     } finally {
@@ -298,17 +290,15 @@ const AgentsList: React.FC<AgentsListProps> = ({
 
   // Check if item is loaded
   const isItemLoaded = useCallback((index: number) => {
-    return !!agents[index];
-  }, [agents]);
+    return !!tasks[index];
+  }, [tasks]);
 
-  // Note: Like status is now loaded in batches via loadMoreItems using batchCheckLiked
-
-  // Load initial batch of agents when stats load or view is not usecase
+  // Load initial batch of tasks when stats load or view is not initiative
   useEffect(() => {
-    if (viewMode !== 'usecase' && totalCount > 0 && agents.length === 0 && !isLoadingMore) {
+    if (viewMode !== 'initiative' && totalCount > 0 && tasks.length === 0 && !isLoadingMore) {
       loadMoreItems(0, BUFFER_SIZE - 1);
     }
-  }, [totalCount, viewMode, agents.length, isLoadingMore, loadMoreItems]);
+  }, [totalCount, viewMode, tasks.length, isLoadingMore, loadMoreItems]);
 
   // Reset scroll indicator when view changes
   useEffect(() => {
@@ -318,45 +308,40 @@ const AgentsList: React.FC<AgentsListProps> = ({
     }
   }, [viewMode, filters, searchQuery]);
 
-  // Load use cases when in usecase view mode
+  // Load use cases when in initiative view mode
   useEffect(() => {
     const loadUseCases = async () => {
-      if (viewMode !== 'usecase' || !activeDomainId) return;
+      if (viewMode !== 'initiative' || !activeDomainId) return;
 
       try {
         setIsLoading(true);
-        // Apply agent filters to fetch only relevant use cases
-        // Pass all filters that are applicable to use cases
+        // Apply task filters to fetch only relevant use cases
         const fetchedUseCases = await useCaseAPI.getAll({
           domain_id: activeDomainId,
           limit: 400,
           tags: filters.tags,
-          data_sensitivity: filters.data_sensitivity,
-          departments: filters.departments,
           statuses: filters.statuses,
           strategic_impact: filters.strategic_impact,
-          kanban_pillar: filters.kanban_pillar,
           expected_delivery_year: filters.expected_delivery_year,
           expected_delivery_month: filters.expected_delivery_month,
-          agent_types: filters.agent_types, // Filter by agents' types
           search: searchQuery
         });
         setUseCases(fetchedUseCases);
 
-        // Load agent associations for each use case
-        const agentsMap: Record<string, InitiativeAgentAssociation[]> = {};
+        // Load task associations for each use case
+        const tasksMap: Record<string, InitiativeTaskAssociation[]> = {};
         await Promise.all(
           fetchedUseCases.map(async (useCase) => {
             try {
-              const associations = await agentAssociationsAPI.getAgentsForInitiative(useCase.id);
-              agentsMap[useCase.id] = associations;
+              const associations = await taskAssociationsAPI.getTasksForInitiative(useCase.id);
+              tasksMap[useCase.id] = associations;
             } catch (error) {
-              console.error(`Failed to load agents for use case ${useCase.id}:`, error);
-              agentsMap[useCase.id] = [];
+              console.error(`Failed to load tasks for use case ${useCase.id}:`, error);
+              tasksMap[useCase.id] = [];
             }
           })
         );
-        setUseCaseAgents(agentsMap);
+        setUseCaseTasks(tasksMap);
       } catch (error) {
         console.error('Failed to load use cases:', error);
       } finally {
@@ -370,17 +355,13 @@ const AgentsList: React.FC<AgentsListProps> = ({
     activeDomainId,
     searchQuery,
     filters.tags,
-    filters.data_sensitivity,
-    filters.departments,
     filters.statuses,
     filters.strategic_impact,
-    filters.kanban_pillar,
     filters.expected_delivery_year,
-    filters.expected_delivery_month,
-    filters.agent_types
+    filters.expected_delivery_month
   ]);
 
-  const handleFilterChange = (newFilters: AgentFilters) => {
+  const handleFilterChange = (newFilters: TaskFilters) => {
     setFilters(newFilters);
     onFiltersChange?.(newFilters);
   };
@@ -402,25 +383,25 @@ const AgentsList: React.FC<AgentsListProps> = ({
     onFiltersChange?.({});
   };
 
-  const handleLikeToggle = async (agentId: string) => {
+  const handleLikeToggle = async (taskId: string) => {
     try {
-      const result = await agentLikesAPI.toggle(agentId);
+      const result = await taskLikesAPI.toggle(taskId);
 
       if (result.liked) {
-        setLikedAgents(prev => new Set(prev).add(agentId));
+        setLikedTasks(prev => new Set(prev).add(taskId));
       } else {
-        setLikedAgents(prev => {
+        setLikedTasks(prev => {
           const newSet = new Set(prev);
-          newSet.delete(agentId);
+          newSet.delete(taskId);
           return newSet;
         });
       }
 
-      setAgents(prevAgents =>
-        prevAgents.map(agent =>
-          agent.id === agentId
-            ? { ...agent, likes_count: result.count }
-            : agent
+      setTasks(prevTasks =>
+        prevTasks.map(task =>
+          task.id === taskId
+            ? { ...task, likes_count: result.count }
+            : task
         )
       );
     } catch (error) {
@@ -430,17 +411,13 @@ const AgentsList: React.FC<AgentsListProps> = ({
 
   const handleDelete = async (id: string) => {
     try {
-      await agentAPI.delete(id);
-      setAgents(prevAgents => prevAgents.filter(agent => agent.id !== id));
+      await taskAPI.delete(id);
+      setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
     } catch (error) {
-      console.error('Error deleting agent:', error);
-      alert('Failed to delete agent');
+      console.error('Error deleting task:', error);
+      alert('Failed to delete task');
     }
   };
-
-  // Note: Sorting by created/updated date should be done server-side.
-  // For now, agents are returned in default server order (created_date DESC).
-  // TODO: Add sort_by query parameter to backend /agents endpoint if client-side sorting is needed.
 
   const isAdmin = user?.role === 'admin';
 
@@ -455,15 +432,13 @@ const AgentsList: React.FC<AgentsListProps> = ({
                 fontWeight: '500',
                 color: '#9CA3AF'
               }}>
-                0 agents found
+                0 tasks found
               </div>
             </div>
             <FilterPanel
               filters={filters}
               onFiltersChange={handleFilterChange}
               onClearFilters={handleClearFilters}
-              showAgentTypeFilter={true}
-              agentTypes={agentTypes}
               hideKanbanStatus={true}
               hideDeliveryDateFilters={true}
               sortBy={sortBy}
@@ -479,7 +454,7 @@ const AgentsList: React.FC<AgentsListProps> = ({
                   {isAdmin && (
                     <button className="create-button" onClick={onCreateClick}>
                       <FaPlus />
-                      Add Agent
+                      Add Task
                     </button>
                   )}
                 </div>
@@ -487,9 +462,9 @@ const AgentsList: React.FC<AgentsListProps> = ({
             </div>
 
             <EmptyState
-              title={emptyStateMessages.noAgents.title}
-              message={emptyStateMessages.noAgents.message}
-              actionText={isAdmin ? "Create Your First Agent" : undefined}
+              title={emptyStateMessages.noTasks?.title || "No tasks found"}
+              message={emptyStateMessages.noTasks?.message || "Create your first task to get started."}
+              actionText={isAdmin ? "Create Your First Task" : undefined}
               onAction={isAdmin ? onCreateClick : undefined}
             />
           </div>
@@ -515,15 +490,13 @@ const AgentsList: React.FC<AgentsListProps> = ({
               fontWeight: '500',
               color: '#9CA3AF'
             }}>
-              {totalCount} agent{totalCount !== 1 ? 's' : ''} found
+              {totalCount} task{totalCount !== 1 ? 's' : ''} found
             </div>
           </div>
           <FilterPanel
             filters={filters}
             onFiltersChange={handleFilterChange}
             onClearFilters={handleClearFilters}
-            showAgentTypeFilter={true}
-            agentTypes={agentTypes}
             hideKanbanStatus={true}
             hideDeliveryDateFilters={true}
             sortBy={sortBy}
@@ -534,7 +507,7 @@ const AgentsList: React.FC<AgentsListProps> = ({
         <div className="dashboard-main">
           <div className="dashboard-header">
             <div className="status-breakdown">
-              <AgentsCountBar statusBreakdown={statusBreakdown} totalCount={totalCount} />
+              <TasksCountBar statusBreakdown={statusBreakdown} totalCount={totalCount} />
             </div>
             <div className="dashboard-controls">
               <div className="view-controls">
@@ -555,19 +528,19 @@ const AgentsList: React.FC<AgentsListProps> = ({
                       <FaList />
                     </button>
                     <button
-                      className={`view-toggle-btn ${viewMode === 'usecase' ? 'active' : ''}`}
-                      onClick={() => setViewMode('usecase')}
-                      title="Use Case view"
+                      className={`view-toggle-btn ${viewMode === 'initiative' ? 'active' : ''}`}
+                      onClick={() => setViewMode('initiative')}
+                      title="Initiative view"
                     >
                       <FaProjectDiagram />
                     </button>
                     <div className="disclaimer-icon-container">
                       <span className="disclaimer-icon">i</span>
                       <div className="disclaimer-tooltip">
-                        {viewMode === 'usecase'
-                          ? 'Agents grouped by initiative. Tap to expand, click for details. Count not additive - agents may support multiple initiatives.'
+                        {viewMode === 'initiative'
+                          ? 'Tasks grouped by initiative. Tap to expand, click for details. Count not additive - tasks may support multiple initiatives.'
                           : viewMode === 'grid'
-                          ? 'Cards view with key information. Click any agent for full details.'
+                          ? 'Cards view with key information. Click any task for full details.'
                           : 'Compact table format for quick comparison.'}
                       </div>
                     </div>
@@ -591,16 +564,16 @@ const AgentsList: React.FC<AgentsListProps> = ({
                 {isAdmin && (
                   <button className="create-button" onClick={onCreateClick}>
                     <FaPlus />
-                    Add Agent
+                    Add Task
                   </button>
                 )}
               </div>
             </div>
           </div>
 
-          {isLoading && agents.length === 0 ? (
-            <LoadingAnimation type={viewMode === 'list' ? 'list' : 'cards'} message={viewMode === 'usecase' ? "Loading Initiatives..." : "Loading Agents..."} />
-          ) : viewMode === 'usecase' ? (
+          {isLoading && tasks.length === 0 ? (
+            <LoadingAnimation type={viewMode === 'list' ? 'list' : 'cards'} message={viewMode === 'initiative' ? "Loading Initiatives..." : "Loading Tasks..."} />
+          ) : viewMode === 'initiative' ? (
             <div className="use-cases-scroll-wrapper">
               <div
                 ref={containerRef}
@@ -609,60 +582,60 @@ const AgentsList: React.FC<AgentsListProps> = ({
               >
                 {useCases
                   .filter((useCase: UseCase) => {
-                    const agentsForThisUseCase = useCaseAgents[useCase.id] || [];
-                    return agentsForThisUseCase.length > 0;
+                    const tasksForThisUseCase = useCaseTasks[useCase.id] || [];
+                    return tasksForThisUseCase.length > 0;
                   })
                   .map((useCase: UseCase) => {
-                  const agentsForThisUseCase = useCaseAgents[useCase.id] || [];
+                  const tasksForThisUseCase = useCaseTasks[useCase.id] || [];
                   const isExpanded = expandedUseCases.has(useCase.id);
-                  const hasAgents = agentsForThisUseCase.length > 0;
+                  const hasTasks = tasksForThisUseCase.length > 0;
 
                   return (
-                    <div key={useCase.id} className="usecase-with-agents">
+                    <div key={useCase.id} className="usecase-with-tasks">
                       <InitiativeCard
                         useCase={useCase}
                         onClick={onUseCaseClick ? () => onUseCaseClick(useCase) : () => {}}
                         viewMode="grid"
                       />
                       <div
-                        className={`agents-footer ${!hasAgents ? 'no-agents' : ''}`}
+                        className={`tasks-footer ${!hasTasks ? 'no-tasks' : ''}`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (hasAgents) {
+                          if (hasTasks) {
                             toggleUseCaseExpansion(useCase.id);
                           }
                         }}
-                        style={{ cursor: hasAgents ? 'pointer' : 'default' }}
+                        style={{ cursor: hasTasks ? 'pointer' : 'default' }}
                       >
-                        <span className="agents-count">
-                          {agentsForThisUseCase.length} Agent{agentsForThisUseCase.length !== 1 ? 's' : ''}
+                        <span className="tasks-count">
+                          {tasksForThisUseCase.length} Task{tasksForThisUseCase.length !== 1 ? 's' : ''}
                         </span>
-                        {hasAgents && (isExpanded ? <FaChevronUp /> : <FaChevronDown />)}
+                        {hasTasks && (isExpanded ? <FaChevronUp /> : <FaChevronDown />)}
                       </div>
-                      {isExpanded && hasAgents && (
-                        <div className="expanded-agents">
-                          {agentsForThisUseCase.map((association: InitiativeAgentAssociation) => {
-                            const agent = agents.find(a => a.id === association.agent_id);
-                            const likesCount = agent?.likes_count || 0;
-                            const commentsCount = agent?.comments_count || 0;
+                      {isExpanded && hasTasks && (
+                        <div className="expanded-tasks">
+                          {tasksForThisUseCase.map((association: InitiativeTaskAssociation) => {
+                            const task = tasks.find(t => t.id === association.task_id);
+                            const likesCount = task?.likes_count || 0;
+                            const commentsCount = task?.comments_count || 0;
 
                             return (
                               <div
-                                key={association.agent_id}
-                                className="mini-agent-card"
+                                key={association.task_id}
+                                className="mini-task-card"
                                 onClick={async () => {
                                   try {
-                                    const fullAgent = await agentAPI.getById(association.agent_id);
-                                    onAgentClick(fullAgent);
+                                    const fullTask = await taskAPI.getById(association.task_id);
+                                    onTaskClick(fullTask);
                                   } catch (error) {
-                                    console.error('Failed to load agent:', error);
+                                    console.error('Failed to load task:', error);
                                   }
                                 }}
                               >
-                                <div className="mini-agent-title">{association.title}</div>
-                                <div className="mini-agent-stats">
+                                <div className="mini-task-title">{association.title}</div>
+                                <div className="mini-task-stats">
                                   <span>
-                                    <FaHeart style={{ color: likedAgents.has(association.agent_id) ? '#e74c3c' : '#9ca3af' }} />
+                                    <FaHeart style={{ color: likedTasks.has(association.task_id) ? '#e74c3c' : '#9ca3af' }} />
                                     {likesCount}
                                   </span>
                                   <span>
@@ -682,18 +655,17 @@ const AgentsList: React.FC<AgentsListProps> = ({
               {useCases.length > 6 && !hasScrolled && (
                 <div className="scroll-hint">
                   <span>Scroll for more</span>
-                  <div className="scroll-arrow">↓</div>
+                  <div className="scroll-arrow">v</div>
                 </div>
               )}
             </div>
           ) : viewMode === 'list' ? (
             <div className="table-view-wrapper">
               <div className="table-header">
-                <div className="table-header-cell title-col">Agent</div>
+                <div className="table-header-cell title-col">Task</div>
                 <div className="table-header-cell desc-col">What is it?</div>
-                <div className="table-header-cell dept-col"></div>
-                <div className="table-header-cell cat-col"></div>
                 <div className="table-header-cell impact-col"></div>
+                <div className="table-header-cell initiative-col"></div>
                 <div className="table-header-cell status-col"></div>
               </div>
 
@@ -725,28 +697,27 @@ const AgentsList: React.FC<AgentsListProps> = ({
                       className="table-body"
                     >
                       {({ index, style }) => {
-                        const agent = agents[index];
+                        const task = tasks[index];
                         return (
                           <div style={style}>
-                            {agent ? (
-                              <AgentCard
-                                key={agent.id}
-                                agent={agent}
-                                onClick={onAgentClick}
-                                onEdit={isAdmin ? (a) => onAgentClick(a) : undefined}
+                            {task ? (
+                              <TaskCard
+                                key={task.id}
+                                task={task}
+                                onClick={onTaskClick}
+                                onEdit={isAdmin ? (t) => onTaskClick(t) : undefined}
                                 onDelete={isAdmin ? handleDelete : undefined}
                                 showActions={isAdmin}
                                 viewMode="list"
                                 onLike={handleLikeToggle}
-                                isLiked={likedAgents.has(agent.id)}
+                                isLiked={likedTasks.has(task.id)}
                               />
                             ) : (
-                              <div className="agent-skeleton-row">
+                              <div className="task-skeleton-row">
                                 <div className="skeleton-cell title-col"></div>
                                 <div className="skeleton-cell desc-col"></div>
-                                <div className="skeleton-cell dept-col"></div>
-                                <div className="skeleton-cell cat-col"></div>
                                 <div className="skeleton-cell impact-col"></div>
+                                <div className="skeleton-cell initiative-col"></div>
                                 <div className="skeleton-cell status-col"></div>
                               </div>
                             )}
@@ -769,37 +740,37 @@ const AgentsList: React.FC<AgentsListProps> = ({
                   const element = e.currentTarget;
                   const scrollBottom = element.scrollHeight - element.scrollTop - element.clientHeight;
                   if (scrollBottom < 200 && hasNextPage && !isLoadingMore) {
-                    const loadedCount = agents.filter(a => a).length;
+                    const loadedCount = tasks.filter(t => t).length;
                     if (loadedCount < totalCount) {
                       loadMoreItems(loadedCount, loadedCount + BUFFER_SIZE - 1);
                     }
                   }
                 }}
               >
-                {agents.filter(a => a).map((agent: Agent) => (
-                  <AgentCard
-                    key={agent.id}
-                    agent={agent}
-                    onClick={onAgentClick}
-                    onEdit={isAdmin ? (a) => onAgentClick(a) : undefined}
+                {tasks.filter(t => t).map((task: Task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onClick={onTaskClick}
+                    onEdit={isAdmin ? (t) => onTaskClick(t) : undefined}
                     onDelete={isAdmin ? handleDelete : undefined}
                     showActions={isAdmin}
                     viewMode="grid"
                     onLike={handleLikeToggle}
-                    isLiked={likedAgents.has(agent.id)}
+                    isLiked={likedTasks.has(task.id)}
                   />
                 ))}
                 {isLoadingMore && (
                   <div className="loading-more">
                     <div className="loading-spinner"></div>
-                    <span>Loading more agents...</span>
+                    <span>Loading more tasks...</span>
                   </div>
                 )}
               </div>
               {totalCount > 6 && !hasScrolled && (
                 <div className="scroll-hint">
                   <span>Scroll for more</span>
-                  <div className="scroll-arrow">↓</div>
+                  <div className="scroll-arrow">v</div>
                 </div>
               )}
             </div>
@@ -819,4 +790,4 @@ const AgentsList: React.FC<AgentsListProps> = ({
   );
 };
 
-export default AgentsList;
+export default TasksList;

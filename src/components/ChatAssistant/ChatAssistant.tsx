@@ -131,10 +131,9 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ useCases, isOpen, onClose
       }
     }
 
-    // Get current time in Abu Dhabi (GST - UTC+4)
+    // Get current time in local timezone
     const now = new Date();
-    const abuDhabiTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Dubai' }));
-    const hour = abuDhabiTime.getHours();
+    const hour = now.getHours();
 
     // Generate time-based greeting (Good morning, Good afternoon, or Good evening)
     let timeGreeting = '';
@@ -834,7 +833,7 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ useCases, isOpen, onClose
         <div className="ai-chat-header">
           <div className="ai-chat-title">
             <Sparkles size={16} strokeWidth={1.5} />
-            <span>Hekmah AI</span>
+            <span>Samantha</span>
           </div>
           <div className="ai-chat-header-buttons">
             {!isVoiceConnected && !isVoiceConnecting && (

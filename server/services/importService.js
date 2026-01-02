@@ -16,13 +16,12 @@ const queryPromise = (query, params = []) => {
   });
 };
 
-// Valid enum values
+// Valid enum values - Samantha simplified schema (no departments, agent_types, data_sensitivity)
 const VALID_STATUSES = ['concept', 'proof_of_concept', 'validation', 'pilot', 'production'];
-const VALID_KANBAN_PILLARS = ['backlog', 'prioritised', 'in_progress', 'completed', 'blocked', 'slow_burner', 'de_prioritised', 'on_hold'];
+const VALID_KANBAN_PILLARS = ['intention', 'experimentation', 'commitment', 'implementation', 'integration', 'blocked', 'slow_burner', 'de_prioritised', 'on_hold'];
 const VALID_PRIORITIES = ['Low', 'Medium', 'High'];
 const VALID_GOAL_STATUSES = ['draft', 'active', 'completed', 'cancelled'];
 const VALID_COMPLEXITY_LEVELS = ['Low', 'Medium', 'High'];
-const VALID_DATA_SENSITIVITY = ['Public', 'Restricted', 'Confidential', 'Secret'];
 
 /**
  * Validate import JSON structure and content
@@ -137,20 +136,15 @@ async function validateDomain(domainData, currentUser, usersByName, authorNames)
     has_errors: false,
     entity_counts: {
       categories: { to_import: 0, to_skip: 0 },
-      departments: { to_import: 0, to_skip: 0 },
       strategic_pillars: { to_import: 0, to_skip: 0 },
       strategic_goals: { to_import: 0, to_skip: 0 },
-      agent_types: { to_import: 0, to_skip: 0 },
       outcomes: { to_import: 0, to_skip: 0 },
       tags: { to_import: 0, to_skip: 0 },
       initiatives: { to_import: 0, to_skip: 0 },
-      agents: { to_import: 0, to_skip: 0 },
       goal_alignments: { to_import: 0, to_skip: 0 },
       initiative_associations: { to_import: 0, to_skip: 0 },
-      agent_initiative_associations: { to_import: 0, to_skip: 0 },
       comments: { to_import: 0, to_skip: 0 },
       initiative_likes: { to_import: 0, to_skip: 0 },
-      agent_likes: { to_import: 0, to_skip: 0 },
       initiative_tags: { to_import: 0, to_skip: 0 }
     },
     validation_issues: []
@@ -176,13 +170,10 @@ async function validateDomain(domainData, currentUser, usersByName, authorNames)
   // Track existing domain for merge functionality
   let existingDomainId = null;
   let existingCategories = new Set();
-  let existingDepartments = new Set();
   let existingPillars = new Set();
   let existingGoals = new Set();
-  let existingAgentTypes = new Set();
   let existingOutcomes = new Set();
   let existingInitiatives = new Set();
-  let existingAgents = new Set();
 
   if (existingDomain.length > 0) {
     result.exists = true;
@@ -195,30 +186,27 @@ async function validateDomain(domainData, currentUser, usersByName, authorNames)
       message: 'Domain already exists - new entities will be merged (existing data preserved)'
     });
 
-    // Load existing entities to detect duplicates
-    const [cats, pillars, goals, agentTypes, outcomes, initiatives, agents] = await Promise.all([
+    // Load existing entities to detect duplicates (Samantha: no departments, agent_types, or agents)
+    const [cats, pillars, goals, outcomes, initiatives] = await Promise.all([
       queryPromise('SELECT name FROM categories WHERE domain_id = ?', [existingDomainId]),
       queryPromise('SELECT name FROM strategic_pillars WHERE domain_id = ?', [existingDomainId]),
       queryPromise(`SELECT sg.title FROM strategic_goals sg
                     INNER JOIN strategic_pillars sp ON sg.strategic_pillar_id = sp.id
                     WHERE sp.domain_id = ?`, [existingDomainId]),
-      queryPromise('SELECT name FROM agent_types WHERE domain_id = ?', [existingDomainId]),
       queryPromise('SELECT outcome_key FROM outcomes WHERE domain_id = ?', [existingDomainId]),
-      queryPromise('SELECT title FROM use_cases WHERE domain_id = ?', [existingDomainId]),
-      queryPromise('SELECT title FROM agents WHERE domain_id = ?', [existingDomainId])
+      queryPromise('SELECT title FROM use_cases WHERE domain_id = ?', [existingDomainId])
     ]);
 
     existingCategories = new Set(cats.map(c => c.name.toLowerCase()));
     existingPillars = new Set(pillars.map(p => p.name.toLowerCase()));
     existingGoals = new Set(goals.map(g => g.title.toLowerCase()));
-    existingAgentTypes = new Set(agentTypes.map(at => at.name.toLowerCase()));
     existingOutcomes = new Set(outcomes.map(o => o.outcome_key.toLowerCase()));
     existingInitiatives = new Set(initiatives.map(i => i.title.toLowerCase()));
-    existingAgents = new Set(agents.map(a => a.title.toLowerCase()));
   }
 
-  // Validate reference data first (categories, departments, pillars, etc.)
+  // Validate reference data first (categories, pillars, etc.)
   // These need to be validated before the entities that reference them
+  // Note: Samantha doesn't use departments or agent_types - they are skipped during import
 
   // Collect author names from all entities
   collectAuthorNames(domainData, authorNames);
@@ -238,29 +226,6 @@ async function validateDomain(domainData, currentUser, usersByName, authorNames)
         result.entity_counts.categories.to_skip++;
       } else {
         result.entity_counts.categories.to_import++;
-      }
-    }
-  }
-
-  // Validate departments
-  if (domainData.departments) {
-    for (const dept of domainData.departments) {
-      if (!dept.name) {
-        result.validation_issues.push({
-          severity: 'error',
-          entity_type: 'department',
-          entity_name: 'N/A',
-          message: 'Department name is required'
-        });
-        result.has_errors = true;
-      } else {
-        // Check if department already exists (global entity)
-        const existing = await queryPromise('SELECT id FROM departments WHERE name = ?', [dept.name]);
-        if (existing.length > 0) {
-          result.entity_counts.departments.to_skip++;
-        } else {
-          result.entity_counts.departments.to_import++;
-        }
       }
     }
   }
@@ -345,25 +310,6 @@ async function validateDomain(domainData, currentUser, usersByName, authorNames)
     }
   }
 
-  // Validate agent types
-  if (domainData.agent_types) {
-    for (const agentType of domainData.agent_types) {
-      if (!agentType.name) {
-        result.validation_issues.push({
-          severity: 'error',
-          entity_type: 'agent_type',
-          entity_name: 'N/A',
-          message: 'Agent type name is required'
-        });
-        result.has_errors = true;
-      } else if (existingAgentTypes.has(agentType.name.toLowerCase())) {
-        result.entity_counts.agent_types.to_skip++;
-      } else {
-        result.entity_counts.agent_types.to_import++;
-      }
-    }
-  }
-
   // Validate outcomes
   if (domainData.outcomes) {
     for (const outcome of domainData.outcomes) {
@@ -406,14 +352,8 @@ async function validateDomain(domainData, currentUser, usersByName, authorNames)
     }
   }
 
-  // Build reference sets for validation
+  // Build reference sets for validation (Samantha: no departments or agent_types)
   const categoryNames = new Set((domainData.categories || []).map(c => c.name).filter(Boolean));
-  const departmentNames = new Set((domainData.departments || []).map(d => d.name).filter(Boolean));
-  const agentTypeNames = new Set((domainData.agent_types || []).map(at => at.name).filter(Boolean));
-
-  // Get existing departments and tags (they're global)
-  const existingDepts = await queryPromise('SELECT name FROM departments');
-  existingDepts.forEach(d => departmentNames.add(d.name));
 
   // Validate initiatives
   const initiativeTitles = new Set();
@@ -443,22 +383,13 @@ async function validateDomain(domainData, currentUser, usersByName, authorNames)
       } else {
         initiativeTitles.add(initiative.title);
 
-        // Validate references
+        // Validate references (Samantha: no departments)
         if (initiative.category_name && !categoryNames.has(initiative.category_name)) {
           result.validation_issues.push({
             severity: 'warning',
             entity_type: 'initiative',
             entity_name: initiative.title,
             message: `Category '${initiative.category_name}' not found, will be set to null`
-          });
-        }
-
-        if (initiative.department_name && !departmentNames.has(initiative.department_name)) {
-          result.validation_issues.push({
-            severity: 'warning',
-            entity_type: 'initiative',
-            entity_name: initiative.title,
-            message: `Department '${initiative.department_name}' not found, will be set to null`
           });
         }
 
@@ -482,58 +413,6 @@ async function validateDomain(domainData, currentUser, usersByName, authorNames)
         }
 
         result.entity_counts.initiatives.to_import++;
-      }
-    }
-  }
-
-  // Validate agents
-  const agentTitles = new Set();
-  // Add existing agent titles for association validation
-  existingAgents.forEach(t => agentTitles.add(t));
-  if (domainData.agents) {
-    for (const agent of domainData.agents) {
-      if (!agent.title) {
-        result.validation_issues.push({
-          severity: 'error',
-          entity_type: 'agent',
-          entity_name: 'N/A',
-          message: 'Agent title is required'
-        });
-        result.has_errors = true;
-      } else if (existingAgents.has(agent.title.toLowerCase())) {
-        agentTitles.add(agent.title); // Keep for association validation
-        result.entity_counts.agents.to_skip++;
-        // Add info message about duplicate - especially useful when ID differs
-        const importId = agent.id || 'none';
-        result.validation_issues.push({
-          severity: 'info',
-          entity_type: 'agent',
-          entity_name: agent.title,
-          message: `Agent already exists in domain (import ID: ${importId}) - will be skipped to preserve existing data`
-        });
-      } else {
-        agentTitles.add(agent.title);
-
-        // Validate references
-        if (agent.agent_type_name && !agentTypeNames.has(agent.agent_type_name)) {
-          result.validation_issues.push({
-            severity: 'warning',
-            entity_type: 'agent',
-            entity_name: agent.title,
-            message: `Agent type '${agent.agent_type_name}' not found, will be set to null`
-          });
-        }
-
-        if (agent.department_name && !departmentNames.has(agent.department_name)) {
-          result.validation_issues.push({
-            severity: 'warning',
-            entity_type: 'agent',
-            entity_name: agent.title,
-            message: `Department '${agent.department_name}' not found, will be set to null`
-          });
-        }
-
-        result.entity_counts.agents.to_import++;
       }
     }
   }
@@ -591,38 +470,11 @@ async function validateDomain(domainData, currentUser, usersByName, authorNames)
     }
   }
 
-  // Validate agent-initiative associations
-  if (domainData.agent_initiative_associations) {
-    for (const assoc of domainData.agent_initiative_associations) {
-      if (!assoc.agent_title || !assoc.initiative_title) {
-        result.entity_counts.agent_initiative_associations.to_skip++;
-      } else if (!agentTitles.has(assoc.agent_title)) {
-        result.validation_issues.push({
-          severity: 'warning',
-          entity_type: 'agent_initiative_association',
-          entity_name: `${assoc.agent_title} -> ${assoc.initiative_title}`,
-          message: `Agent '${assoc.agent_title}' not found in import`
-        });
-        result.entity_counts.agent_initiative_associations.to_skip++;
-      } else if (!initiativeTitles.has(assoc.initiative_title)) {
-        result.validation_issues.push({
-          severity: 'warning',
-          entity_type: 'agent_initiative_association',
-          entity_name: `${assoc.agent_title} -> ${assoc.initiative_title}`,
-          message: `Initiative '${assoc.initiative_title}' not found in import`
-        });
-        result.entity_counts.agent_initiative_associations.to_skip++;
-      } else {
-        result.entity_counts.agent_initiative_associations.to_import++;
-      }
-    }
-  }
-
-  // Count other entities
-  const entityTitles = new Set([...initiativeTitles, ...agentTitles]);
+  // Count other entities (Samantha: only initiative comments, no agents)
   if (domainData.comments) {
     for (const comment of domainData.comments) {
-      if (!comment.entity_title || !entityTitles.has(comment.entity_title)) {
+      // Only import comments for initiatives (Samantha doesn't have agents)
+      if (!comment.entity_title || !initiativeTitles.has(comment.entity_title)) {
         result.entity_counts.comments.to_skip++;
       } else {
         result.entity_counts.comments.to_import++;
@@ -636,16 +488,6 @@ async function validateDomain(domainData, currentUser, usersByName, authorNames)
         result.entity_counts.initiative_likes.to_skip++;
       } else {
         result.entity_counts.initiative_likes.to_import++;
-      }
-    }
-  }
-
-  if (domainData.agent_likes) {
-    for (const like of domainData.agent_likes) {
-      if (!like.agent_title || !agentTitles.has(like.agent_title)) {
-        result.entity_counts.agent_likes.to_skip++;
-      } else {
-        result.entity_counts.agent_likes.to_import++;
       }
     }
   }
@@ -675,11 +517,6 @@ function collectAuthorNames(domainData, authorNames) {
   if (domainData.initiatives) {
     domainData.initiatives.forEach(i => {
       if (i.author_name) authorNames.add(i.author_name);
-    });
-  }
-  if (domainData.agents) {
-    domainData.agents.forEach(a => {
-      if (a.author_name) authorNames.add(a.author_name);
     });
   }
   if (domainData.comments) {
@@ -736,32 +573,27 @@ async function importDomainsFromJson(jsonData, currentUser) {
 
 /**
  * Load existing reference data for an existing domain to enable merge imports
+ * Samantha: No departments, agent_types, or agents
  */
 async function loadExistingReferenceData(domainId) {
-  const [categories, departments, pillars, goals, agentTypes, outcomes, tags, initiatives, agents] = await Promise.all([
+  const [categories, pillars, goals, outcomes, tags, initiatives] = await Promise.all([
     queryPromise('SELECT id, name FROM categories WHERE domain_id = ?', [domainId]),
-    queryPromise('SELECT id, name FROM departments WHERE domain_id = ?', [domainId]),
     queryPromise('SELECT id, name FROM strategic_pillars WHERE domain_id = ?', [domainId]),
     queryPromise(`SELECT sg.id, sg.title FROM strategic_goals sg
                   INNER JOIN strategic_pillars sp ON sg.strategic_pillar_id = sp.id
                   WHERE sp.domain_id = ?`, [domainId]),
-    queryPromise('SELECT id, name FROM agent_types WHERE domain_id = ?', [domainId]),
     queryPromise('SELECT id, outcome_key FROM outcomes WHERE domain_id = ?', [domainId]),
     queryPromise('SELECT id, name FROM tags'),
-    queryPromise('SELECT id, title FROM use_cases WHERE domain_id = ?', [domainId]),
-    queryPromise('SELECT id, title FROM agents WHERE domain_id = ?', [domainId])
+    queryPromise('SELECT id, title FROM use_cases WHERE domain_id = ?', [domainId])
   ]);
 
   return {
     categoryMap: new Map(categories.map(c => [c.name.toLowerCase(), c.id])),
-    departmentMap: new Map(departments.map(d => [d.name.toLowerCase(), d.id])),
     pillarMap: new Map(pillars.map(p => [p.name.toLowerCase(), p.id])),
     goalMap: new Map(goals.map(g => [g.title.toLowerCase(), g.id])),
-    agentTypeMap: new Map(agentTypes.map(at => [at.name.toLowerCase(), at.id])),
     outcomeMap: new Map(outcomes.map(o => [o.outcome_key.toLowerCase(), o.id])),
     tagMap: new Map(tags.map(t => [t.name.toLowerCase(), t.id])),
-    initiativeMap: new Map(initiatives.map(i => [i.title.toLowerCase(), i.id])),
-    agentMap: new Map(agents.map(a => [a.title.toLowerCase(), a.id]))
+    initiativeMap: new Map(initiatives.map(i => [i.title.toLowerCase(), i.id]))
   };
 }
 
@@ -774,20 +606,15 @@ async function importSingleDomain(domainData, currentUser, usersByName) {
     status: 'pending',
     entities: {
       categories: { imported: 0, skipped: 0, errors: 0 },
-      departments: { imported: 0, skipped: 0, errors: 0 },
       strategic_pillars: { imported: 0, skipped: 0, errors: 0 },
       strategic_goals: { imported: 0, skipped: 0, errors: 0 },
-      agent_types: { imported: 0, skipped: 0, errors: 0 },
       outcomes: { imported: 0, skipped: 0, errors: 0 },
       tags: { imported: 0, skipped: 0, errors: 0 },
       initiatives: { imported: 0, skipped: 0, errors: 0 },
-      agents: { imported: 0, skipped: 0, errors: 0 },
       goal_alignments: { imported: 0, skipped: 0, errors: 0 },
       initiative_associations: { imported: 0, skipped: 0, errors: 0 },
-      agent_initiative_associations: { imported: 0, skipped: 0, errors: 0 },
       comments: { imported: 0, skipped: 0, errors: 0 },
       initiative_likes: { imported: 0, skipped: 0, errors: 0 },
-      agent_likes: { imported: 0, skipped: 0, errors: 0 },
       initiative_tags: { imported: 0, skipped: 0, errors: 0 }
     },
     warnings: [],
@@ -803,33 +630,27 @@ async function importSingleDomain(domainData, currentUser, usersByName) {
   const isExistingDomain = existingDomain.length > 0;
   let domainId;
 
-  // Maps for resolving references
+  // Maps for resolving references (Samantha: no departments, agent_types, or agents)
   let categoryMap = new Map(); // name -> id
-  let departmentMap = new Map(); // name -> id
   let pillarMap = new Map(); // name -> id
   let goalMap = new Map(); // title -> id
-  let agentTypeMap = new Map(); // name -> id
   let outcomeMap = new Map(); // outcome_key -> id
   let tagMap = new Map(); // name -> id
   let initiativeMap = new Map(); // title -> id
-  let agentMap = new Map(); // title -> id
   const commentUuidMap = new Map(); // old uuid -> new id
 
   if (isExistingDomain) {
     domainId = existingDomain[0].id;
     result.warnings.push('Domain already exists - merging new entities (existing data preserved)');
 
-    // Load existing reference data
+    // Load existing reference data (Samantha: no departments, agent_types, or agents)
     const existingData = await loadExistingReferenceData(domainId);
     categoryMap = existingData.categoryMap;
-    departmentMap = existingData.departmentMap;
     pillarMap = existingData.pillarMap;
     goalMap = existingData.goalMap;
-    agentTypeMap = existingData.agentTypeMap;
     outcomeMap = existingData.outcomeMap;
     tagMap = existingData.tagMap;
     initiativeMap = existingData.initiativeMap;
-    agentMap = existingData.agentMap;
   }
 
   // Start transaction
@@ -860,26 +681,7 @@ async function importSingleDomain(domainData, currentUser, usersByName) {
       }
     }
 
-    // 3. Import departments (domain-specific, check for duplicates)
-    if (domainData.departments) {
-      for (const dept of domainData.departments) {
-        try {
-          const existingId = departmentMap.get(dept.name.toLowerCase());
-          if (existingId) {
-            result.entities.departments.skipped++;
-          } else {
-            const id = await importDepartment(dept, domainId);
-            departmentMap.set(dept.name.toLowerCase(), id);
-            result.entities.departments.imported++;
-          }
-        } catch (err) {
-          result.entities.departments.errors++;
-          result.warnings.push(`Department '${dept.name}': ${err.message}`);
-        }
-      }
-    }
-
-    // 4. Import strategic pillars (check for duplicates)
+    // 3. Import strategic pillars (check for duplicates)
     if (domainData.strategic_pillars) {
       for (const pillar of domainData.strategic_pillars) {
         try {
@@ -898,26 +700,7 @@ async function importSingleDomain(domainData, currentUser, usersByName) {
       }
     }
 
-    // 5. Import agent types (check for duplicates)
-    if (domainData.agent_types) {
-      for (const agentType of domainData.agent_types) {
-        try {
-          const existingId = agentTypeMap.get(agentType.name.toLowerCase());
-          if (existingId) {
-            result.entities.agent_types.skipped++;
-          } else {
-            const id = await importAgentType(agentType, domainId);
-            agentTypeMap.set(agentType.name.toLowerCase(), id);
-            result.entities.agent_types.imported++;
-          }
-        } catch (err) {
-          result.entities.agent_types.errors++;
-          result.warnings.push(`Agent type '${agentType.name}': ${err.message}`);
-        }
-      }
-    }
-
-    // 6. Import outcomes (check for duplicates)
+    // 4. Import outcomes (check for duplicates)
     if (domainData.outcomes) {
       for (const outcome of domainData.outcomes) {
         try {
@@ -986,6 +769,7 @@ async function importSingleDomain(domainData, currentUser, usersByName) {
 
     // 9. Import initiatives (check for duplicates)
     if (domainData.initiatives) {
+      console.log(`[IMPORT] Starting import of ${domainData.initiatives.length} initiatives...`);
       for (const initiative of domainData.initiatives) {
         try {
           // Check if initiative already exists
@@ -996,43 +780,20 @@ async function importSingleDomain(domainData, currentUser, usersByName) {
           }
 
           const categoryId = initiative.category_name ? categoryMap.get(initiative.category_name.toLowerCase()) || null : null;
-          const departmentId = initiative.department_name ? departmentMap.get(initiative.department_name.toLowerCase()) || null : null;
           const authorId = resolveAuthorId(initiative.author_name, currentUser.id, usersByName);
-          const id = await importInitiative(initiative, domainId, categoryId, departmentId, authorId);
+          const authorName = initiative.author_name || currentUser.name;
+          const id = await importInitiative(initiative, domainId, categoryId, authorId, authorName);
           initiativeMap.set(initiative.title.toLowerCase(), id);
           result.entities.initiatives.imported++;
         } catch (err) {
+          console.error(`[IMPORT] Initiative '${initiative.title}' failed:`, err.message, err.sql || '');
           result.entities.initiatives.errors++;
           result.warnings.push(`Initiative '${initiative.title}': ${err.message}`);
         }
       }
     }
 
-    // 10. Import agents (check for duplicates)
-    if (domainData.agents) {
-      for (const agent of domainData.agents) {
-        try {
-          // Check if agent already exists
-          const existingId = agentMap.get(agent.title.toLowerCase());
-          if (existingId) {
-            result.entities.agents.skipped++;
-            continue;
-          }
-
-          const agentTypeId = agent.agent_type_name ? agentTypeMap.get(agent.agent_type_name.toLowerCase()) || null : null;
-          const departmentId = agent.department_name ? departmentMap.get(agent.department_name.toLowerCase()) || null : null;
-          const authorId = resolveAuthorId(agent.author_name, currentUser.id, usersByName);
-          const id = await importAgent(agent, domainId, agentTypeId, departmentId, authorId);
-          agentMap.set(agent.title.toLowerCase(), id);
-          result.entities.agents.imported++;
-        } catch (err) {
-          result.entities.agents.errors++;
-          result.warnings.push(`Agent '${agent.title}': ${err.message}`);
-        }
-      }
-    }
-
-    // 11. Import goal alignments
+    // 8. Import goal alignments
     if (domainData.initiative_goal_alignments) {
       for (const alignment of domainData.initiative_goal_alignments) {
         try {
@@ -1054,7 +815,7 @@ async function importSingleDomain(domainData, currentUser, usersByName) {
       }
     }
 
-    // 12. Import initiative associations
+    // 9. Import initiative associations
     if (domainData.initiative_associations) {
       for (const assoc of domainData.initiative_associations) {
         try {
@@ -1077,41 +838,18 @@ async function importSingleDomain(domainData, currentUser, usersByName) {
       }
     }
 
-    // 13. Import agent-initiative associations
-    if (domainData.agent_initiative_associations) {
-      for (const assoc of domainData.agent_initiative_associations) {
-        try {
-          const agentId = agentMap.get(assoc.agent_title.toLowerCase());
-          const initiativeId = initiativeMap.get(assoc.initiative_title.toLowerCase());
-          if (!agentId || !initiativeId) {
-            result.entities.agent_initiative_associations.skipped++;
-            continue;
-          }
-          const createdById = resolveAuthorId(assoc.created_by_name, currentUser.id, usersByName);
-          await importAgentInitiativeAssociation(agentId, initiativeId, createdById);
-          result.entities.agent_initiative_associations.imported++;
-        } catch (err) {
-          if (err.code === 'ER_DUP_ENTRY') {
-            result.entities.agent_initiative_associations.skipped++;
-          } else {
-            result.entities.agent_initiative_associations.errors++;
-          }
-        }
-      }
-    }
-
-    // 14. Import comments (need to handle threading)
+    // 10. Import comments (only initiative comments - Samantha doesn't have agents)
     if (domainData.comments) {
       // First pass: import comments without parents
       const commentsWithParents = [];
       for (const comment of domainData.comments) {
         try {
-          let entityId;
-          if (comment.entity_type === 'initiative') {
-            entityId = initiativeMap.get(comment.entity_title.toLowerCase());
-          } else {
-            entityId = agentMap.get(comment.entity_title.toLowerCase());
+          // Only import initiative comments (skip agent comments)
+          if (comment.entity_type !== 'initiative') {
+            result.entities.comments.skipped++;
+            continue;
           }
+          const entityId = initiativeMap.get(comment.entity_title.toLowerCase());
           if (!entityId) {
             result.entities.comments.skipped++;
             continue;
@@ -1144,7 +882,7 @@ async function importSingleDomain(domainData, currentUser, usersByName) {
       }
     }
 
-    // 15. Import initiative likes
+    // 11. Import initiative likes
     if (domainData.initiative_likes) {
       for (const like of domainData.initiative_likes) {
         try {
@@ -1166,29 +904,7 @@ async function importSingleDomain(domainData, currentUser, usersByName) {
       }
     }
 
-    // 16. Import agent likes
-    if (domainData.agent_likes) {
-      for (const like of domainData.agent_likes) {
-        try {
-          const agentId = agentMap.get(like.agent_title.toLowerCase());
-          if (!agentId) {
-            result.entities.agent_likes.skipped++;
-            continue;
-          }
-          const userId = resolveAuthorId(like.user_name, currentUser.id, usersByName);
-          await importAgentLike(agentId, userId);
-          result.entities.agent_likes.imported++;
-        } catch (err) {
-          if (err.code === 'ER_DUP_ENTRY') {
-            result.entities.agent_likes.skipped++;
-          } else {
-            result.entities.agent_likes.errors++;
-          }
-        }
-      }
-    }
-
-    // 17. Import initiative tags
+    // 12. Import initiative tags
     if (domainData.initiative_tags) {
       for (const it of domainData.initiative_tags) {
         try {
@@ -1267,30 +983,11 @@ async function importCategory(category, domainId) {
   return result.insertId;
 }
 
-async function importDepartment(dept, domainId) {
-  const id = uuidv4();
-  await queryPromise(
-    `INSERT INTO departments (id, domain_id, name, created_date, updated_date)
-     VALUES (?, ?, ?, NOW(), NOW())`,
-    [id, domainId, dept.name]
-  );
-  return id;
-}
-
 async function importStrategicPillar(pillar, domainId) {
   const result = await queryPromise(
     `INSERT INTO strategic_pillars (domain_id, name, description, display_order, created_date, updated_date)
      VALUES (?, ?, ?, ?, NOW(), NOW())`,
     [domainId, pillar.name, pillar.description, pillar.display_order || 0]
-  );
-  return result.insertId;
-}
-
-async function importAgentType(agentType, domainId) {
-  const result = await queryPromise(
-    `INSERT INTO agent_types (domain_id, name, description, created_date, updated_date)
-     VALUES (?, ?, ?, NOW(), NOW())`,
-    [domainId, agentType.name, agentType.description]
   );
   return result.insertId;
 }
@@ -1343,11 +1040,12 @@ async function importStrategicGoal(goal, pillarId, authorId) {
   return id;
 }
 
-async function importInitiative(initiative, domainId, categoryId, departmentId, authorId) {
+async function importInitiative(initiative, domainId, categoryId, authorId, authorName) {
   const id = uuidv4();
+  // Samantha schema includes author_name column
   await queryPromise(
-    `INSERT INTO use_cases (id, domain_id, title, description, problem_statement, solution_overview, technical_implementation, results_metrics, lessons_learned, category_id, department_id, status, kanban_pillar, expected_delivery_date, data_complexity, integration_complexity, intelligence_complexity, functional_complexity, strategic_impact, justification, author_id, owner_name, owner_email, data_sensitivity, roadmap_link, value_realisation_link, view_count, rating, created_date, updated_date)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+    `INSERT INTO use_cases (id, domain_id, title, description, problem_statement, solution_overview, technical_implementation, results_metrics, lessons_learned, category_id, status, author_id, author_name, owner_name, owner_email, view_count, rating, strategic_impact, effort_level, justification, expected_delivery_date, roadmap_link, created_date, updated_date)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
     [
       id,
       domainId,
@@ -1359,61 +1057,18 @@ async function importInitiative(initiative, domainId, categoryId, departmentId, 
       initiative.results_metrics,
       initiative.lessons_learned,
       categoryId,
-      departmentId,
-      VALID_STATUSES.includes(initiative.status) ? initiative.status : 'concept',
-      VALID_KANBAN_PILLARS.includes(initiative.kanban_pillar) ? initiative.kanban_pillar : null,
-      initiative.expected_delivery_date,
-      VALID_COMPLEXITY_LEVELS.includes(initiative.data_complexity) ? initiative.data_complexity : 'Low',
-      VALID_COMPLEXITY_LEVELS.includes(initiative.integration_complexity) ? initiative.integration_complexity : 'Low',
-      VALID_COMPLEXITY_LEVELS.includes(initiative.intelligence_complexity) ? initiative.intelligence_complexity : 'Low',
-      VALID_COMPLEXITY_LEVELS.includes(initiative.functional_complexity) ? initiative.functional_complexity : 'Low',
-      VALID_COMPLEXITY_LEVELS.includes(initiative.strategic_impact) ? initiative.strategic_impact : 'Low',
-      initiative.justification,
+      VALID_KANBAN_PILLARS.includes(initiative.kanban_pillar || initiative.status) ? (initiative.kanban_pillar || initiative.status) : 'intention',
       authorId,
+      authorName || initiative.author_name,
       initiative.owner_name,
       initiative.owner_email,
-      VALID_DATA_SENSITIVITY.includes(initiative.data_sensitivity) ? initiative.data_sensitivity : null,
-      initiative.roadmap_link,
-      initiative.value_realisation_link,
       initiative.view_count || 0,
-      initiative.rating || 0
-    ]
-  );
-  return id;
-}
-
-async function importAgent(agent, domainId, agentTypeId, departmentId, authorId) {
-  const id = uuidv4();
-  await queryPromise(
-    `INSERT INTO agents (id, domain_id, title, description, problem_statement, solution_overview, technical_implementation, results_metrics, lessons_learned, agent_type_id, department_id, status, kanban_pillar, expected_delivery_date, data_complexity, integration_complexity, intelligence_complexity, functional_complexity, strategic_impact, justification, author_id, owner_name, owner_email, data_sensitivity, roadmap_link, value_realisation_link, created_date, updated_date)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
-    [
-      id,
-      domainId,
-      agent.title,
-      agent.description,
-      agent.problem_statement,
-      agent.solution_overview,
-      agent.technical_implementation,
-      agent.results_metrics,
-      agent.lessons_learned,
-      agentTypeId,
-      departmentId,
-      VALID_STATUSES.includes(agent.status) ? agent.status : 'concept',
-      VALID_KANBAN_PILLARS.includes(agent.kanban_pillar) ? agent.kanban_pillar : null,
-      agent.expected_delivery_date,
-      VALID_COMPLEXITY_LEVELS.includes(agent.data_complexity) ? agent.data_complexity : 'Low',
-      VALID_COMPLEXITY_LEVELS.includes(agent.integration_complexity) ? agent.integration_complexity : 'Low',
-      VALID_COMPLEXITY_LEVELS.includes(agent.intelligence_complexity) ? agent.intelligence_complexity : 'Low',
-      VALID_COMPLEXITY_LEVELS.includes(agent.functional_complexity) ? agent.functional_complexity : 'Low',
-      VALID_COMPLEXITY_LEVELS.includes(agent.strategic_impact) ? agent.strategic_impact : 'Low',
-      agent.justification,
-      authorId,
-      agent.owner_name,
-      agent.owner_email,
-      VALID_DATA_SENSITIVITY.includes(agent.data_sensitivity) ? agent.data_sensitivity : null,
-      agent.roadmap_link,
-      agent.value_realisation_link
+      initiative.rating || 0,
+      VALID_COMPLEXITY_LEVELS.includes(initiative.strategic_impact) ? initiative.strategic_impact : 'Medium',
+      initiative.effort_level || 'Medium',
+      initiative.justification,
+      initiative.expected_delivery_date,
+      initiative.roadmap_link
     ]
   );
   return id;
@@ -1440,24 +1095,15 @@ async function importInitiativeAssociation(initiativeId, relatedId, createdById)
   );
 }
 
-async function importAgentInitiativeAssociation(agentId, initiativeId, createdById) {
-  await queryPromise(
-    `INSERT INTO agent_initiative_associations (agent_id, use_case_id, created_by, created_date)
-     VALUES (?, ?, ?, NOW())`,
-    [agentId, initiativeId, createdById]
-  );
-}
-
 async function importComment(comment, entityId, userId, parentId) {
   const id = uuidv4();
-  const isInitiative = comment.entity_type === 'initiative';
+  // Samantha: only initiative comments (no agents)
   await queryPromise(
-    `INSERT INTO comments (id, use_case_id, agent_id, user_id, parent_comment_id, content, is_edited, created_date, updated_date)
-     VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+    `INSERT INTO comments (id, use_case_id, user_id, parent_comment_id, content, is_edited, created_date, updated_date)
+     VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
     [
       id,
-      isInitiative ? entityId : null,
-      isInitiative ? null : entityId,
+      entityId,
       userId,
       parentId,
       comment.content,
@@ -1475,13 +1121,6 @@ async function importInitiativeLike(initiativeId, userId) {
   );
 }
 
-async function importAgentLike(agentId, userId) {
-  await queryPromise(
-    `INSERT INTO agent_likes (agent_id, user_id, created_date)
-     VALUES (?, ?, NOW())`,
-    [agentId, userId]
-  );
-}
 
 async function importInitiativeTag(initiativeId, tagId) {
   await queryPromise(

@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaCalendar, FaBuilding, FaTags, FaLayerGroup, FaBolt, FaTag, FaEdit, FaTrash, FaEllipsisV, FaHeart, FaComment } from 'react-icons/fa';
+import { FaCalendar, FaTags, FaLayerGroup, FaBolt, FaTag, FaEdit, FaTrash, FaEllipsisV, FaHeart, FaComment } from 'react-icons/fa';
 import { UseCase } from '../../types';
 import './InitiativeCard.css';
 
@@ -24,35 +24,50 @@ const InitiativeCard: React.FC<InitiativeCardProps> = ({ useCase, onClick, onEdi
   };
 
   const getStatusColor = (status: string) => {
-    // Using DoF Secondary Colors (Sea Green, Earthy Brown, Sunset Yellow) + Primary Colors
     switch (status) {
-      case 'concept':
-        return '#77787B'; // Metal Grey (Primary) - Neutral starting point
-      case 'proof_of_concept':
-        return '#C68D6D'; // Earthy Brown (Secondary) - Stability/Testing
-      case 'validation':
-        return '#F6BD60'; // Sunset Yellow (Secondary) - Dependability/Progress
-      case 'pilot':
-        return '#00A79D'; // Sea Green (Secondary) - Renewal/Active development
-      case 'production':
-        return '#B79546'; // Gold (Primary) - Wealth/Quality/Achievement
+      case 'intention':
+        return '#77787B';
+      case 'experimentation':
+        return '#9B59B6';
+      case 'commitment':
+        return '#C68D6D';
+      case 'implementation':
+        return '#4A90E2';
+      case 'integration':
+        return '#00A79D';
+      case 'blocked':
+        return '#E74C3C';
+      case 'slow_burner':
+        return '#F6BD60';
+      case 'de_prioritised':
+        return '#9e9e9e';
+      case 'on_hold':
+        return '#B79546';
       default:
-        return '#77787B'; // Metal Grey (Primary)
+        return '#77787B';
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'concept':
-        return 'Concept';
-      case 'proof_of_concept':
-        return 'Proof of Concept';
-      case 'validation':
-        return 'Validation';
-      case 'pilot':
-        return 'Pilot';
-      case 'production':
-        return 'Production';
+      case 'intention':
+        return 'Intention';
+      case 'experimentation':
+        return 'Experimentation';
+      case 'commitment':
+        return 'Commitment';
+      case 'implementation':
+        return 'Implementation';
+      case 'integration':
+        return 'Integration';
+      case 'blocked':
+        return 'Blocked';
+      case 'slow_burner':
+        return 'Slow Burner';
+      case 'de_prioritised':
+        return 'De-prioritised';
+      case 'on_hold':
+        return 'On Hold';
       default:
         return status;
     }
@@ -78,11 +93,6 @@ const InitiativeCard: React.FC<InitiativeCardProps> = ({ useCase, onClick, onEdi
     return '#D4C5A9';
   };
 
-  const getDepartmentColor = (department: string) => {
-    // Very subtle golden colors for bottom section
-    return '#D4C5A9';
-  };
-
   const getTagColor = (tag: string, index: number) => {
     // Very subtle golden colors for bottom section
     const goldenColors = ['#D4C5A9', '#C9B992', '#D1C2A5', '#CFC0A1', '#D4C5A9', '#C9B992'];
@@ -99,15 +109,6 @@ const InitiativeCard: React.FC<InitiativeCardProps> = ({ useCase, onClick, onEdi
       <div className="table-row" onClick={() => onClick(useCase)}>
         <div className="table-cell title-col">{useCase.title}</div>
         <div className="table-cell desc-col">{useCase.description || 'No description available'}</div>
-        <div className="table-cell dept-col">
-          <span
-            className="metadata-icon tooltip-trigger"
-            data-tooltip={useCase.department}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <FaBuilding />
-          </span>
-        </div>
         <div className="table-cell cat-col">
           <span
             className="metadata-icon tooltip-trigger"
@@ -199,13 +200,6 @@ const InitiativeCard: React.FC<InitiativeCardProps> = ({ useCase, onClick, onEdi
         <div className="card-footer-row">
           {/* Left side - metadata icons */}
           <div className="card-metadata-icons">
-            <span
-              className="metadata-icon tooltip-trigger"
-              data-tooltip={useCase.department}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <FaBuilding />
-            </span>
             <span
               className="metadata-icon tooltip-trigger"
               data-tooltip={useCase.category}

@@ -1,19 +1,19 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { UseCase, Agent } from '../../types';
+import { UseCase } from '../../types';
 import TimelineCard from './TimelineCard';
 import { FaChevronRight, FaChevronDown } from 'react-icons/fa';
 
 interface TimelineColumnProps {
   id: string;
   title: string;
-  useCases: (UseCase | Agent)[];
+  useCases: UseCase[];
   totalCount?: number;
   hasMore?: boolean;
   isLoadingMore?: boolean;
   onLoadMore?: () => void;
-  onCardClick: (useCase: UseCase | Agent) => void;
+  onCardClick: (useCase: UseCase) => void;
   isCollapsible?: boolean;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;

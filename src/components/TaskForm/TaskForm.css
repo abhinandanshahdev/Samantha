@@ -1,4 +1,4 @@
-.agent-form-container {
+.task-form-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
@@ -149,7 +149,7 @@
   color: #495057;
 }
 
-.agent-form {
+.task-form {
   background: white;
   border-radius: 12px;
   padding: 24px;
@@ -532,7 +532,7 @@
 }
 
 @media (max-width: 768px) {
-  .agent-form-container {
+  .task-form-container {
     padding: 16px;
   }
 
@@ -546,7 +546,7 @@
     font-size: 1.5rem;
   }
 
-  .agent-form {
+  .task-form {
     padding: 16px;
   }
   

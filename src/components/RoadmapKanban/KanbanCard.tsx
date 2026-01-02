@@ -2,17 +2,15 @@ import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { FaBuilding, FaLayerGroup, FaBolt, FaCalendar, FaGripVertical } from 'react-icons/fa';
-import { UseCase, Agent } from '../../types';
+import { UseCase } from '../../types';
 import './KanbanCard.css';
 
 interface KanbanCardProps {
-  useCase: UseCase | Agent;
-  onClick: (useCase: UseCase | Agent) => void;
+  useCase: UseCase;
+  onClick: (useCase: UseCase) => void;
 }
 
 const KanbanCard: React.FC<KanbanCardProps> = ({ useCase, onClick }) => {
-  // Check if the item is an agent
-  const isAgent = 'agent_type' in useCase;
   const {
     attributes,
     listeners,
@@ -30,15 +28,23 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ useCase, onClick }) => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'concept':
+      case 'intention':
         return '#77787B'; // Metal Grey
-      case 'proof_of_concept':
+      case 'experimentation':
+        return '#9B59B6'; // Purple
+      case 'commitment':
         return '#C68D6D'; // Earthy Brown
-      case 'validation':
-        return '#F6BD60'; // Sunset Yellow
-      case 'pilot':
+      case 'implementation':
+        return '#4A90E2'; // Blue
+      case 'integration':
         return '#00A79D'; // Sea Green
-      case 'production':
+      case 'blocked':
+        return '#E74C3C'; // Red
+      case 'slow_burner':
+        return '#F6BD60'; // Sunset Yellow
+      case 'de_prioritised':
+        return '#9e9e9e'; // Grey
+      case 'on_hold':
         return '#B79546'; // Gold
       default:
         return '#77787B';
@@ -74,11 +80,11 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ useCase, onClick }) => {
       style={style}
       className={`kanban-card ${isDragging ? 'dragging' : ''}`}
       {...attributes}
+      {...listeners}
     >
-      {/* Drag handle - visible on touch devices, use this to drag */}
+      {/* Drag handle - visible on touch devices only */}
       <div
         className="kanban-card-drag-handle"
-        {...listeners}
         onClick={(e) => e.stopPropagation()}
       >
         <FaGripVertical />

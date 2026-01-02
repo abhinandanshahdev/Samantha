@@ -6,7 +6,7 @@ import './CommentThread.css';
 interface CommentThreadProps {
   useCaseId?: string;
   entityId?: string;
-  entityType?: 'use_case' | 'agent';
+  entityType?: 'use_case' | 'task';
   currentUserId: string;
   currentUserName: string;
   isAdmin?: boolean;
@@ -82,8 +82,8 @@ const CommentThread: React.FC<CommentThreadProps> = ({
 
     try {
       setSubmitting(true);
-      const commentData = entityType === 'agent'
-        ? { agent_id: actualEntityId, content: newCommentContent.trim() }
+      const commentData = entityType === 'task'
+        ? { task_id: actualEntityId, content: newCommentContent.trim() }
         : { use_case_id: actualEntityId, content: newCommentContent.trim() };
 
       await commentsAPI.create(commentData);
@@ -102,8 +102,8 @@ const CommentThread: React.FC<CommentThreadProps> = ({
 
     try {
       setSubmitting(true);
-      const commentData = entityType === 'agent'
-        ? { agent_id: actualEntityId, parent_comment_id: parentId, content: replyContent.trim() }
+      const commentData = entityType === 'task'
+        ? { task_id: actualEntityId, parent_comment_id: parentId, content: replyContent.trim() }
         : { use_case_id: actualEntityId, parent_comment_id: parentId, content: replyContent.trim() };
 
       await commentsAPI.create(commentData);

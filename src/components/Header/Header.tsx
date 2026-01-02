@@ -81,17 +81,15 @@ const Header: React.FC<HeaderProps> = ({ onSearch, onUserMenuClick, user, onChat
         {/* Logo & Brand - Aligned with content */}
         <div className="header-brand">
           <div className="brand-group">
-            <img 
-              src="/assets/DoFLogo.png" 
-              alt="Department of Finance Abu Dhabi" 
-              className="brand-logo" 
+            <img
+              src="/logo-samantha.svg"
+              alt="Voyagers AI"
+              className="brand-logo"
             />
             <div className="brand-divider"></div>
             <div className="brand-name">
-              <span className="brand-title">Hekmah</span>
-              <span className="brand-subtitle">
-                {activeDomain ? activeDomain.name : 'Strategic Excellence @ DoF'}
-              </span>
+              <span className="brand-title">Voyagers</span>
+              <span className="brand-subtitle">AI for the family</span>
             </div>
           </div>
         </div>
@@ -104,7 +102,7 @@ const Header: React.FC<HeaderProps> = ({ onSearch, onUserMenuClick, user, onChat
               <input
                 ref={searchInputRef}
                 type="text"
-                placeholder={`Search ${activeDomain?.name || 'initiatives'}, patterns, departments...`}
+                placeholder="Type to search..."
                 className="search-field"
                 value={searchValue}
                 onChange={handleInputChange}
@@ -147,10 +145,10 @@ const Header: React.FC<HeaderProps> = ({ onSearch, onUserMenuClick, user, onChat
             <button
               className="ai-chat-button"
               onClick={onChatClick}
-              title="AI for Hekmah"
+              title="Voyagers AI assistant"
             >
               <Sparkles size={16} strokeWidth={1.5} />
-              <span>Hekmah AI</span>
+              <span>Ask Voyagers</span>
             </button>
           )}
 
@@ -190,7 +188,7 @@ const Header: React.FC<HeaderProps> = ({ onSearch, onUserMenuClick, user, onChat
           <form onSubmit={handleSearch} className="mobile-search-form">
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Type to search..."
               className="mobile-search-input"
               value={searchValue}
               onChange={handleInputChange}

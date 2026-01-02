@@ -124,7 +124,7 @@ const SkillsBrowser: React.FC<SkillsBrowserProps> = ({
         <div className="skills-browser-header">
           <div className="skills-browser-title">
             <Book size={18} />
-            <span>Hekmah AI Skills</span>
+            <span>Samantha Skills</span>
           </div>
           <div className="skills-browser-header-actions">
             <button

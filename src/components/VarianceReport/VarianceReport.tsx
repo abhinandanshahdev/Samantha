@@ -33,12 +33,12 @@ interface VarianceReportProps {
   onClose: () => void;
 }
 
-type BreakdownType = 'department' | 'status' | 'impact' | 'category' | 'kanban';
+type BreakdownType = 'status' | 'impact' | 'category';
 type TimeRange = 7 | 14 | 30 | 90;
 
 const COLORS = {
   initiatives: '#00A79D', // Sea Green
-  agents: '#C68D6D',      // Earthy Brown
+  tasks: '#C68D6D',       // Earthy Brown
   gold: '#B79546',        // Primary Gold
   positive: '#22c55e',
   negative: '#ef4444',
@@ -51,7 +51,7 @@ const VarianceReport: React.FC<VarianceReportProps> = ({ onClose }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<TimeRange>(7);
-  const [breakdown, setBreakdown] = useState<BreakdownType>('department');
+  const [breakdown, setBreakdown] = useState<BreakdownType>('status');
   const reportRef = useRef<HTMLDivElement>(null);
 
   const fetchData = useCallback(async () => {
@@ -147,10 +147,10 @@ const VarianceReport: React.FC<VarianceReportProps> = ({ onClose }) => {
         pointHoverRadius: 6
       },
       {
-        label: 'Agents',
-        data: data.daily.map(d => d.agents),
-        borderColor: COLORS.agents,
-        backgroundColor: `${COLORS.agents}20`,
+        label: 'Tasks',
+        data: data.daily.map(d => d.tasks),
+        borderColor: COLORS.tasks,
+        backgroundColor: `${COLORS.tasks}20`,
         fill: true,
         tension: 0.4,
         pointRadius: 4,
@@ -169,9 +169,9 @@ const VarianceReport: React.FC<VarianceReportProps> = ({ onClose }) => {
         borderRadius: 4
       },
       {
-        label: 'Agents',
-        data: data.breakdown.map(b => b.agents_current),
-        backgroundColor: COLORS.agents,
+        label: 'Tasks',
+        data: data.breakdown.map(b => b.tasks_current),
+        backgroundColor: COLORS.tasks,
         borderRadius: 4
       }
     ]
@@ -323,10 +323,10 @@ const VarianceReport: React.FC<VarianceReportProps> = ({ onClose }) => {
               </div>
 
               <div className="stat-card">
-                <div className="stat-label">Agents</div>
-                <div className="stat-value">{data.summary.agents.current}</div>
-                <div className={`stat-variance ${getVarianceClass(data.summary.agents.variance)}`}>
-                  {formatVariance(data.summary.agents.variance, data.summary.agents.percent)}
+                <div className="stat-label">Tasks</div>
+                <div className="stat-value">{data.summary.tasks.current}</div>
+                <div className={`stat-variance ${getVarianceClass(data.summary.tasks.variance)}`}>
+                  {formatVariance(data.summary.tasks.variance, data.summary.tasks.percent)}
                 </div>
                 <div className="stat-sublabel">vs previous {timeRange} days</div>
               </div>
@@ -334,7 +334,7 @@ const VarianceReport: React.FC<VarianceReportProps> = ({ onClose }) => {
               <div className="stat-card">
                 <div className="stat-label">Ratio</div>
                 <div className="stat-value">{data.summary.ratio}:1</div>
-                <div className="stat-sublabel-large">Initiatives per Agent</div>
+                <div className="stat-sublabel-large">Tasks per Initiative</div>
               </div>
             </div>
           )}
@@ -352,7 +352,7 @@ const VarianceReport: React.FC<VarianceReportProps> = ({ onClose }) => {
           {/* Breakdown Tabs */}
           <div className="breakdown-section">
             <div className="breakdown-tabs">
-              {(['department', 'status', 'impact', 'category', 'kanban'] as BreakdownType[]).map(type => (
+              {(['status', 'impact', 'category'] as BreakdownType[]).map(type => (
                 <button
                   key={type}
                   className={`breakdown-tab ${breakdown === type ? 'active' : ''}`}
@@ -385,8 +385,8 @@ const VarianceReport: React.FC<VarianceReportProps> = ({ onClose }) => {
                       <th>Init (Now)</th>
                       <th>Init (Prev)</th>
                       <th>Var</th>
-                      <th>Agents (Now)</th>
-                      <th>Agents (Prev)</th>
+                      <th>Tasks (Now)</th>
+                      <th>Tasks (Prev)</th>
                       <th>Var</th>
                     </tr>
                   </thead>
@@ -399,10 +399,10 @@ const VarianceReport: React.FC<VarianceReportProps> = ({ onClose }) => {
                         <td className={getVarianceClass(row.initiatives_variance)}>
                           {row.initiatives_variance > 0 ? '+' : ''}{row.initiatives_variance}
                         </td>
-                        <td>{row.agents_current}</td>
-                        <td>{row.agents_previous}</td>
-                        <td className={getVarianceClass(row.agents_variance)}>
-                          {row.agents_variance > 0 ? '+' : ''}{row.agents_variance}
+                        <td>{row.tasks_current}</td>
+                        <td>{row.tasks_previous}</td>
+                        <td className={getVarianceClass(row.tasks_variance)}>
+                          {row.tasks_variance > 0 ? '+' : ''}{row.tasks_variance}
                         </td>
                       </tr>
                     ))}
@@ -415,10 +415,10 @@ const VarianceReport: React.FC<VarianceReportProps> = ({ onClose }) => {
                       <td className={getVarianceClass(data.summary.initiatives.variance)}>
                         <strong>{data.summary.initiatives.variance > 0 ? '+' : ''}{data.summary.initiatives.variance}</strong>
                       </td>
-                      <td><strong>{data.summary.agents.current}</strong></td>
-                      <td><strong>{data.summary.agents.previous}</strong></td>
-                      <td className={getVarianceClass(data.summary.agents.variance)}>
-                        <strong>{data.summary.agents.variance > 0 ? '+' : ''}{data.summary.agents.variance}</strong>
+                      <td><strong>{data.summary.tasks.current}</strong></td>
+                      <td><strong>{data.summary.tasks.previous}</strong></td>
+                      <td className={getVarianceClass(data.summary.tasks.variance)}>
+                        <strong>{data.summary.tasks.variance > 0 ? '+' : ''}{data.summary.tasks.variance}</strong>
                       </td>
                     </tr>
                   </tfoot>

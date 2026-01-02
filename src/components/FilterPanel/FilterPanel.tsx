@@ -1,55 +1,51 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Category, SearchFilters, Department, StrategicPillar, StrategicGoal, AgentType, AgentFilters, UseCase, Agent } from '../../types';
-import { departmentAPI, strategicPillarsAPI, strategicGoalsAPI, tagsAPI, dataSensitivityLevelsAPI } from '../../services/apiService';
+import { Category, SearchFilters, StrategicPillar, StrategicGoal, TaskFilters, UseCase, Task, KanbanStatus } from '../../types';
+import { strategicPillarsAPI, strategicGoalsAPI, tagsAPI } from '../../services/apiService';
 import { useActiveDomainId } from '../../context/DomainContext';
 import { FaChevronDown, FaTimes, FaFilter, FaSearch } from 'react-icons/fa';
 import './FilterPanel.css';
 
 interface FilterPanelProps {
   categories?: Category[];
-  filters: SearchFilters | AgentFilters;
-  onFiltersChange: (filters: SearchFilters | AgentFilters) => void;
+  filters: SearchFilters | TaskFilters;
+  onFiltersChange: (filters: SearchFilters | TaskFilters) => void;
   onClearFilters?: () => void;
-  showAgentTypeFilter?: boolean;
-  agentTypes?: AgentType[];
+  showTaskFilter?: boolean;
   hideKanbanStatus?: boolean;
   hideDeliveryDateFilters?: boolean;
-  initiatives?: UseCase[]; // Initiatives for agent filter (filtered by other criteria)
-  agents?: Agent[]; // Agents for counting linked initiatives
+  initiatives?: UseCase[]; // Initiatives for task filter (filtered by other criteria)
+  tasks?: Task[]; // Tasks for counting linked initiatives
   sortBy?: 'created' | 'updated';
   onSortChange?: (sort: 'created' | 'updated') => void;
 }
 
-const FILTER_STORAGE_KEY = 'hekmah_filter_preferences';
+const FILTER_STORAGE_KEY = 'samantha_filter_preferences';
 
 const FilterPanel: React.FC<FilterPanelProps> = ({
   categories = [],
   filters,
   onFiltersChange,
   onClearFilters,
-  showAgentTypeFilter = false,
-  agentTypes = [],
+  showTaskFilter = false,
   hideKanbanStatus = false,
   hideDeliveryDateFilters = false,
   initiatives = [],
-  agents = [],
+  tasks = [],
   sortBy,
   onSortChange
 }) => {
   const activeDomainId = useActiveDomainId();
-  const [departments, setDepartments] = useState<Department[]>([]);
   const [strategicPillars, setStrategicPillars] = useState<StrategicPillar[]>([]);
   const [strategicGoals, setStrategicGoals] = useState<StrategicGoal[]>([]);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
-  const [dataSensitivityLevels, setDataSensitivityLevels] = useState<Array<{ name: string; description: string }>>([]);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [initiativeSearch, setInitiativeSearch] = useState('');
   const [mobileExpanded, setMobileExpanded] = useState(false);
   const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
-  // Sort initiatives by agent_count descending (agent_count comes from backend)
+  // Sort initiatives by task_count descending (task_count comes from backend)
   const initiativesSorted = useMemo(() => {
-    return [...initiatives].sort((a, b) => (b.agent_count || 0) - (a.agent_count || 0));
+    return [...initiatives].sort((a, b) => (b.task_count || 0) - (a.task_count || 0));
   }, [initiatives]);
 
   // Filter initiatives by search term
@@ -61,31 +57,22 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     );
   }, [initiativesSorted, initiativeSearch]);
 
-  // Load departments, strategic pillars, goals, and tags (filtered by domain)
+  // Load strategic pillars, goals, and tags (filtered by domain)
   useEffect(() => {
     const loadFilterData = async () => {
       try {
-        const [fetchedDepartments, fetchedPillars, fetchedGoals, fetchedTags, fetchedDataSensitivityLevels] = await Promise.all([
-          departmentAPI.getAll(activeDomainId || undefined),
+        const [fetchedPillars, fetchedGoals, fetchedTags] = await Promise.all([
           strategicPillarsAPI.getAll(activeDomainId),
           strategicGoalsAPI.getAll(activeDomainId ? { domain_id: activeDomainId } : undefined),
-          tagsAPI.getAll(),
-          dataSensitivityLevelsAPI.getAll()
+          tagsAPI.getAll()
         ]);
 
-        setDepartments(fetchedDepartments);
         setStrategicPillars(fetchedPillars);
         setStrategicGoals(fetchedGoals);
 
         // Extract tag names from fetched tags
         const tagNames = fetchedTags.map(tag => tag.name);
         setAvailableTags(tagNames);
-
-        // Set data sensitivity levels
-        setDataSensitivityLevels(fetchedDataSensitivityLevels.map(level => ({
-          name: level.name,
-          description: level.description
-        })));
       } catch (error) {
         console.error('Failed to load filter data:', error);
       }
@@ -133,24 +120,12 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     } as SearchFilters);
   };
 
-  const handleDepartmentToggle = (departmentName: string) => {
-    const currentDepartments = filters.departments || [];
-    const newDepartments = currentDepartments.includes(departmentName)
-      ? currentDepartments.filter(d => d !== departmentName)
-      : [...currentDepartments, departmentName];
-
-    onFiltersChange({
-      ...filters,
-      departments: newDepartments.length > 0 ? newDepartments : undefined,
-      department: undefined // Clear legacy single-select
-    });
-  };
-
   const handleStatusToggle = (statusValue: string) => {
     const currentStatuses = filters.statuses || [];
-    const newStatuses = currentStatuses.includes(statusValue)
-      ? currentStatuses.filter(s => s !== statusValue)
-      : [...currentStatuses, statusValue];
+    const typedStatusValue = statusValue as KanbanStatus;
+    const newStatuses = currentStatuses.includes(typedStatusValue)
+      ? currentStatuses.filter(s => s !== typedStatusValue)
+      : [...currentStatuses, typedStatusValue];
 
     onFiltersChange({
       ...filters,
@@ -159,23 +134,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     });
   };
 
-  const handleAgentTypeToggle = (agentTypeName: string) => {
-    const agentFilters = filters as AgentFilters;
-    const currentAgentTypes = agentFilters.agent_types || [];
-    const newAgentTypes = currentAgentTypes.includes(agentTypeName)
-      ? currentAgentTypes.filter(t => t !== agentTypeName)
-      : [...currentAgentTypes, agentTypeName];
-
-    onFiltersChange({
-      ...filters,
-      agent_types: newAgentTypes.length > 0 ? newAgentTypes : undefined,
-      agent_type: undefined // Clear legacy single-select
-    } as AgentFilters);
-  };
-
   const handleInitiativeToggle = (initiativeId: string) => {
-    const agentFilters = filters as AgentFilters;
-    const currentInitiatives = agentFilters.initiative_ids || [];
+    const taskFilters = filters as TaskFilters;
+    const currentInitiatives = taskFilters.initiative_ids || [];
     const newInitiatives = currentInitiatives.includes(initiativeId)
       ? currentInitiatives.filter(id => id !== initiativeId)
       : [...currentInitiatives, initiativeId];
@@ -183,7 +144,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     onFiltersChange({
       ...filters,
       initiative_ids: newInitiatives.length > 0 ? newInitiatives : undefined
-    } as AgentFilters);
+    } as TaskFilters);
   };
 
   const handleTagToggle = (tagName: string) => {
@@ -198,17 +159,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     });
   };
 
-  const handleDataSensitivityToggle = (level: string) => {
-    const currentLevels = filters.data_sensitivity || [];
-    const newLevels = currentLevels.includes(level as any)
-      ? currentLevels.filter((l: string) => l !== level)
-      : [...currentLevels, level as any];
-    onFiltersChange({
-      ...filters,
-      data_sensitivity: newLevels.length > 0 ? newLevels : undefined
-    });
-  };
-
   const handleClearAll = () => {
     localStorage.removeItem(FILTER_STORAGE_KEY);
     onClearFilters?.();
@@ -220,14 +170,8 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
       case 'category':
         handleCategoryToggle(value);
         break;
-      case 'department':
-        handleDepartmentToggle(value);
-        break;
       case 'status':
         handleStatusToggle(value);
-        break;
-      case 'agent_type':
-        handleAgentTypeToggle(value);
         break;
       case 'tag':
         handleTagToggle(value);
@@ -238,35 +182,34 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   const getActiveFiltersCount = () => {
     let count = 0;
     const searchFilters = filters as SearchFilters;
-    const agentFilters = filters as AgentFilters;
+    const taskFilters = filters as TaskFilters;
 
     if (searchFilters.categories && searchFilters.categories.length > 0) count += searchFilters.categories.length;
-    if (filters.departments && filters.departments.length > 0) count += filters.departments.length;
     if (filters.statuses && filters.statuses.length > 0) count += filters.statuses.length;
-    if (agentFilters.agent_types && agentFilters.agent_types.length > 0) count += agentFilters.agent_types.length;
     if (searchFilters.tags && searchFilters.tags.length > 0) count += searchFilters.tags.length;
     if (searchFilters.strategic_pillars && searchFilters.strategic_pillars.length > 0) count += searchFilters.strategic_pillars.length;
     if (searchFilters.strategic_goals && searchFilters.strategic_goals.length > 0) count += searchFilters.strategic_goals.length;
-    if (!hideKanbanStatus && filters.kanban_pillar) count++;
     if (!hideDeliveryDateFilters && filters.expected_delivery_year) count++;
     if (!hideDeliveryDateFilters && filters.expected_delivery_month) count++;
-    if (filters.data_sensitivity && filters.data_sensitivity.length > 0) count += filters.data_sensitivity.length;
-    if (agentFilters.initiative_ids && agentFilters.initiative_ids.length > 0) count += agentFilters.initiative_ids.length;
+    if (taskFilters.initiative_ids && taskFilters.initiative_ids.length > 0) count += taskFilters.initiative_ids.length;
     // Legacy support
     if (searchFilters.category) count++;
-    if (filters.department) count++;
     if (filters.status) count++;
     if (searchFilters.strategic_pillar_id) count++;
     if (searchFilters.strategic_goal_id) count++;
     return count;
   };
 
-  const statuses = [
-    { value: 'concept', label: 'Concept', color: '#77787B' }, // Metal Grey
-    { value: 'proof_of_concept', label: 'Proof of Concept', color: '#C68D6D' }, // Earthy Brown
-    { value: 'validation', label: 'Validation', color: '#F6BD60' }, // Sunset Yellow
-    { value: 'pilot', label: 'Pilot', color: '#00A79D' }, // Sea Green
-    { value: 'production', label: 'Production', color: '#B79546' } // Gold
+  const statuses: { value: KanbanStatus; label: string; color: string }[] = [
+    { value: 'intention', label: 'Intention', color: '#77787B' },
+    { value: 'experimentation', label: 'Experimentation', color: '#9B59B6' },
+    { value: 'commitment', label: 'Commitment', color: '#C68D6D' },
+    { value: 'implementation', label: 'Implementation', color: '#4A90E2' },
+    { value: 'integration', label: 'Integration', color: '#00A79D' },
+    { value: 'blocked', label: 'Blocked', color: '#E74C3C' },
+    { value: 'slow_burner', label: 'Slow Burner', color: '#F6BD60' },
+    { value: 'de_prioritised', label: 'De-prioritised', color: '#9e9e9e' },
+    { value: 'on_hold', label: 'On Hold', color: '#B79546' }
   ];
 
   const toggleDropdown = (dropdown: string) => {
@@ -352,12 +295,12 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
 
         <div className="filter-dropdowns">
         {/* Patterns Dropdown - Only shown for Initiatives */}
-        {!showAgentTypeFilter && (
+        {!showTaskFilter && (
         <div
           className="filter-dropdown"
           ref={el => {dropdownRefs.current['patterns'] = el}}
         >
-          <button 
+          <button
             className={`dropdown-trigger ${openDropdown === 'patterns' ? 'active' : ''}`}
             onClick={() => toggleDropdown('patterns')}
           >
@@ -391,45 +334,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           )}
         </div>
         )}
-
-        {/* Departments Dropdown */}
-        <div 
-          className="filter-dropdown"
-          ref={el => {dropdownRefs.current['departments'] = el}}
-        >
-          <button 
-            className={`dropdown-trigger ${openDropdown === 'departments' ? 'active' : ''}`}
-            onClick={() => toggleDropdown('departments')}
-          >
-            <span className="dropdown-label">
-              Departments
-              {(filters.departments?.length || 0) > 0 && (
-                <span className="selection-count">{filters.departments?.length}</span>
-              )}
-            </span>
-            <FaChevronDown className={`dropdown-arrow ${openDropdown === 'departments' ? 'rotated' : ''}`} />
-          </button>
-          
-          {openDropdown === 'departments' && (
-            <div className="dropdown-menu">
-              <div className="dropdown-options">
-                {departments.map(department => (
-                  <label key={department.id} className="dropdown-option">
-                    <input
-                      type="checkbox"
-                      name="departments"
-                      id={`department-${department.id}`}
-                      checked={filters.departments?.includes(department.name) || false}
-                      onChange={() => handleDepartmentToggle(department.name)}
-                    />
-                    <span className="option-checkbox"></span>
-                    <span className="option-text">{department.name}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
 
         {/* Status Dropdown */}
         <div 
@@ -473,61 +377,20 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           )}
         </div>
 
-        {/* Agent Types Dropdown - Only shown when showAgentTypeFilter is true */}
-        {showAgentTypeFilter && agentTypes && agentTypes.length > 0 && (
-          <div
-            className="filter-dropdown"
-            ref={el => {dropdownRefs.current['agent-types'] = el}}
-          >
-            <button
-              className={`dropdown-trigger ${openDropdown === 'agent-types' ? 'active' : ''}`}
-              onClick={() => toggleDropdown('agent-types')}
-            >
-              <span className="dropdown-label">
-                Agent Types
-                {((filters as AgentFilters).agent_types?.length || 0) > 0 && (
-                  <span className="selection-count">{(filters as AgentFilters).agent_types?.length}</span>
-                )}
-              </span>
-              <FaChevronDown className={`dropdown-arrow ${openDropdown === 'agent-types' ? 'rotated' : ''}`} />
-            </button>
-
-            {openDropdown === 'agent-types' && (
-              <div className="dropdown-menu">
-                <div className="dropdown-options">
-                  {agentTypes.map(agentType => (
-                    <label key={agentType.id} className="dropdown-option">
-                      <input
-                        type="checkbox"
-                        name="agent_types"
-                        id={`agent-type-${agentType.id}`}
-                        checked={(filters as AgentFilters).agent_types?.includes(agentType.name) || false}
-                        onChange={() => handleAgentTypeToggle(agentType.name)}
-                      />
-                      <span className="option-checkbox"></span>
-                      <span className="option-text">{agentType.name}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Initiatives Dropdown - Only shown when showAgentTypeFilter is true */}
-        {showAgentTypeFilter && initiatives && initiatives.length > 0 && (
+        {/* Initiatives Dropdown - Only shown when showTaskFilter is true */}
+        {showTaskFilter && initiatives && initiatives.length > 0 && (
           <div
             className="filter-dropdown"
             ref={el => {dropdownRefs.current['initiatives'] = el}}
           >
             <button
-              className={`dropdown-trigger ${openDropdown === 'initiatives' ? 'active' : ''} ${((filters as AgentFilters).initiative_ids?.length || 0) > 0 ? 'has-selection' : ''}`}
+              className={`dropdown-trigger ${openDropdown === 'initiatives' ? 'active' : ''} ${((filters as TaskFilters).initiative_ids?.length || 0) > 0 ? 'has-selection' : ''}`}
               onClick={() => toggleDropdown('initiatives')}
             >
               <span className="dropdown-label">
                 Linked Initiatives
-                {((filters as AgentFilters).initiative_ids?.length || 0) > 0 && (
-                  <span className="selection-count">{(filters as AgentFilters).initiative_ids?.length}</span>
+                {((filters as TaskFilters).initiative_ids?.length || 0) > 0 && (
+                  <span className="selection-count">{(filters as TaskFilters).initiative_ids?.length}</span>
                 )}
               </span>
               <FaChevronDown className={`dropdown-arrow ${openDropdown === 'initiatives' ? 'rotated' : ''}`} />
@@ -592,7 +455,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                             type="checkbox"
                             name="initiative_ids"
                             id={`initiative-${initiative.id}`}
-                            checked={(filters as AgentFilters).initiative_ids?.includes(initiative.id) || false}
+                            checked={(filters as TaskFilters).initiative_ids?.includes(initiative.id) || false}
                             onChange={() => handleInitiativeToggle(initiative.id)}
                           />
                           <span className="option-checkbox"></span>
@@ -605,14 +468,14 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                         <span style={{
                           marginLeft: '8px',
                           padding: '2px 6px',
-                          background: (initiative.agent_count || 0) > 0 ? '#e8f5e9' : '#f5f5f5',
-                          color: (initiative.agent_count || 0) > 0 ? '#2e7d32' : '#999',
+                          background: (initiative.task_count || 0) > 0 ? '#e8f5e9' : '#f5f5f5',
+                          color: (initiative.task_count || 0) > 0 ? '#2e7d32' : '#999',
                           borderRadius: '10px',
                           fontSize: '11px',
                           fontWeight: '600',
                           flexShrink: 0
                         }}>
-                          {initiative.agent_count || 0}
+                          {initiative.task_count || 0}
                         </span>
                       </label>
                     ))
@@ -668,53 +531,8 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           )}
         </div>
 
-        {/* Data Sensitivity Dropdown */}
-        <div
-          className="filter-dropdown"
-          ref={el => {dropdownRefs.current['data-sensitivity'] = el}}
-        >
-          <button
-            className={`dropdown-trigger ${openDropdown === 'data-sensitivity' ? 'active' : ''}`}
-            onClick={() => toggleDropdown('data-sensitivity')}
-          >
-            <span className="dropdown-label">
-              Data Sensitivity
-              {(filters.data_sensitivity?.length || 0) > 0 && (
-                <span className="selection-count">{filters.data_sensitivity?.length}</span>
-              )}
-            </span>
-            <FaChevronDown className={`dropdown-arrow ${openDropdown === 'data-sensitivity' ? 'rotated' : ''}`} />
-          </button>
-
-          {openDropdown === 'data-sensitivity' && (
-            <div className="dropdown-menu">
-              {dataSensitivityLevels.length === 0 ? (
-                <div className="dropdown-empty">
-                  No data sensitivity levels available.
-                </div>
-              ) : (
-                <div className="dropdown-options">
-                  {dataSensitivityLevels.map(level => (
-                    <label key={level.name} className="dropdown-option">
-                      <input
-                        type="checkbox"
-                        name="data_sensitivity"
-                        id={`data-sensitivity-${level.name}`}
-                        checked={filters.data_sensitivity?.includes(level.name as any) || false}
-                        onChange={() => handleDataSensitivityToggle(level.name)}
-                      />
-                      <span className="option-checkbox"></span>
-                      <span className="option-text">{level.name}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
         {/* Strategic Pillars Dropdown - Only shown for Initiatives */}
-        {!showAgentTypeFilter && (
+        {!showTaskFilter && (
         <div
           className="filter-dropdown"
           ref={el => {dropdownRefs.current['strategic-pillars'] = el}}
@@ -755,8 +573,8 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
         )}
 
         {/* Strategic Goals Dropdown - Only shown for Initiatives */}
-        {!showAgentTypeFilter && (
-        <div 
+        {!showTaskFilter && (
+        <div
           className="filter-dropdown"
           ref={el => {dropdownRefs.current['strategic-goals'] = el}}
         >
@@ -794,64 +612,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                       <span className="option-text">{goal.title}</span>
                     </label>
                   ))}
-              </div>
-            </div>
-          )}
-        </div>
-        )}
-
-        {/* Kanban Delivery Status Dropdown */}
-        {!hideKanbanStatus && (
-        <div
-          className="filter-dropdown"
-          ref={el => {dropdownRefs.current['kanban'] = el}}
-        >
-          <button
-            className={`dropdown-trigger ${openDropdown === 'kanban' ? 'active' : ''}`}
-            onClick={() => toggleDropdown('kanban')}
-          >
-            <span className="dropdown-label">
-              Delivery Status
-              {filters.kanban_pillar && (
-                <span className="selection-count">1</span>
-              )}
-            </span>
-            <FaChevronDown className={`dropdown-arrow ${openDropdown === 'kanban' ? 'rotated' : ''}`} />
-          </button>
-
-          {openDropdown === 'kanban' && (
-            <div className="dropdown-menu">
-              <div className="dropdown-options">
-                <label className="dropdown-option">
-                  <input
-                    type="radio"
-                    name="kanban_pillar"
-                    id="kanban-all"
-                    checked={!filters.kanban_pillar}
-                    onChange={() => onFiltersChange({ ...filters, kanban_pillar: undefined })}
-                  />
-                  <span className="option-checkbox"></span>
-                  <span className="option-text">All Statuses</span>
-                </label>
-                {['backlog', 'prioritised', 'in_progress', 'completed', 'blocked', 'slow_burner', 'de_prioritised', 'on_hold'].map(status => (
-                  <label key={status} className="dropdown-option">
-                    <input
-                      type="radio"
-                      name="kanban_pillar"
-                      id={`kanban-${status}`}
-                      checked={filters.kanban_pillar === status}
-                      onChange={() => onFiltersChange({ ...filters, kanban_pillar: status as any })}
-                    />
-                    <span className="option-checkbox"></span>
-                    <span className="option-text">
-                      {status === 'in_progress' ? 'In Progress' :
-                       status === 'slow_burner' ? 'Slow Burner' :
-                       status === 'de_prioritised' ? 'De-prioritised' :
-                       status === 'on_hold' ? 'On Hold' :
-                       status.charAt(0).toUpperCase() + status.slice(1)}
-                    </span>
-                  </label>
-                ))}
               </div>
             </div>
           )}
@@ -977,17 +737,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
               </button>
             </div>
           ))}
-          {filters.departments?.map(dept => (
-            <div key={dept} className="filter-pill">
-              <span className="pill-label">Dept: {dept}</span>
-              <button 
-                className="pill-remove"
-                onClick={() => removeFilter('department', dept)}
-              >
-                <FaTimes />
-              </button>
-            </div>
-          ))}
           {filters.statuses?.map(status => {
             const statusObj = statuses.find(s => s.value === status);
             return (
@@ -1004,18 +753,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
               </div>
             );
           })}
-          {(filters as AgentFilters).agent_types?.map(agentTypeName => (
-            <div key={agentTypeName} className="filter-pill">
-              <span className="pill-label">Agent Type: {agentTypeName}</span>
-              <button
-                className="pill-remove"
-                onClick={() => removeFilter('agent_type', agentTypeName)}
-              >
-                <FaTimes />
-              </button>
-            </div>
-          ))}
-          {(filters as AgentFilters).initiative_ids?.map((initiativeId: string) => {
+          {(filters as TaskFilters).initiative_ids?.map((initiativeId: string) => {
             const initiative = initiatives.find(i => i.id === initiativeId);
             return (
               <div key={initiativeId} className="filter-pill">
@@ -1074,23 +812,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
               </div>
             );
           })}
-          {!hideKanbanStatus && filters.kanban_pillar && (
-            <div className="filter-pill">
-              <span className="pill-label">
-                Delivery: {filters.kanban_pillar === 'in_progress' ? 'In Progress' :
-                          filters.kanban_pillar === 'slow_burner' ? 'Slow Burner' :
-                          filters.kanban_pillar === 'de_prioritised' ? 'De-prioritised' :
-                          filters.kanban_pillar === 'on_hold' ? 'On Hold' :
-                          filters.kanban_pillar.charAt(0).toUpperCase() + filters.kanban_pillar.slice(1)}
-              </span>
-              <button
-                className="pill-remove"
-                onClick={() => onFiltersChange({ ...filters, kanban_pillar: undefined })}
-              >
-                <FaTimes />
-              </button>
-            </div>
-          )}
           {!hideDeliveryDateFilters && filters.expected_delivery_year && (
             <div className="filter-pill">
               <span className="pill-label">Year: {filters.expected_delivery_year}</span>
@@ -1113,17 +834,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
               </button>
             </div>
           )}
-          {filters.data_sensitivity?.map((level: string) => (
-            <div key={level} className="filter-pill">
-              <span className="pill-label">Data Sensitivity: {level}</span>
-              <button
-                className="pill-remove"
-                onClick={() => handleDataSensitivityToggle(level)}
-              >
-                <FaTimes />
-              </button>
-            </div>
-          ))}
         </div>
       )}
       </div>{/* End filter-content-wrapper */}

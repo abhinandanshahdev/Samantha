@@ -36,14 +36,13 @@ console.log('🔧 COMPASS OpenAI Configuration:', {
 const AVAILABLE_FUNCTIONS = {
   get_use_cases_by_criteria: {
     name: "get_use_cases_by_criteria",
-    description: "Get use cases filtered by various criteria like department, status, strategic impact, kanban status, and delivery date",
+    description: "Get use cases filtered by various criteria like status, strategic impact, effort level, and delivery date",
     parameters: {
       type: "object",
       properties: {
-        department: { type: "string", description: "Filter by department name" },
-        status: { type: "string", enum: ["concept", "proof_of_concept", "validation", "pilot", "production"], description: "Filter by development stage" },
+        status: { type: "string", enum: ["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"], description: "Filter by status" },
         strategic_impact: { type: "string", enum: ["Low", "Medium", "High"], description: "Filter by strategic impact level" },
-        kanban_pillar: { type: "string", enum: ["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"], description: "Filter by kanban/delivery status" },
+        effort_level: { type: "string", enum: ["Low", "Medium", "High"], description: "Filter by effort level" },
         expected_delivery_date: { type: "string", description: "Filter by expected delivery date (format: MMM YYYY, e.g., 'Jan 2025')" },
         has_delivery_date: { type: "boolean", description: "Filter by whether initiative has a delivery date set. true = has date (scheduled/planned), false = no date (unplanned)" },
         limit: { type: "number", description: "Maximum number of results to return (default 10)" }
@@ -76,7 +75,7 @@ const AVAILABLE_FUNCTIONS = {
 
   get_use_cases_by_goal: {
     name: "get_use_cases_by_goal",
-    description: "Get AI initiatives/use cases that are aligned to a specific strategic goal",
+    description: "Get initiatives/use cases that are aligned to a specific strategic goal",
     parameters: {
       type: "object",
       properties: {
@@ -90,14 +89,14 @@ const AVAILABLE_FUNCTIONS = {
   
   get_use_case_statistics: {
     name: "get_use_case_statistics",
-    description: "Get real-time statistics about use cases, departments, goals, etc.",
+    description: "Get real-time statistics about use cases and goals",
     parameters: {
       type: "object",
       properties: {
-        group_by: { 
-          type: "string", 
-          enum: ["department", "status", "strategic_impact", "pillar", "kanban_pillar"],
-          description: "How to group the statistics" 
+        group_by: {
+          type: "string",
+          enum: ["status", "strategic_impact", "effort_level", "category"],
+          description: "How to group the statistics"
         }
       },
       additionalProperties: false
@@ -131,35 +130,6 @@ const AVAILABLE_FUNCTIONS = {
     }
   },
   
-  get_executive_brief: {
-    name: "get_executive_brief",
-    description: "Get executive summary of recent activity and changes in the organization",
-    parameters: {
-      type: "object",
-      properties: {
-        days: { type: "number", description: "Number of days to look back (default 7)" }
-      },
-      additionalProperties: false
-    }
-  },
-
-  get_variance_report: {
-    name: "get_variance_report",
-    description: "Get variance/comparison report for initiatives and agents over a time period. Shows current vs previous period counts, daily trends, and breakdown by department/status/impact/category/kanban. Use this for portfolio analytics, trend analysis, or comparing activity across time periods.",
-    parameters: {
-      type: "object",
-      properties: {
-        days: { type: "number", enum: [7, 14, 30, 90], description: "Number of days for the analysis period (default 7). Compares this period vs the previous equivalent period." },
-        breakdown: {
-          type: "string",
-          enum: ["department", "status", "impact", "category", "kanban"],
-          description: "How to break down the data (default: department). 'department' groups by department, 'status' by development stage, 'impact' by strategic impact level, 'category' by initiative category/agent type, 'kanban' by kanban pillar status."
-        }
-      },
-      additionalProperties: false
-    }
-  },
-
   ask_user_clarification: {
     name: "ask_user_clarification",
     description: "Ask the user for clarification when their query is ambiguous or needs more context",
@@ -176,7 +146,7 @@ const AVAILABLE_FUNCTIONS = {
 
   get_domain_metadata: {
     name: "get_domain_metadata",
-    description: "Get all metadata for the current domain including departments, categories, agent types, tags, sensitivity levels, and strategic pillars. Use this to understand what filter values are available.",
+    description: "Get all metadata for the current domain including categories, tags, and strategic pillars. Use this to understand what filter values are available.",
     parameters: {
       type: "object",
       properties: {},
@@ -184,13 +154,13 @@ const AVAILABLE_FUNCTIONS = {
     }
   },
 
-  search_agents: {
-    name: "search_agents",
-    description: "Search for AI agents by name, title, or description containing specific keywords",
+  search_tasks: {
+    name: "search_tasks",
+    description: "Search for tasks by name, title, or description containing specific keywords",
     parameters: {
       type: "object",
       properties: {
-        search_term: { type: "string", description: "The term to search for in agent titles and descriptions" },
+        search_term: { type: "string", description: "The term to search for in task titles and descriptions" },
         limit: { type: "number", description: "Maximum number of results to return (default 10)" }
       },
       required: ["search_term"],
@@ -198,47 +168,44 @@ const AVAILABLE_FUNCTIONS = {
     }
   },
 
-  get_agents_by_criteria: {
-    name: "get_agents_by_criteria",
-    description: "Get AI agents filtered by various criteria like agent type, department, status, strategic impact, kanban status, and data sensitivity",
+  get_tasks_by_criteria: {
+    name: "get_tasks_by_criteria",
+    description: "Get tasks filtered by various criteria like status, strategic impact, and effort level",
     parameters: {
       type: "object",
       properties: {
-        agent_type: { type: "string", description: "Filter by agent type name" },
-        department: { type: "string", description: "Filter by department name" },
-        status: { type: "string", enum: ["concept", "proof_of_concept", "validation", "pilot", "production"], description: "Filter by development stage" },
+        status: { type: "string", enum: ["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"], description: "Filter by status" },
         strategic_impact: { type: "string", enum: ["Low", "Medium", "High"], description: "Filter by strategic impact level" },
-        kanban_pillar: { type: "string", enum: ["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"], description: "Filter by kanban/delivery status" },
-        data_sensitivity: { type: "string", description: "Filter by data sensitivity level" },
+        effort_level: { type: "string", enum: ["Low", "Medium", "High"], description: "Filter by effort level" },
         limit: { type: "number", description: "Maximum number of results to return (default 10)" }
       },
       additionalProperties: false
     }
   },
 
-  get_agents_by_initiative: {
-    name: "get_agents_by_initiative",
-    description: "Get AI agents associated with a specific initiative or use case by searching for the initiative name",
+  get_tasks_by_initiative: {
+    name: "get_tasks_by_initiative",
+    description: "Get tasks associated with a specific initiative or use case by searching for the initiative name",
     parameters: {
       type: "object",
       properties: {
-        initiative_name: { type: "string", description: "The name of the initiative or use case to find associated agents for" },
-        limit: { type: "number", description: "Maximum number of agents to return (default 10)" }
+        initiative_name: { type: "string", description: "The name of the initiative or use case to find associated tasks for" },
+        limit: { type: "number", description: "Maximum number of tasks to return (default 10)" }
       },
       required: ["initiative_name"],
       additionalProperties: false
     }
   },
 
-  get_agent_statistics: {
-    name: "get_agent_statistics",
-    description: "Get statistics about AI agents, grouped by status, agent type, department, strategic impact, or kanban status",
+  get_task_statistics: {
+    name: "get_task_statistics",
+    description: "Get statistics about tasks, grouped by status, strategic impact, or effort level",
     parameters: {
       type: "object",
       properties: {
         group_by: {
           type: "string",
-          enum: ["status", "agent_type", "department", "strategic_impact", "kanban_pillar"],
+          enum: ["status", "strategic_impact", "effort_level"],
           description: "How to group the statistics (default: status)"
         }
       },
@@ -246,14 +213,14 @@ const AVAILABLE_FUNCTIONS = {
     }
   },
 
-  get_agent_details: {
-    name: "get_agent_details",
-    description: "Get detailed information about a specific AI agent including full description, technical details, and linked initiatives",
+  get_task_details: {
+    name: "get_task_details",
+    description: "Get detailed information about a specific task including full description, technical details, and linked initiatives",
     parameters: {
       type: "object",
       properties: {
-        agent_id: { type: "string", description: "ID of the agent" },
-        agent_title: { type: "string", description: "Title or name of the agent (alternative to ID)" }
+        task_id: { type: "string", description: "ID of the task" },
+        task_title: { type: "string", description: "Title or name of the task (alternative to ID)" }
       },
       additionalProperties: false
     }
@@ -277,7 +244,7 @@ const AVAILABLE_FUNCTIONS = {
 // Function implementations
 const FUNCTION_IMPLEMENTATIONS = {
   get_use_cases_by_criteria: async (params, domainId) => {
-    console.log('📊 Backend: Getting use cases by criteria:', params, 'Domain:', domainId);
+    console.log('Backend: Getting use cases by criteria:', params, 'Domain:', domainId);
 
     let whereClause = 'WHERE 1=1';
     const queryParams = [];
@@ -285,10 +252,6 @@ const FUNCTION_IMPLEMENTATIONS = {
     if (domainId) {
       whereClause += ' AND uc.domain_id = ?';
       queryParams.push(domainId);
-    }
-    if (params.department) {
-      whereClause += ' AND d.name = ?';
-      queryParams.push(params.department);
     }
     if (params.status) {
       whereClause += ' AND uc.status = ?';
@@ -298,13 +261,11 @@ const FUNCTION_IMPLEMENTATIONS = {
       whereClause += ' AND uc.strategic_impact = ?';
       queryParams.push(params.strategic_impact);
     }
-    if (params.kanban_pillar) {
-      whereClause += ' AND uc.kanban_pillar = ?';
-      queryParams.push(params.kanban_pillar);
+    if (params.effort_level) {
+      whereClause += ' AND uc.effort_level = ?';
+      queryParams.push(params.effort_level);
     }
     if (params.expected_delivery_date) {
-      // Convert "MMM YYYY" format to DATE format "YYYY-MM-01"
-      // e.g., "Jan 2026" -> "2026-01-01"
       const monthMap = {
         'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
         'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08',
@@ -318,24 +279,17 @@ const FUNCTION_IMPLEMENTATIONS = {
         const monthNum = monthMap[monthAbbr];
 
         if (monthNum) {
-          const dateValue = `${year}-${monthNum}-01`;
+          const dateValue = `${year}-${monthNum}`;
           whereClause += ' AND uc.expected_delivery_date = ?';
           queryParams.push(dateValue);
-          console.log(`📅 Converted "${params.expected_delivery_date}" to "${dateValue}"`);
-        } else {
-          console.warn(`⚠️ Unknown month abbreviation: ${monthAbbr}`);
         }
-      } else {
-        console.warn(`⚠️ Invalid date format: ${params.expected_delivery_date}`);
       }
     }
     if (params.has_delivery_date !== undefined) {
       if (params.has_delivery_date === true) {
         whereClause += ' AND uc.expected_delivery_date IS NOT NULL';
-        console.log(`📅 Filtering for initiatives WITH delivery date`);
       } else {
         whereClause += ' AND uc.expected_delivery_date IS NULL';
-        console.log(`📅 Filtering for initiatives WITHOUT delivery date (unplanned)`);
       }
     }
 
@@ -347,13 +301,13 @@ const FUNCTION_IMPLEMENTATIONS = {
         uc.description,
         uc.status,
         uc.strategic_impact,
-        uc.kanban_pillar,
+        uc.effort_level,
         uc.expected_delivery_date,
-        d.name as department,
+        c.name as category,
         u.name as author_name,
         uc.created_date
       FROM use_cases uc
-      LEFT JOIN departments d ON uc.department_id = d.id
+      LEFT JOIN categories c ON uc.category_id = c.id
       LEFT JOIN users u ON uc.author_id = u.id
       ${whereClause}
       ORDER BY uc.created_date DESC
@@ -369,7 +323,7 @@ const FUNCTION_IMPLEMENTATIONS = {
       });
     });
 
-    console.log(`✅ Backend: Found ${results.length} use cases`);
+    console.log(`Backend: Found ${results.length} use cases`);
     return results;
   },
   
@@ -493,14 +447,14 @@ const FUNCTION_IMPLEMENTATIONS = {
         uc.description,
         uc.status,
         uc.strategic_impact,
-        uc.kanban_pillar,
+        uc.effort_level,
         uc.expected_delivery_date,
-        d.name as department,
+        c.name as category,
         u.name as author_name,
         uc.created_date
       FROM use_cases uc
       INNER JOIN use_case_goal_alignments ucga ON uc.id = ucga.use_case_id
-      LEFT JOIN departments d ON uc.department_id = d.id
+      LEFT JOIN categories c ON uc.category_id = c.id
       LEFT JOIN users u ON uc.author_id = u.id
       WHERE ucga.strategic_goal_id = ?`;
 
@@ -527,9 +481,9 @@ const FUNCTION_IMPLEMENTATIONS = {
       description: uc.description,
       status: uc.status,
       strategic_impact: uc.strategic_impact,
-      kanban_pillar: uc.kanban_pillar,
+      effort_level: uc.effort_level,
       expected_delivery_date: uc.expected_delivery_date,
-      department: uc.department,
+      category: uc.category,
       author_name: uc.author_name,
       created_date: uc.created_date
     }));
@@ -539,13 +493,13 @@ const FUNCTION_IMPLEMENTATIONS = {
   },
   
   get_use_case_statistics: async (params, domainId) => {
-    console.log('📈 Backend: Getting use case statistics:', params, 'Domain:', domainId);
+    console.log('Backend: Getting use case statistics:', params, 'Domain:', domainId);
 
-    // Get use cases with department names for proper grouping
+    // Get use cases with category names for proper grouping
     let useCaseQuery = `
-      SELECT uc.*, d.name as department_name
+      SELECT uc.*, c.name as category_name
       FROM use_cases uc
-      LEFT JOIN departments d ON uc.department_id = d.id`;
+      LEFT JOIN categories c ON uc.category_id = c.id`;
 
     const queryParams = [];
     if (domainId) {
@@ -561,6 +515,7 @@ const FUNCTION_IMPLEMENTATIONS = {
         else resolve(results);
       });
     });
+
     // Get strategic goals through pillars filtered by domain
     let pillarQuery = 'SELECT id FROM strategic_pillars';
     const pillarParams = [];
@@ -593,22 +548,13 @@ const FUNCTION_IMPLEMENTATIONS = {
         else resolve(results);
       });
     });
-    
+
     const stats = {
       total_use_cases: useCases.length,
       total_strategic_goals: goals.length,
       total_strategic_pillars: pillars.length
     };
-    
-    if (params.group_by === 'department') {
-      const deptCounts = useCases.reduce((acc, uc) => {
-        const deptName = uc.department_name || 'Unassigned';
-        acc[deptName] = (acc[deptName] || 0) + 1;
-        return acc;
-      }, {});
-      stats.by_department = deptCounts;
-    }
-    
+
     if (params.group_by === 'status') {
       const statusCounts = useCases.reduce((acc, uc) => {
         acc[uc.status] = (acc[uc.status] || 0) + 1;
@@ -616,7 +562,7 @@ const FUNCTION_IMPLEMENTATIONS = {
       }, {});
       stats.by_status = statusCounts;
     }
-    
+
     if (params.group_by === 'strategic_impact') {
       const impactCounts = useCases.reduce((acc, uc) => {
         acc[uc.strategic_impact] = (acc[uc.strategic_impact] || 0) + 1;
@@ -624,27 +570,34 @@ const FUNCTION_IMPLEMENTATIONS = {
       }, {});
       stats.by_strategic_impact = impactCounts;
     }
-    
-    if (params.group_by === 'pillar' || params.group_by === 'kanban_pillar') {
-      const pillarCounts = useCases.reduce((acc, uc) => {
-        const pillar = uc.kanban_pillar || 'unspecified';
-        acc[pillar] = (acc[pillar] || 0) + 1;
+
+    if (params.group_by === 'effort_level') {
+      const effortCounts = useCases.reduce((acc, uc) => {
+        acc[uc.effort_level || 'Medium'] = (acc[uc.effort_level || 'Medium'] || 0) + 1;
         return acc;
       }, {});
-      stats.by_kanban_pillar = pillarCounts;
+      stats.by_effort_level = effortCounts;
     }
-    
-    console.log(`✅ Backend: Generated statistics`);
+
+    if (params.group_by === 'category') {
+      const categoryCounts = useCases.reduce((acc, uc) => {
+        const catName = uc.category_name || 'Uncategorized';
+        acc[catName] = (acc[catName] || 0) + 1;
+        return acc;
+      }, {});
+      stats.by_category = categoryCounts;
+    }
+
+    console.log(`Backend: Generated statistics`);
     return stats;
   },
   
   search_use_cases: async (params, domainId) => {
-    console.log('🔍 Backend: Searching use cases:', params, 'Domain:', domainId);
+    console.log('Backend: Searching use cases:', params, 'Domain:', domainId);
 
     const searchTerm = params.search_term.toLowerCase();
     const limit = params.limit || 10;
 
-    // Get all use cases with search
     let searchQuery = `
       SELECT
         uc.id,
@@ -654,11 +607,12 @@ const FUNCTION_IMPLEMENTATIONS = {
         uc.solution_overview,
         uc.status,
         uc.strategic_impact,
-        d.name as department,
+        uc.effort_level,
+        c.name as category,
         u.name as author_name,
         uc.created_date
       FROM use_cases uc
-      LEFT JOIN departments d ON uc.department_id = d.id
+      LEFT JOIN categories c ON uc.category_id = c.id
       LEFT JOIN users u ON uc.author_id = u.id
       WHERE (LOWER(uc.title) LIKE ?
          OR LOWER(uc.description) LIKE ?
@@ -700,19 +654,20 @@ const FUNCTION_IMPLEMENTATIONS = {
       id: uc.id,
       title: uc.title,
       description: uc.description,
-      department: uc.department,
+      category: uc.category,
       status: uc.status,
       strategic_impact: uc.strategic_impact,
+      effort_level: uc.effort_level,
       author_name: uc.author_name,
       created_date: uc.created_date
     }));
 
-    console.log(`✅ Backend: Found ${results.length} matching use cases for "${searchTerm}"`);
+    console.log(`Backend: Found ${results.length} matching use cases for "${searchTerm}"`);
     return results;
   },
   
   get_use_case_details: async (params, domainId) => {
-    console.log('🔎 Backend: Getting use case details:', params, 'Domain:', domainId);
+    console.log('Backend: Getting use case details:', params, 'Domain:', domainId);
 
     let useCase;
 
@@ -728,16 +683,13 @@ const FUNCTION_IMPLEMENTATIONS = {
           uc.results_metrics,
           uc.status,
           uc.strategic_impact,
-          uc.data_complexity,
-          uc.integration_complexity,
-          uc.intelligence_complexity,
-          uc.functional_complexity,
-          d.name as department,
+          uc.effort_level,
+          c.name as category,
           u.name as author_name,
           uc.created_date,
           uc.updated_date
         FROM use_cases uc
-        LEFT JOIN departments d ON uc.department_id = d.id
+        LEFT JOIN categories c ON uc.category_id = c.id
         LEFT JOIN users u ON uc.author_id = u.id
         WHERE uc.id = ?`;
 
@@ -766,16 +718,13 @@ const FUNCTION_IMPLEMENTATIONS = {
           uc.results_metrics,
           uc.status,
           uc.strategic_impact,
-          uc.data_complexity,
-          uc.integration_complexity,
-          uc.intelligence_complexity,
-          uc.functional_complexity,
-          d.name as department,
+          uc.effort_level,
+          c.name as category,
           u.name as author_name,
           uc.created_date,
           uc.updated_date
         FROM use_cases uc
-        LEFT JOIN departments d ON uc.department_id = d.id
+        LEFT JOIN categories c ON uc.category_id = c.id
         LEFT JOIN users u ON uc.author_id = u.id
         WHERE LOWER(uc.title) LIKE ?`;
 
@@ -797,7 +746,7 @@ const FUNCTION_IMPLEMENTATIONS = {
     }
 
     if (!useCase) {
-      console.log('❌ Backend: Use case not found');
+      console.log('Backend: Use case not found');
       return { error: "Use case not found" };
     }
 
@@ -823,22 +772,17 @@ const FUNCTION_IMPLEMENTATIONS = {
       });
     });
 
-    console.log(`✅ Backend: Found use case: ${useCase.title} with ${comments.length} comments`);
+    console.log(`Backend: Found use case: ${useCase.title} with ${comments.length} comments`);
     return {
       id: useCase.id,
       title: useCase.title,
       description: useCase.description,
       problem_statement: useCase.problem_statement,
       solution_overview: useCase.solution_overview,
-      department: useCase.department,
+      category: useCase.category,
       status: useCase.status,
       strategic_impact: useCase.strategic_impact,
-      complexity: {
-        data: useCase.data_complexity,
-        integration: useCase.integration_complexity,
-        intelligence: useCase.intelligence_complexity,
-        functional: useCase.functional_complexity
-      },
+      effort_level: useCase.effort_level,
       author_name: useCase.author_name,
       created_date: useCase.created_date,
       updated_date: useCase.updated_date,
@@ -855,275 +799,14 @@ const FUNCTION_IMPLEMENTATIONS = {
     };
   },
 
-  get_executive_brief: async (params, domainId) => {
-    console.log('📋 Backend: Getting executive brief:', params, 'Domain:', domainId);
+  // Note: get_executive_brief and get_variance_report functions removed for Samantha
 
-    const daysBack = params.days || 7;
-
-    // Build domain filter clause
-    let domainFilter = '';
-    const domainParams = [];
-    if (domainId) {
-      domainFilter = ' AND uc.domain_id = ?';
-      domainParams.push(domainId);
-    }
-
-    // Get recent use case changes (created and updated)
-    const recentUseCases = await new Promise((resolve, reject) => {
-      db.query(`
-        SELECT
-          'use_case' as item_type,
-          'created' as action_type,
-          uc.id,
-          uc.title,
-          uc.status,
-          uc.strategic_impact,
-          d.name as department,
-          u.name as author_name,
-          uc.created_date as action_date
-        FROM use_cases uc
-        LEFT JOIN departments d ON uc.department_id = d.id
-        LEFT JOIN users u ON uc.author_id = u.id
-        WHERE uc.created_date >= DATE_SUB(NOW(), INTERVAL ? DAY)${domainFilter}
-
-        UNION ALL
-
-        SELECT
-          'use_case' as item_type,
-          'updated' as action_type,
-          uc.id,
-          uc.title,
-          uc.status,
-          uc.strategic_impact,
-          d.name as department,
-          u.name as author_name,
-          uc.updated_date as action_date
-        FROM use_cases uc
-        LEFT JOIN departments d ON uc.department_id = d.id
-        LEFT JOIN users u ON uc.author_id = u.id
-        WHERE uc.updated_date >= DATE_SUB(NOW(), INTERVAL ? DAY)
-          AND uc.updated_date > uc.created_date${domainFilter}
-
-        ORDER BY action_date DESC
-      `, [daysBack, ...domainParams, daysBack, ...domainParams], (err, results) => {
-        if (err) reject(err);
-        else resolve(results);
-      });
-    });
-
-    // Get department activity summary
-    let deptQuery = `
-      SELECT
-        d.name as department,
-        COUNT(CASE WHEN uc.created_date >= DATE_SUB(NOW(), INTERVAL ? DAY) THEN 1 END) as new_use_cases,
-        COUNT(CASE WHEN uc.updated_date >= DATE_SUB(NOW(), INTERVAL ? DAY) AND uc.updated_date > uc.created_date THEN 1 END) as updated_use_cases
-      FROM departments d
-      LEFT JOIN use_cases uc ON d.id = uc.department_id`;
-
-    const deptQueryParams = [daysBack, daysBack];
-
-    if (domainId) {
-      deptQuery += ' WHERE uc.domain_id = ? OR uc.domain_id IS NULL';
-      deptQueryParams.push(domainId);
-    }
-
-    deptQuery += `
-      GROUP BY d.id, d.name
-      HAVING new_use_cases > 0 OR updated_use_cases > 0
-      ORDER BY (new_use_cases + updated_use_cases) DESC`;
-
-    const departmentActivity = await new Promise((resolve, reject) => {
-      db.query(deptQuery, deptQueryParams, (err, results) => {
-        if (err) reject(err);
-        else resolve(results);
-      });
-    });
-
-    // Get total active use cases
-    let activeCountQuery = `
-      SELECT COUNT(*) as count
-      FROM use_cases
-      WHERE status IN ('concept', 'proof_of_concept', 'validation', 'pilot', 'production')`;
-
-    const activeCountParams = [];
-    if (domainId) {
-      activeCountQuery += ' AND domain_id = ?';
-      activeCountParams.push(domainId);
-    }
-
-    const activeCount = await new Promise((resolve, reject) => {
-      db.query(activeCountQuery, activeCountParams, (err, results) => {
-        if (err) reject(err);
-        else resolve(results);
-      });
-    });
-
-    // Get initiative status breakdown
-    let statusBreakdownQuery = `
-      SELECT status, COUNT(*) as count
-      FROM use_cases
-      WHERE 1=1`;
-    const statusParams = [];
-    if (domainId) {
-      statusBreakdownQuery += ' AND domain_id = ?';
-      statusParams.push(domainId);
-    }
-    statusBreakdownQuery += ' GROUP BY status';
-
-    const initiativeStatusBreakdown = await new Promise((resolve, reject) => {
-      db.query(statusBreakdownQuery, statusParams, (err, results) => {
-        if (err) reject(err);
-        else resolve(results);
-      });
-    });
-
-    // Get agent statistics
-    let agentCountQuery = `SELECT COUNT(*) as count FROM agents WHERE 1=1`;
-    const agentParams = [];
-    if (domainId) {
-      agentCountQuery += ' AND domain_id = ?';
-      agentParams.push(domainId);
-    }
-
-    const totalAgents = await new Promise((resolve, reject) => {
-      db.query(agentCountQuery, agentParams, (err, results) => {
-        if (err) reject(err);
-        else resolve(results[0].count);
-      });
-    });
-
-    // Get agent status breakdown
-    let agentStatusQuery = `
-      SELECT status, COUNT(*) as count
-      FROM agents
-      WHERE 1=1`;
-    if (domainId) {
-      agentStatusQuery += ' AND domain_id = ?';
-    }
-    agentStatusQuery += ' GROUP BY status';
-
-    const agentStatusBreakdown = await new Promise((resolve, reject) => {
-      db.query(agentStatusQuery, domainId ? [domainId] : [], (err, results) => {
-        if (err) reject(err);
-        else resolve(results);
-      });
-    });
-
-    // Get agent type breakdown
-    let agentTypeQuery = `
-      SELECT at.name as agent_type, COUNT(*) as count
-      FROM agents a
-      LEFT JOIN agent_types at ON a.agent_type_id = at.id
-      WHERE 1=1`;
-    if (domainId) {
-      agentTypeQuery += ' AND a.domain_id = ?';
-    }
-    agentTypeQuery += ' GROUP BY at.name';
-
-    const agentTypeBreakdown = await new Promise((resolve, reject) => {
-      db.query(agentTypeQuery, domainId ? [domainId] : [], (err, results) => {
-        if (err) reject(err);
-        else resolve(results);
-      });
-    });
-
-    // Get blocked and overdue counts
-    let blockedQuery = `
-      SELECT
-        (SELECT COUNT(*) FROM use_cases WHERE kanban_pillar = 'blocked'${domainId ? ' AND domain_id = ?' : ''}) as blocked_initiatives,
-        (SELECT COUNT(*) FROM agents WHERE kanban_pillar = 'blocked'${domainId ? ' AND domain_id = ?' : ''}) as blocked_agents
-    `;
-    const blockedParams = domainId ? [domainId, domainId] : [];
-
-    const blockedCounts = await new Promise((resolve, reject) => {
-      db.query(blockedQuery, blockedParams, (err, results) => {
-        if (err) reject(err);
-        else resolve(results[0]);
-      });
-    });
-
-    // Convert status breakdowns to objects
-    const initiativesByStatus = {};
-    initiativeStatusBreakdown.forEach(row => {
-      initiativesByStatus[row.status] = row.count;
-    });
-
-    const agentsByStatus = {};
-    agentStatusBreakdown.forEach(row => {
-      agentsByStatus[row.status] = row.count;
-    });
-
-    const agentsByType = {};
-    agentTypeBreakdown.forEach(row => {
-      if (row.agent_type) {
-        agentsByType[row.agent_type] = row.count;
-      }
-    });
-
-    // Construct executive summary
-    const summary = {
-      period: `Last ${daysBack} days`,
-      portfolio_overview: {
-        total_initiatives: activeCount[0].count,
-        total_agents: totalAgents,
-        initiatives_by_status: initiativesByStatus,
-        agents_by_status: agentsByStatus,
-        agents_by_type: agentsByType
-      },
-      activity_summary: {
-        total_changes: recentUseCases.length,
-        new_initiatives: recentUseCases.filter(uc => uc.action_type === 'created').length,
-        updated_initiatives: recentUseCases.filter(uc => uc.action_type === 'updated').length,
-        total_active_initiatives: activeCount[0].count
-      },
-      production_summary: {
-        initiatives_in_production: initiativesByStatus.production || 0,
-        agents_in_production: agentsByStatus.production || 0
-      },
-      health_indicators: {
-        blocked_initiatives: blockedCounts.blocked_initiatives || 0,
-        blocked_agents: blockedCounts.blocked_agents || 0,
-        high_impact_count: recentUseCases.filter(uc => uc.strategic_impact === 'High').length
-      },
-      recent_initiatives: recentUseCases
-        .filter(uc => uc.action_type === 'created')
-        .slice(0, 5)
-        .map(uc => ({
-          id: uc.id,
-          title: uc.title,
-          department: uc.department,
-          status: uc.status,
-          strategic_impact: uc.strategic_impact,
-          created_date: uc.action_date
-        })),
-      status_changes: recentUseCases
-        .filter(uc => uc.action_type === 'updated')
-        .slice(0, 5)
-        .map(uc => ({
-          id: uc.id,
-          title: uc.title,
-          department: uc.department,
-          new_status: uc.status,
-          updated_date: uc.action_date
-        })),
-      department_activity: departmentActivity.map(da => ({
-        department: da.department,
-        new_initiatives: da.new_use_cases,
-        updated_initiatives: da.updated_use_cases,
-        total_activity: da.new_use_cases + da.updated_use_cases
-      })),
-      highlights: {
-        most_active_departments: departmentActivity.slice(0, 3).map(d => d.department),
-        high_impact_count: recentUseCases.filter(uc => uc.strategic_impact === 'High').length,
-        production_count: (initiativesByStatus.production || 0) + (agentsByStatus.production || 0)
-      }
-    };
-
-    console.log(`✅ Backend: Generated executive brief for ${daysBack} days with ${summary.activity_summary.total_changes} total changes`);
-    return summary;
+  get_domain_metadata_old: async (params, domainId) => {
+    // Placeholder - using new simplified version below
+    return { error: 'Deprecated' };
   },
 
-  get_variance_report: async (params, domainId) => {
+  get_variance_report_old: async (params, domainId) => {
     console.log('📊 Backend: Getting variance report:', params, 'Domain:', domainId);
 
     if (!domainId) {
@@ -1154,8 +837,8 @@ const FUNCTION_IMPLEMENTATIONS = {
       SELECT
         (SELECT COUNT(*) FROM use_cases WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?) as initiatives_current,
         (SELECT COUNT(*) FROM use_cases WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?) as initiatives_previous,
-        (SELECT COUNT(*) FROM agents WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?) as agents_current,
-        (SELECT COUNT(*) FROM agents WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?) as agents_previous
+        (SELECT COUNT(*) FROM tasks WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?) as tasks_current,
+        (SELECT COUNT(*) FROM tasks WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?) as tasks_previous
     `;
 
     const summaryParams = [
@@ -1184,9 +867,9 @@ const FUNCTION_IMPLEMENTATIONS = {
       UNION ALL
       SELECT
         DATE(created_date) as date,
-        'agent' as type,
+        'task' as type,
         COUNT(*) as count
-      FROM agents
+      FROM tasks
       WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?
       GROUP BY DATE(created_date)
       ORDER BY date ASC
@@ -1209,66 +892,20 @@ const FUNCTION_IMPLEMENTATIONS = {
     let breakdownParams;
 
     switch (breakdown) {
-      case 'department':
-        breakdownQuery = `
-          SELECT
-            d.name as name,
-            COALESCE(uc_current.count, 0) as initiatives_current,
-            COALESCE(uc_previous.count, 0) as initiatives_previous,
-            COALESCE(ag_current.count, 0) as agents_current,
-            COALESCE(ag_previous.count, 0) as agents_previous
-          FROM departments d
-          LEFT JOIN (
-            SELECT department_id, COUNT(*) as count
-            FROM use_cases
-            WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?
-            GROUP BY department_id
-          ) uc_current ON d.id = uc_current.department_id
-          LEFT JOIN (
-            SELECT department_id, COUNT(*) as count
-            FROM use_cases
-            WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?
-            GROUP BY department_id
-          ) uc_previous ON d.id = uc_previous.department_id
-          LEFT JOIN (
-            SELECT department_id, COUNT(*) as count
-            FROM agents
-            WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?
-            GROUP BY department_id
-          ) ag_current ON d.id = ag_current.department_id
-          LEFT JOIN (
-            SELECT department_id, COUNT(*) as count
-            FROM agents
-            WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?
-            GROUP BY department_id
-          ) ag_previous ON d.id = ag_previous.department_id
-          WHERE d.domain_id = ?
-          HAVING initiatives_current > 0 OR initiatives_previous > 0 OR agents_current > 0 OR agents_previous > 0
-          ORDER BY (initiatives_current + agents_current) DESC
-        `;
-        breakdownParams = [
-          domainId, currentStartStr, currentEndStr,
-          domainId, previousStartStr, previousEndStr,
-          domainId, currentStartStr, currentEndStr,
-          domainId, previousStartStr, previousEndStr,
-          domainId
-        ];
-        break;
-
       case 'status':
         breakdownQuery = `
           SELECT
             status as name,
             (SELECT COUNT(*) FROM use_cases WHERE domain_id = ? AND status = s.status AND DATE(created_date) BETWEEN ? AND ?) as initiatives_current,
             (SELECT COUNT(*) FROM use_cases WHERE domain_id = ? AND status = s.status AND DATE(created_date) BETWEEN ? AND ?) as initiatives_previous,
-            (SELECT COUNT(*) FROM agents WHERE domain_id = ? AND status = s.status AND DATE(created_date) BETWEEN ? AND ?) as agents_current,
-            (SELECT COUNT(*) FROM agents WHERE domain_id = ? AND status = s.status AND DATE(created_date) BETWEEN ? AND ?) as agents_previous
+            (SELECT COUNT(*) FROM tasks WHERE domain_id = ? AND status = s.status AND DATE(created_date) BETWEEN ? AND ?) as tasks_current,
+            (SELECT COUNT(*) FROM tasks WHERE domain_id = ? AND status = s.status AND DATE(created_date) BETWEEN ? AND ?) as tasks_previous
           FROM (
             SELECT DISTINCT status FROM use_cases WHERE domain_id = ?
             UNION
-            SELECT DISTINCT status FROM agents WHERE domain_id = ?
+            SELECT DISTINCT status FROM tasks WHERE domain_id = ?
           ) s
-          ORDER BY FIELD(status, 'production', 'pilot', 'validation', 'proof_of_concept', 'concept')
+          ORDER BY FIELD(status, 'intention', 'experimentation', 'commitment', 'implementation', 'integration', 'blocked', 'slow_burner', 'de_prioritised', 'on_hold')
         `;
         breakdownParams = [
           domainId, currentStartStr, currentEndStr,
@@ -1285,8 +922,8 @@ const FUNCTION_IMPLEMENTATIONS = {
             impact as name,
             (SELECT COUNT(*) FROM use_cases WHERE domain_id = ? AND strategic_impact = i.impact AND DATE(created_date) BETWEEN ? AND ?) as initiatives_current,
             (SELECT COUNT(*) FROM use_cases WHERE domain_id = ? AND strategic_impact = i.impact AND DATE(created_date) BETWEEN ? AND ?) as initiatives_previous,
-            (SELECT COUNT(*) FROM agents WHERE domain_id = ? AND strategic_impact = i.impact AND DATE(created_date) BETWEEN ? AND ?) as agents_current,
-            (SELECT COUNT(*) FROM agents WHERE domain_id = ? AND strategic_impact = i.impact AND DATE(created_date) BETWEEN ? AND ?) as agents_previous
+            (SELECT COUNT(*) FROM tasks WHERE domain_id = ? AND strategic_impact = i.impact AND DATE(created_date) BETWEEN ? AND ?) as tasks_current,
+            (SELECT COUNT(*) FROM tasks WHERE domain_id = ? AND strategic_impact = i.impact AND DATE(created_date) BETWEEN ? AND ?) as tasks_previous
           FROM (
             SELECT 'High' as impact UNION SELECT 'Medium' UNION SELECT 'Low'
           ) i
@@ -1303,12 +940,12 @@ const FUNCTION_IMPLEMENTATIONS = {
       case 'category':
         breakdownQuery = `
           SELECT
-            COALESCE(c.name, at.name) as name,
+            c.name as name,
             'category' as breakdown_type,
             COALESCE(uc_current.count, 0) as initiatives_current,
             COALESCE(uc_previous.count, 0) as initiatives_previous,
-            0 as agents_current,
-            0 as agents_previous
+            0 as tasks_current,
+            0 as tasks_previous
           FROM categories c
           LEFT JOIN (
             SELECT category_id, COUNT(*) as count
@@ -1324,70 +961,17 @@ const FUNCTION_IMPLEMENTATIONS = {
           ) uc_previous ON c.id = uc_previous.category_id
           WHERE c.domain_id = ?
           HAVING initiatives_current > 0 OR initiatives_previous > 0
-
-          UNION ALL
-
-          SELECT
-            at.name as name,
-            'agent_type' as breakdown_type,
-            0 as initiatives_current,
-            0 as initiatives_previous,
-            COALESCE(ag_current.count, 0) as agents_current,
-            COALESCE(ag_previous.count, 0) as agents_previous
-          FROM agent_types at
-          LEFT JOIN (
-            SELECT agent_type_id, COUNT(*) as count
-            FROM agents
-            WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?
-            GROUP BY agent_type_id
-          ) ag_current ON at.id = ag_current.agent_type_id
-          LEFT JOIN (
-            SELECT agent_type_id, COUNT(*) as count
-            FROM agents
-            WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?
-            GROUP BY agent_type_id
-          ) ag_previous ON at.id = ag_previous.agent_type_id
-          WHERE at.domain_id = ?
-          HAVING agents_current > 0 OR agents_previous > 0
-
-          ORDER BY (initiatives_current + agents_current) DESC
+          ORDER BY initiatives_current DESC
         `;
         breakdownParams = [
-          domainId, currentStartStr, currentEndStr,
-          domainId, previousStartStr, previousEndStr,
-          domainId,
           domainId, currentStartStr, currentEndStr,
           domainId, previousStartStr, previousEndStr,
           domainId
         ];
         break;
 
-      case 'kanban':
-        breakdownQuery = `
-          SELECT
-            pillar as name,
-            (SELECT COUNT(*) FROM use_cases WHERE domain_id = ? AND kanban_pillar = k.pillar AND DATE(created_date) BETWEEN ? AND ?) as initiatives_current,
-            (SELECT COUNT(*) FROM use_cases WHERE domain_id = ? AND kanban_pillar = k.pillar AND DATE(created_date) BETWEEN ? AND ?) as initiatives_previous,
-            (SELECT COUNT(*) FROM agents WHERE domain_id = ? AND kanban_pillar = k.pillar AND DATE(created_date) BETWEEN ? AND ?) as agents_current,
-            (SELECT COUNT(*) FROM agents WHERE domain_id = ? AND kanban_pillar = k.pillar AND DATE(created_date) BETWEEN ? AND ?) as agents_previous
-          FROM (
-            SELECT 'backlog' as pillar UNION SELECT 'prioritised' UNION SELECT 'in_progress'
-            UNION SELECT 'completed' UNION SELECT 'blocked' UNION SELECT 'slow_burner'
-            UNION SELECT 'de_prioritised' UNION SELECT 'on_hold'
-          ) k
-          HAVING initiatives_current > 0 OR initiatives_previous > 0 OR agents_current > 0 OR agents_previous > 0
-          ORDER BY FIELD(pillar, 'backlog', 'prioritised', 'in_progress', 'completed', 'blocked', 'slow_burner', 'de_prioritised', 'on_hold')
-        `;
-        breakdownParams = [
-          domainId, currentStartStr, currentEndStr,
-          domainId, previousStartStr, previousEndStr,
-          domainId, currentStartStr, currentEndStr,
-          domainId, previousStartStr, previousEndStr
-        ];
-        break;
-
       default:
-        return { error: 'Invalid breakdown type' };
+        return { error: 'Invalid breakdown type. Valid options: status, impact, category' };
     }
 
     const breakdownResults = await new Promise((resolve, reject) => {
@@ -1405,13 +989,13 @@ const FUNCTION_IMPLEMENTATIONS = {
       ? ((initiativesVariance / summary.initiatives_previous) * 100).toFixed(1)
       : (summary.initiatives_current > 0 ? 100 : 0);
 
-    const agentsVariance = summary.agents_current - summary.agents_previous;
-    const agentsPercent = summary.agents_previous > 0
-      ? ((agentsVariance / summary.agents_previous) * 100).toFixed(1)
-      : (summary.agents_current > 0 ? 100 : 0);
+    const tasksVariance = summary.tasks_current - summary.tasks_previous;
+    const tasksPercent = summary.tasks_previous > 0
+      ? ((tasksVariance / summary.tasks_previous) * 100).toFixed(1)
+      : (summary.tasks_current > 0 ? 100 : 0);
 
-    const ratio = summary.agents_current > 0
-      ? (summary.initiatives_current / summary.agents_current).toFixed(1)
+    const ratio = summary.tasks_current > 0
+      ? (summary.initiatives_current / summary.tasks_current).toFixed(1)
       : summary.initiatives_current;
 
     // Process daily data into a more usable format
@@ -1421,12 +1005,12 @@ const FUNCTION_IMPLEMENTATIONS = {
         ? row.date.toISOString().split('T')[0]
         : row.date;
       if (!dailyMap[dateStr]) {
-        dailyMap[dateStr] = { date: dateStr, initiatives: 0, agents: 0 };
+        dailyMap[dateStr] = { date: dateStr, initiatives: 0, tasks: 0 };
       }
       if (row.type === 'initiative') {
         dailyMap[dateStr].initiatives = row.count;
       } else {
-        dailyMap[dateStr].agents = row.count;
+        dailyMap[dateStr].tasks = row.count;
       }
     });
 
@@ -1435,7 +1019,7 @@ const FUNCTION_IMPLEMENTATIONS = {
     const cursor = new Date(currentStart);
     while (cursor <= currentEnd) {
       const dateStr = formatDate(cursor);
-      daily.push(dailyMap[dateStr] || { date: dateStr, initiatives: 0, agents: 0 });
+      daily.push(dailyMap[dateStr] || { date: dateStr, initiatives: 0, tasks: 0 });
       cursor.setDate(cursor.getDate() + 1);
     }
 
@@ -1446,9 +1030,9 @@ const FUNCTION_IMPLEMENTATIONS = {
       initiatives_current: row.initiatives_current || 0,
       initiatives_previous: row.initiatives_previous || 0,
       initiatives_variance: (row.initiatives_current || 0) - (row.initiatives_previous || 0),
-      agents_current: row.agents_current || 0,
-      agents_previous: row.agents_previous || 0,
-      agents_variance: (row.agents_current || 0) - (row.agents_previous || 0)
+      tasks_current: row.tasks_current || 0,
+      tasks_previous: row.tasks_previous || 0,
+      tasks_variance: (row.tasks_current || 0) - (row.tasks_previous || 0)
     }));
 
     const result = {
@@ -1468,11 +1052,11 @@ const FUNCTION_IMPLEMENTATIONS = {
           variance: initiativesVariance,
           percent: parseFloat(initiativesPercent)
         },
-        agents: {
-          current: summary.agents_current,
-          previous: summary.agents_previous,
-          variance: agentsVariance,
-          percent: parseFloat(agentsPercent)
+        tasks: {
+          current: summary.tasks_current,
+          previous: summary.tasks_previous,
+          variance: tasksVariance,
+          percent: parseFloat(tasksPercent)
         },
         ratio: parseFloat(ratio)
       },
@@ -1485,19 +1069,11 @@ const FUNCTION_IMPLEMENTATIONS = {
   },
 
   get_domain_metadata: async (params, domainId) => {
-    console.log('📋 Backend: Getting domain metadata for domain:', domainId);
+    console.log('Backend: Getting domain metadata for domain:', domainId);
 
     if (!domainId) {
       return { error: 'Domain ID is required for metadata' };
     }
-
-    // Get departments for this domain
-    const departments = await new Promise((resolve, reject) => {
-      db.query('SELECT name FROM departments WHERE domain_id = ? ORDER BY name', [domainId], (err, results) => {
-        if (err) reject(err);
-        else resolve(results.map(r => r.name));
-      });
-    });
 
     // Get categories for this domain
     const categories = await new Promise((resolve, reject) => {
@@ -1507,25 +1083,9 @@ const FUNCTION_IMPLEMENTATIONS = {
       });
     });
 
-    // Get agent types for this domain
-    const agentTypes = await new Promise((resolve, reject) => {
-      db.query('SELECT name FROM agent_types WHERE domain_id = ? ORDER BY name', [domainId], (err, results) => {
-        if (err) reject(err);
-        else resolve(results.map(r => r.name));
-      });
-    });
-
-    // Get all tags (global, not domain-scoped)
+    // Get all tags
     const tags = await new Promise((resolve, reject) => {
       db.query('SELECT name FROM tags ORDER BY name', [], (err, results) => {
-        if (err) reject(err);
-        else resolve(results.map(r => r.name));
-      });
-    });
-
-    // Get data sensitivity levels (global)
-    const sensitivityLevels = await new Promise((resolve, reject) => {
-      db.query('SELECT name FROM data_sensitivity_levels ORDER BY display_order', [], (err, results) => {
         if (err) reject(err);
         else resolve(results.map(r => r.name));
       });
@@ -1540,20 +1100,17 @@ const FUNCTION_IMPLEMENTATIONS = {
     });
 
     return {
-      departments,
       categories,
-      agent_types: agentTypes,
       tags,
-      data_sensitivity_levels: sensitivityLevels,
       strategic_pillars: pillars,
-      status_values: ['concept', 'proof_of_concept', 'validation', 'pilot', 'production'],
-      kanban_values: ['backlog', 'prioritised', 'in_progress', 'completed', 'blocked', 'slow_burner', 'de_prioritised', 'on_hold'],
-      strategic_impact_values: ['Low', 'Medium', 'High']
+      status_values: ['intention', 'experimentation', 'commitment', 'implementation', 'integration', 'blocked', 'slow_burner', 'de_prioritised', 'on_hold'],
+      strategic_impact_values: ['Low', 'Medium', 'High'],
+      effort_level_values: ['Low', 'Medium', 'High']
     };
   },
 
-  search_agents: async (params, domainId) => {
-    console.log('🔍 Backend: Searching agents:', params, 'Domain:', domainId);
+  search_tasks: async (params, domainId) => {
+    console.log('Backend: Searching tasks:', params, 'Domain:', domainId);
 
     const searchTerm = params.search_term || '';
     const limit = params.limit || 10;
@@ -1562,34 +1119,30 @@ const FUNCTION_IMPLEMENTATIONS = {
     const queryParams = [];
 
     if (domainId) {
-      whereClause += ' AND a.domain_id = ?';
+      whereClause += ' AND t.domain_id = ?';
       queryParams.push(domainId);
     }
 
     if (searchTerm) {
-      whereClause += ' AND (a.title LIKE ? OR a.description LIKE ? OR a.problem_statement LIKE ?)';
+      whereClause += ' AND (t.title LIKE ? OR t.description LIKE ? OR t.problem_statement LIKE ?)';
       const searchPattern = `%${searchTerm}%`;
       queryParams.push(searchPattern, searchPattern, searchPattern);
     }
 
     const query = `
       SELECT
-        a.id,
-        a.title,
-        a.description,
-        a.status,
-        a.strategic_impact,
-        a.kanban_pillar,
-        at.name as agent_type,
-        d.name as department,
-        a.created_date
-      FROM agents a
-      LEFT JOIN agent_types at ON a.agent_type_id = at.id
-      LEFT JOIN departments d ON a.department_id = d.id
+        t.id,
+        t.title,
+        t.description,
+        t.status,
+        t.strategic_impact,
+        t.effort_level,
+        t.created_date
+      FROM tasks t
       ${whereClause}
       ORDER BY
-        CASE WHEN a.title LIKE ? THEN 1 ELSE 2 END,
-        a.created_date DESC
+        CASE WHEN t.title LIKE ? THEN 1 ELSE 2 END,
+        t.created_date DESC
       LIMIT ?
     `;
 
@@ -1602,69 +1155,52 @@ const FUNCTION_IMPLEMENTATIONS = {
       });
     });
 
-    console.log(`✅ Backend: Found ${results.length} agents matching "${searchTerm}"`);
+    console.log(`Backend: Found ${results.length} tasks matching "${searchTerm}"`);
 
     return {
       search_term: searchTerm,
       count: results.length,
-      agents: results
+      tasks: results
     };
   },
 
-  get_agents_by_criteria: async (params, domainId) => {
-    console.log('📊 Backend: Getting agents by criteria:', params, 'Domain:', domainId);
+  get_tasks_by_criteria: async (params, domainId) => {
+    console.log('Backend: Getting tasks by criteria:', params, 'Domain:', domainId);
 
     let whereClause = 'WHERE 1=1';
     const queryParams = [];
 
     if (domainId) {
-      whereClause += ' AND a.domain_id = ?';
+      whereClause += ' AND t.domain_id = ?';
       queryParams.push(domainId);
     }
-    if (params.agent_type) {
-      whereClause += ' AND at.name = ?';
-      queryParams.push(params.agent_type);
-    }
-    if (params.department) {
-      whereClause += ' AND d.name = ?';
-      queryParams.push(params.department);
-    }
     if (params.status) {
-      whereClause += ' AND a.status = ?';
+      whereClause += ' AND t.status = ?';
       queryParams.push(params.status);
     }
     if (params.strategic_impact) {
-      whereClause += ' AND a.strategic_impact = ?';
+      whereClause += ' AND t.strategic_impact = ?';
       queryParams.push(params.strategic_impact);
     }
-    if (params.kanban_pillar) {
-      whereClause += ' AND a.kanban_pillar = ?';
-      queryParams.push(params.kanban_pillar);
-    }
-    if (params.data_sensitivity) {
-      whereClause += ' AND a.data_sensitivity = ?';
-      queryParams.push(params.data_sensitivity);
+    if (params.effort_level) {
+      whereClause += ' AND t.effort_level = ?';
+      queryParams.push(params.effort_level);
     }
 
     const limit = params.limit || 10;
 
     const query = `
       SELECT
-        a.id,
-        a.title,
-        a.description,
-        a.status,
-        a.strategic_impact,
-        a.kanban_pillar,
-        a.data_sensitivity,
-        at.name as agent_type,
-        d.name as department,
-        a.created_date
-      FROM agents a
-      LEFT JOIN agent_types at ON a.agent_type_id = at.id
-      LEFT JOIN departments d ON a.department_id = d.id
+        t.id,
+        t.title,
+        t.description,
+        t.status,
+        t.strategic_impact,
+        t.effort_level,
+        t.created_date
+      FROM tasks t
       ${whereClause}
-      ORDER BY a.created_date DESC
+      ORDER BY t.created_date DESC
       LIMIT ?
     `;
 
@@ -1680,12 +1216,12 @@ const FUNCTION_IMPLEMENTATIONS = {
     return {
       criteria: params,
       count: results.length,
-      agents: results
+      tasks: results
     };
   },
 
-  get_agents_by_initiative: async (params, domainId) => {
-    console.log('🎯 Backend: Getting agents by initiative:', params, 'Domain:', domainId);
+  get_tasks_by_initiative: async (params, domainId) => {
+    console.log('Backend: Getting tasks by initiative:', params, 'Domain:', domainId);
 
     const initiativeName = params.initiative_name;
     const limit = params.limit || 10;
@@ -1717,14 +1253,14 @@ const FUNCTION_IMPLEMENTATIONS = {
       });
     });
 
-    console.log(`✅ Backend: Found ${useCases.length} use cases matching "${initiativeName}"`);
+    console.log(`Backend: Found ${useCases.length} use cases matching "${initiativeName}"`);
 
     if (useCases.length === 0) {
       return {
         initiative_name: initiativeName,
         matched_use_cases: [],
         count: 0,
-        agents: []
+        tasks: []
       };
     }
 
@@ -1732,86 +1268,73 @@ const FUNCTION_IMPLEMENTATIONS = {
     const useCaseIds = useCases.map(uc => uc.id);
     const placeholders = useCaseIds.map(() => '?').join(',');
 
-    // Now find agents associated with these use cases
-    let agentWhereClause = `WHERE aia.use_case_id IN (${placeholders})`;
-    const agentQueryParams = [...useCaseIds];
+    // Now find tasks associated with these use cases
+    let taskWhereClause = `WHERE tia.use_case_id IN (${placeholders})`;
+    const taskQueryParams = [...useCaseIds];
 
     if (domainId) {
-      agentWhereClause += ' AND a.domain_id = ?';
-      agentQueryParams.push(domainId);
+      taskWhereClause += ' AND t.domain_id = ?';
+      taskQueryParams.push(domainId);
     }
 
-    const agentQuery = `
+    const taskQuery = `
       SELECT DISTINCT
-        a.id,
-        a.title,
-        a.description,
-        a.status,
-        a.strategic_impact,
-        a.kanban_pillar,
-        a.data_sensitivity,
-        at.name as agent_type,
-        d.name as department,
-        a.created_date
-      FROM agents a
-      INNER JOIN agent_initiative_associations aia ON a.id = aia.agent_id
-      LEFT JOIN agent_types at ON a.agent_type_id = at.id
-      LEFT JOIN departments d ON a.department_id = d.id
-      ${agentWhereClause}
-      ORDER BY a.created_date DESC
+        t.id,
+        t.title,
+        t.description,
+        t.status,
+        t.strategic_impact,
+        t.effort_level,
+        t.created_date
+      FROM tasks t
+      INNER JOIN task_initiative_associations tia ON t.id = tia.task_id
+      ${taskWhereClause}
+      ORDER BY t.created_date DESC
       LIMIT ?
     `;
 
-    agentQueryParams.push(limit);
+    taskQueryParams.push(limit);
 
-    const agents = await new Promise((resolve, reject) => {
-      db.query(agentQuery, agentQueryParams, (err, results) => {
+    const tasks = await new Promise((resolve, reject) => {
+      db.query(taskQuery, taskQueryParams, (err, results) => {
         if (err) reject(err);
         else resolve(results);
       });
     });
 
-    console.log(`✅ Backend: Found ${agents.length} agents associated with initiative "${initiativeName}"`);
+    console.log(`Backend: Found ${tasks.length} tasks associated with initiative "${initiativeName}"`);
 
     return {
       initiative_name: initiativeName,
       matched_use_cases: useCases.map(uc => ({ id: uc.id, title: uc.title })),
-      count: agents.length,
-      agents: agents
+      count: tasks.length,
+      tasks: tasks
     };
   },
 
-  get_agent_statistics: async (params, domainId) => {
-    console.log('📈 Backend: Getting agent statistics:', params, 'Domain:', domainId);
+  get_task_statistics: async (params, domainId) => {
+    console.log('Backend: Getting task statistics:', params, 'Domain:', domainId);
 
     const groupBy = params.group_by || 'status';
 
-    let groupColumn, groupJoin = '';
+    let groupColumn;
 
     switch (groupBy) {
-      case 'department':
-        groupColumn = 'd.name';
-        groupJoin = 'LEFT JOIN departments d ON a.department_id = d.id';
-        break;
-      case 'agent_type':
-        groupColumn = 'at.name';
-        groupJoin = 'LEFT JOIN agent_types at ON a.agent_type_id = at.id';
-        break;
       case 'strategic_impact':
-        groupColumn = 'a.strategic_impact';
+        groupColumn = 't.strategic_impact';
         break;
-      case 'kanban_pillar':
-        groupColumn = 'a.kanban_pillar';
+      case 'effort_level':
+        groupColumn = 't.effort_level';
         break;
       default: // status
-        groupColumn = 'a.status';
+        groupColumn = 't.status';
     }
 
     let whereClause = 'WHERE 1=1';
     const queryParams = [];
 
     if (domainId) {
-      whereClause += ' AND a.domain_id = ?';
+      whereClause += ' AND t.domain_id = ?';
       queryParams.push(domainId);
     }
 
@@ -1819,8 +1342,7 @@ const FUNCTION_IMPLEMENTATIONS = {
       SELECT
         ${groupColumn} as category,
         COUNT(*) as count
-      FROM agents a
-      ${groupJoin}
+      FROM tasks t
       ${whereClause}
       GROUP BY ${groupColumn}
       ORDER BY count DESC
@@ -1834,7 +1356,7 @@ const FUNCTION_IMPLEMENTATIONS = {
     });
 
     // Get total
-    const totalQuery = `SELECT COUNT(*) as total FROM agents a ${whereClause}`;
+    const totalQuery = `SELECT COUNT(*) as total FROM tasks t ${whereClause}`;
     const totalResult = await new Promise((resolve, reject) => {
       db.query(totalQuery, queryParams, (err, results) => {
         if (err) reject(err);
@@ -1844,7 +1366,7 @@ const FUNCTION_IMPLEMENTATIONS = {
 
     return {
       group_by: groupBy,
-      total_agents: totalResult,
+      total_tasks: totalResult,
       breakdown: results.map(r => ({
         [groupBy]: r.category || 'Unknown',
         count: r.count
@@ -1852,50 +1374,46 @@ const FUNCTION_IMPLEMENTATIONS = {
     };
   },
 
-  get_agent_details: async (params, domainId) => {
-    console.log('🤖 Backend: Getting agent details:', params, 'Domain:', domainId);
+  get_task_details: async (params, domainId) => {
+    console.log('Backend: Getting task details:', params, 'Domain:', domainId);
 
     let whereClause = 'WHERE 1=1';
     const queryParams = [];
 
     if (domainId) {
-      whereClause += ' AND a.domain_id = ?';
+      whereClause += ' AND t.domain_id = ?';
       queryParams.push(domainId);
     }
 
-    if (params.agent_id) {
-      whereClause += ' AND a.id = ?';
-      queryParams.push(params.agent_id);
-    } else if (params.agent_title) {
-      whereClause += ' AND a.title LIKE ?';
-      queryParams.push(`%${params.agent_title}%`);
+    if (params.task_id) {
+      whereClause += ' AND t.id = ?';
+      queryParams.push(params.task_id);
+    } else if (params.task_title) {
+      whereClause += ' AND t.title LIKE ?';
+      queryParams.push(`%${params.task_title}%`);
     } else {
-      return { error: 'Either agent_id or agent_title is required' };
+      return { error: 'Either task_id or task_title is required' };
     }
 
     const query = `
       SELECT
-        a.*,
-        at.name as agent_type,
-        d.name as department,
+        t.*,
         u.name as author_name
-      FROM agents a
-      LEFT JOIN agent_types at ON a.agent_type_id = at.id
-      LEFT JOIN departments d ON a.department_id = d.id
-      LEFT JOIN users u ON a.author_id = u.id
+      FROM tasks t
+      LEFT JOIN users u ON t.author_id = u.id
       ${whereClause}
       LIMIT 1
     `;
 
-    const agent = await new Promise((resolve, reject) => {
+    const task = await new Promise((resolve, reject) => {
       db.query(query, queryParams, (err, results) => {
         if (err) reject(err);
         else resolve(results[0] || null);
       });
     });
 
-    if (!agent) {
-      return { error: 'Agent not found' };
+    if (!task) {
+      return { error: 'Task not found' };
     }
 
     // Get linked initiatives
@@ -1903,32 +1421,29 @@ const FUNCTION_IMPLEMENTATIONS = {
       db.query(`
         SELECT uc.id, uc.title, uc.status, uc.strategic_impact
         FROM use_cases uc
-        JOIN agent_initiative_associations aia ON uc.id = aia.use_case_id
-        WHERE aia.agent_id = ?
+        JOIN task_initiative_associations tia ON uc.id = tia.use_case_id
+        WHERE tia.task_id = ?
         ORDER BY uc.title
-      `, [agent.id], (err, results) => {
+      `, [task.id], (err, results) => {
         if (err) reject(err);
         else resolve(results);
       });
     });
 
     return {
-      agent: {
-        id: agent.id,
-        title: agent.title,
-        description: agent.description,
-        problem_statement: agent.problem_statement,
-        solution_overview: agent.solution_overview,
-        technical_implementation: agent.technical_implementation,
-        results_metrics: agent.results_metrics,
-        status: agent.status,
-        strategic_impact: agent.strategic_impact,
-        kanban_pillar: agent.kanban_pillar,
-        data_sensitivity: agent.data_sensitivity,
-        agent_type: agent.agent_type,
-        department: agent.department,
-        author: agent.author_name,
-        created_date: agent.created_date
+      task: {
+        id: task.id,
+        title: task.title,
+        description: task.description,
+        problem_statement: task.problem_statement,
+        solution_overview: task.solution_overview,
+        technical_implementation: task.technical_implementation,
+        results_metrics: task.results_metrics,
+        status: task.status,
+        strategic_impact: task.strategic_impact,
+        effort_level: task.effort_level,
+        author: task.author_name,
+        created_date: task.created_date
       },
       linked_initiatives: initiatives,
       initiative_count: initiatives.length
@@ -1936,7 +1451,7 @@ const FUNCTION_IMPLEMENTATIONS = {
   },
 
   get_use_cases_by_tag: async (params, domainId) => {
-    console.log('🏷️ Backend: Getting use cases by tag:', params, 'Domain:', domainId);
+    console.log('Backend: Getting use cases by tag:', params, 'Domain:', domainId);
 
     const tagName = params.tag_name;
     const limit = params.limit || 20;
@@ -1954,7 +1469,6 @@ const FUNCTION_IMPLEMENTATIONS = {
     });
 
     if (tags.length === 0) {
-      console.log(`⚠️ No tag found matching: ${tagName}`);
       return {
         tag_name: tagName,
         count: 0,
@@ -1974,14 +1488,14 @@ const FUNCTION_IMPLEMENTATIONS = {
         uc.description,
         uc.status,
         uc.strategic_impact,
-        uc.kanban_pillar,
+        uc.effort_level,
         uc.expected_delivery_date,
-        d.name as department,
+        c.name as category,
         u.name as author_name,
         uc.created_date
       FROM use_cases uc
       INNER JOIN use_case_tags uct ON uc.id = uct.use_case_id
-      LEFT JOIN departments d ON uc.department_id = d.id
+      LEFT JOIN categories c ON uc.category_id = c.id
       LEFT JOIN users u ON uc.author_id = u.id
       WHERE uct.tag_id = ?`;
 
@@ -2002,7 +1516,7 @@ const FUNCTION_IMPLEMENTATIONS = {
       });
     });
 
-    console.log(`✅ Backend: Found ${useCases.length} use cases with tag "${matchedTagName}"`);
+    console.log(`Backend: Found ${useCases.length} use cases with tag "${matchedTagName}"`);
     return {
       tag_name: matchedTagName,
       count: useCases.length,
@@ -2012,9 +1526,9 @@ const FUNCTION_IMPLEMENTATIONS = {
         description: uc.description,
         status: uc.status,
         strategic_impact: uc.strategic_impact,
-        kanban_pillar: uc.kanban_pillar,
+        effort_level: uc.effort_level,
         expected_delivery_date: uc.expected_delivery_date,
-        department: uc.department,
+        category: uc.category,
         author_name: uc.author_name,
         created_date: uc.created_date
       }))
@@ -2114,23 +1628,11 @@ const buildIntelligentSystemPrompt = async (userName, domainId = null) => {
     });
   });
 
-  // Get departments
-  const departments = await new Promise((resolve, reject) => {
-    const deptQuery = domainId
-      ? 'SELECT * FROM departments WHERE domain_id = ? ORDER BY name'
-      : 'SELECT * FROM departments ORDER BY name';
-    const deptParams = domainId ? [domainId] : [];
-    db.query(deptQuery, deptParams, (err, results) => {
-      if (err) reject(err);
-      else resolve(results);
-    });
-  });
-
-  // Get kanban statuses distribution
+  // Get status distribution
   const kanbanStatuses = await new Promise((resolve, reject) => {
     const statusQuery = domainId
-      ? `SELECT kanban_pillar, COUNT(*) as count FROM use_cases WHERE domain_id = ? AND kanban_pillar IS NOT NULL GROUP BY kanban_pillar`
-      : `SELECT kanban_pillar, COUNT(*) as count FROM use_cases WHERE kanban_pillar IS NOT NULL GROUP BY kanban_pillar`;
+      ? `SELECT status, COUNT(*) as count FROM use_cases WHERE domain_id = ? AND status IS NOT NULL GROUP BY status`
+      : `SELECT status, COUNT(*) as count FROM use_cases WHERE status IS NOT NULL GROUP BY status`;
     const statusParams = domainId ? [domainId] : [];
     db.query(statusQuery, statusParams, (err, results) => {
       if (err) reject(err);
@@ -2187,17 +1689,15 @@ const buildIntelligentSystemPrompt = async (userName, domainId = null) => {
     ? outcomes.map(o => `- ${o.title}${o.measure ? ': ' + o.measure : ''}`).join('\n')
     : 'No outcomes defined yet';
 
-  const departmentsContext = departments.map(d => d.name).join(', ');
-
   const kanbanContext = kanbanStatuses.length > 0
-    ? kanbanStatuses.map(s => `${s.kanban_pillar}: ${s.count} initiatives`).join(', ')
-    : 'No kanban data available';
+    ? kanbanStatuses.map(s => `${s.status}: ${s.count} initiatives`).join(', ')
+    : 'No status data available';
 
   const roadmapContext = roadmapDates.length > 0
     ? roadmapDates.map(r => `${r.delivery_month}: ${r.count} initiatives`).join(', ')
     : 'No upcoming deliveries scheduled';
   
-  const baseInstructions = `You are Hekmah, an intelligent ${domainName} assistant at Department of Finance, Abu Dhabi. You're having a conversation with ${userName}.
+  const baseInstructions = `You are Samantha, a friendly ${domainName} assistant for your family. You're having a conversation with ${userName}.
 
 PERSONALITY: Be warm, conversational, and personable. Use ${userName}'s name occasionally but not excessively. Be professional yet friendly. Keep responses concise but informative.
 
@@ -2221,9 +1721,6 @@ ${pillarsWithGoalsContext}
 EXPECTED OUTCOMES:
 ${outcomesContext}
 
-DEPARTMENTS:
-Active departments: ${departmentsContext}
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📋 CURRENT STATE OVERVIEW
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2237,19 +1734,19 @@ ${roadmapContext}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ORGANIZATIONAL CONTEXT:
-Strategic goals are high-level organizational objectives aligned to these pillars. ${domainName} ${initiativePlural.charAt(0).toUpperCase() + initiativePlural.slice(1)} are specific projects aligned to one or more strategic goals. We prioritize ${initiativePlural} based on strategic alignment (40%), business impact (40%), and technical feasibility (20%). Development stages progress from concept → proof_of_concept → validation → pilot → production.
+Strategic goals are high-level objectives aligned to these pillars. ${domainName} ${initiativePlural.charAt(0).toUpperCase() + initiativePlural.slice(1)} are specific projects aligned to one or more strategic goals. We prioritize ${initiativePlural} based on strategic alignment, impact, and feasibility.
 
 YOUR CAPABILITIES:
-You can help ${userName} with questions about ${domainName} ${initiativePlural} at Department of Finance, including strategic pillars and goals, prioritization analysis, project status and progress, departmental activities, and technical implementation details.
+You can help ${userName} with questions about ${domainName} ${initiativePlural}, including strategic pillars and goals, prioritization analysis, project status and progress, and task details.
 
 DATA ACCESS:
-You have real-time functions to query use cases by department, status, strategic goal, pillar, or impact level. You can also get strategic goals by pillar, current statistics and counts, and detailed use case information.
+You have real-time functions to query use cases by status, strategic goal, pillar, or impact level. You can also get strategic goals by pillar, current statistics and counts, and detailed use case information.
 
 ANTI-HALLUCINATION RULES (CRITICAL):
 Never make up or guess information about use cases, departments, goals, or statistics. If you don't have specific data, always use the available functions to get current information. If a function call fails or returns no data, say "I don't have that specific information available right now." Never provide numbers, names, or details unless they come from function calls. When asked about specific use cases, departments, or statistics, always call the appropriate function first. Do not respond with example data or hypothetical scenarios - only real data from functions. If asked "how many" or "what are the" or "show me" you must call a function. When someone mentions any proper noun that could be a use case name, search for it before responding. Never assume you know what something is - always search the database first.
 
 BEHAVIORAL GUIDELINES:
-If asked about topics outside ${domainName} at DoF, politely decline: "I apologize ${userName}, but I can only help with questions about ${domainName} ${initiativePlural} at Department of Finance. What would you like to know about our ${domainName} strategy?" Use the available functions to get current, accurate data rather than making assumptions. Be conversational but avoid repeating "Department of Finance" multiple times in one response. Reference specific data when available rather than speaking generally. Use natural speech patterns and avoid being overly formal.
+If asked about topics outside ${domainName}, politely redirect: "I'm here to help with ${domainName} ${initiativePlural} and tasks. What would you like to know?" Use the available functions to get current, accurate data rather than making assumptions. Be conversational and reference specific data when available rather than speaking generally. Use natural speech patterns and avoid being overly formal.
 
 FORMATTING:
 Use markdown formatting to make responses clear and scannable:
@@ -2280,7 +1777,7 @@ const generateIntelligentResponse = async (userQuery, conversationHistory = [], 
     
     // Add conversation history (excluding welcome messages)
     conversationHistory.forEach(msg => {
-      if (!msg.text.includes('Welcome! I am Hekmah') && !msg.text.includes('Hello ' + userName)) {
+      if (!msg.text.includes('Welcome! I am Samantha') && !msg.text.includes('Hello ' + userName)) {
         messages.push({
           role: msg.isUser ? 'user' : 'assistant',
           content: msg.text

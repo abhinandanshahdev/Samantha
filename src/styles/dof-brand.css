@@ -61,9 +61,9 @@
   /* Gradient (Internal Digital Communications) */
   --dof-gradient: linear-gradient(135deg, var(--dof-sea-green) 0%, var(--dof-sunset-yellow) 100%);
   
-  /* Typography */
-  --font-primary: 'Helvetica LT Pro', 'Helvetica', 'Calibri', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  --font-secondary: 'Markazi Text', 'Georgia', serif;
+  /* Typography - Modern Plus Jakarta Sans font */
+  --font-primary: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  --font-secondary: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   
   /* Font Weights */
   --font-light: 300;

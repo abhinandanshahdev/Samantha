@@ -16,9 +16,9 @@ const AuthLoadingScreen: React.FC = () => {
         maxWidth: '400px'
       }}>
         {/* Logo */}
-        <img 
-          src="/assets/DoFLogo.png" 
-          alt="Department of Finance Abu Dhabi Logo" 
+        <img
+          src="/logo-samantha.svg"
+          alt="Samantha Logo"
           style={{
             width: '100px',
             height: 'auto',
@@ -35,7 +35,7 @@ const AuthLoadingScreen: React.FC = () => {
           margin: '0 0 10px 0',
           fontFamily: 'Montserrat, sans-serif'
         }}>
-          Hekmah
+          Samantha
         </h1>
         
         <p style={{

@@ -1,6 +1,6 @@
 {
-  "short_name": "Hekmah",
-  "name": "Hekmah - Department of Finance Abu Dhabi",
+  "short_name": "Voyagers",
+  "name": "Voyagers - AI for the family",
   "icons": [
     {
       "src": "favicon.ico",
@@ -20,6 +20,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#D4AF37",
+  "theme_color": "#6366F1",
   "background_color": "#F8F9FA"
 }

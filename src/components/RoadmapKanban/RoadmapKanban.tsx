@@ -13,8 +13,8 @@ import {
   Modifier,
 } from '@dnd-kit/core';
 import { motion } from 'framer-motion';
-import { UseCase, KanbanStatus, SearchFilters, Category, Agent, AgentFilters } from '../../types';
-import { useCaseAPI, categoryAPI, agentAPI } from '../../services/apiService';
+import { UseCase, KanbanStatus, SearchFilters, Category } from '../../types';
+import { useCaseAPI, categoryAPI } from '../../services/apiService';
 import { useActiveDomainId } from '../../context/DomainContext';
 import KanbanColumn from './KanbanColumn';
 import KanbanCard from './KanbanCard';
@@ -28,7 +28,7 @@ const ITEMS_PER_LOAD = 20;
 
 // Column state for grouped loading
 interface ColumnState {
-  items: (UseCase | Agent)[];
+  items: UseCase[];
   totalCount: number;
   hasMore: boolean;
   isLoading: boolean;
@@ -36,7 +36,6 @@ interface ColumnState {
 
 interface RoadmapKanbanProps {
   onUseCaseClick: (useCase: UseCase) => void;
-  onAgentClick?: (agent: Agent) => void;
   showAIChat?: boolean;
   onCloseChatClick?: () => void;
   user?: any;
@@ -44,24 +43,26 @@ interface RoadmapKanbanProps {
 }
 
 const KANBAN_COLUMNS: { id: KanbanStatus; title: string }[] = [
-  { id: 'backlog', title: 'Backlog' },
-  { id: 'prioritised', title: 'Prioritised' },
-  { id: 'in_progress', title: 'In Progress' },
-  { id: 'completed', title: 'Completed' },
+  { id: 'intention', title: 'Intention' },
+  { id: 'experimentation', title: 'Experimentation' },
+  { id: 'commitment', title: 'Commitment' },
+  { id: 'implementation', title: 'Implementation' },
+  { id: 'integration', title: 'Integration' },
   { id: 'blocked', title: 'Blocked' },
   { id: 'slow_burner', title: 'Slow Burner' },
   { id: 'de_prioritised', title: 'De-prioritised' },
   { id: 'on_hold', title: 'On Hold' },
 ];
 
-const FILTER_STORAGE_KEY = 'hekmah_filter_preferences';
+const FILTER_STORAGE_KEY = 'samantha_filter_preferences';
 
 // Initial column states - defined outside component to prevent recreation on each render
 const createInitialColumnStates = (): Record<KanbanStatus, ColumnState> => ({
-  backlog: { items: [], totalCount: 0, hasMore: false, isLoading: false },
-  prioritised: { items: [], totalCount: 0, hasMore: false, isLoading: false },
-  in_progress: { items: [], totalCount: 0, hasMore: false, isLoading: false },
-  completed: { items: [], totalCount: 0, hasMore: false, isLoading: false },
+  intention: { items: [], totalCount: 0, hasMore: false, isLoading: false },
+  experimentation: { items: [], totalCount: 0, hasMore: false, isLoading: false },
+  commitment: { items: [], totalCount: 0, hasMore: false, isLoading: false },
+  implementation: { items: [], totalCount: 0, hasMore: false, isLoading: false },
+  integration: { items: [], totalCount: 0, hasMore: false, isLoading: false },
   blocked: { items: [], totalCount: 0, hasMore: false, isLoading: false },
   slow_burner: { items: [], totalCount: 0, hasMore: false, isLoading: false },
   de_prioritised: { items: [], totalCount: 0, hasMore: false, isLoading: false },
@@ -70,7 +71,6 @@ const createInitialColumnStates = (): Record<KanbanStatus, ColumnState> => ({
 
 const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
   onUseCaseClick,
-  onAgentClick,
   showAIChat = false,
   onCloseChatClick,
   user,
@@ -91,7 +91,6 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
     return {};
   };
 
-  const [showAgents, setShowAgents] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [filters, setFilters] = useState<SearchFilters>(getInitialFilters);
@@ -106,7 +105,7 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
   const initialLoadRef = useRef<string | null>(null);
 
   // Keep a reference to all items for drag-drop and filtering purposes
-  const allItemsRef = useRef<Map<string, UseCase | Agent>>(new Map());
+  const allItemsRef = useRef<Map<string, UseCase>>(new Map());
 
   // Ref for the scrollable board container (for auto-scroll during drag)
   const boardRef = useRef<HTMLDivElement>(null);
@@ -244,9 +243,6 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
     offset: number = 0,
     append: boolean = false
   ) => {
-    const isAgentsMode = showAgents;
-    const agentFilters = filters as AgentFilters;
-
     // Mark column as loading
     setColumnStates(prev => ({
       ...prev,
@@ -254,33 +250,13 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
     }));
 
     try {
-      let items: (UseCase | Agent)[];
-
-      if (isAgentsMode) {
-        items = await agentAPI.getAll({
-          domain_id: activeDomainId || undefined,
-          limit: ITEMS_PER_LOAD,
-          offset,
-          tags: filters.tags,
-          data_sensitivity: filters.data_sensitivity,
-          departments: filters.departments,
-          statuses: filters.statuses,
-          strategic_impact: filters.strategic_impact,
-          kanban_pillar: columnId,
-          expected_delivery_year: filters.expected_delivery_year,
-          expected_delivery_month: filters.expected_delivery_month,
-          agent_types: filters.agent_types,
-          initiative_ids: agentFilters.initiative_ids,
-          search: filters.search
-        });
-      } else {
-        items = await useCaseAPI.getAll({
-          ...filtersWithDomain,
-          kanban_pillar: columnId,
-          limit: ITEMS_PER_LOAD,
-          offset
-        });
-      }
+      // Filter by status instead of kanban_pillar
+      const items = await useCaseAPI.getAll({
+        ...filtersWithDomain,
+        statuses: [columnId],
+        limit: ITEMS_PER_LOAD,
+        offset
+      });
 
       // Update items reference for drag-drop
       items.forEach(item => allItemsRef.current.set(item.id, item));
@@ -308,12 +284,12 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
       }));
       return [];
     }
-  }, [showAgents, filters, filtersWithDomain, activeDomainId]);
+  }, [filtersWithDomain]);
 
   // Load grouped stats and initial items for all columns
   useEffect(() => {
     const loadData = async () => {
-      const filterKey = JSON.stringify({ ...filtersWithDomain, showAgents });
+      const filterKey = JSON.stringify({ ...filtersWithDomain });
 
       // Skip if already loading the same filter combination
       if (initialLoadRef.current === filterKey) return;
@@ -323,27 +299,8 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
       allItemsRef.current.clear();
 
       try {
-        // First, get grouped counts
-        let groupedStats: { groups: Record<string, { count: number }>; total_count: number };
-
-        if (showAgents) {
-          const agentFilters = filters as AgentFilters;
-          groupedStats = await agentAPI.getGroupedStats('kanban_pillar', {
-            domain_id: activeDomainId || undefined,
-            tags: filters.tags,
-            data_sensitivity: filters.data_sensitivity,
-            departments: filters.departments,
-            statuses: filters.statuses,
-            strategic_impact: filters.strategic_impact,
-            expected_delivery_year: filters.expected_delivery_year,
-            expected_delivery_month: filters.expected_delivery_month,
-            agent_types: filters.agent_types,
-            initiative_ids: agentFilters.initiative_ids,
-            search: filters.search
-          });
-        } else {
-          groupedStats = await useCaseAPI.getGroupedStats('kanban_pillar', filtersWithDomain);
-        }
+        // First, get grouped counts using status as the group_by field
+        const groupedStats = await useCaseAPI.getGroupedStats('status', filtersWithDomain);
 
         setTotalCount(groupedStats.total_count);
 
@@ -364,34 +321,12 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
         const loadPromises = KANBAN_COLUMNS.map(async (col) => {
           const count = groupedStats.groups[col.id]?.count || 0;
           if (count > 0) {
-            const agentFilters = filters as AgentFilters;
-            let items: (UseCase | Agent)[];
-
-            if (showAgents) {
-              items = await agentAPI.getAll({
-                domain_id: activeDomainId || undefined,
-                limit: ITEMS_PER_LOAD,
-                offset: 0,
-                tags: filters.tags,
-                data_sensitivity: filters.data_sensitivity,
-                departments: filters.departments,
-                statuses: filters.statuses,
-                strategic_impact: filters.strategic_impact,
-                kanban_pillar: col.id,
-                expected_delivery_year: filters.expected_delivery_year,
-                expected_delivery_month: filters.expected_delivery_month,
-                agent_types: filters.agent_types,
-                initiative_ids: agentFilters.initiative_ids,
-                search: filters.search
-              });
-            } else {
-              items = await useCaseAPI.getAll({
-                ...filtersWithDomain,
-                kanban_pillar: col.id,
-                limit: ITEMS_PER_LOAD,
-                offset: 0
-              });
-            }
+            const items = await useCaseAPI.getAll({
+              ...filtersWithDomain,
+              statuses: [col.id],
+              limit: ITEMS_PER_LOAD,
+              offset: 0
+            });
 
             // Store items in reference map
             items.forEach(item => allItemsRef.current.set(item.id, item));
@@ -425,7 +360,7 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
     };
 
     loadData();
-  }, [filtersWithDomain, showAgents, filters, activeDomainId]);
+  }, [filtersWithDomain, filters, activeDomainId]);
 
   // Handler for loading more items in a column
   const handleLoadMore = useCallback(async (columnId: KanbanStatus) => {
@@ -447,26 +382,14 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
 
   // Get all loaded items as arrays for backwards compatibility
   const allUseCases = useMemo(() => {
-    if (showAgents) return [];
     const items: UseCase[] = [];
     KANBAN_COLUMNS.forEach(col => {
       columnStates[col.id].items.forEach(item => {
-        if ('category' in item) items.push(item as UseCase);
+        items.push(item);
       });
     });
     return items;
-  }, [columnStates, showAgents]);
-
-  const allAgents = useMemo(() => {
-    if (!showAgents) return [];
-    const items: Agent[] = [];
-    KANBAN_COLUMNS.forEach(col => {
-      columnStates[col.id].items.forEach(item => {
-        if ('agent_type' in item) items.push(item as Agent);
-      });
-    });
-    return items;
-  }, [columnStates, showAgents]);
+  }, [columnStates]);
 
   // Filter initiatives for the dropdown - now just returns loaded items
   // In a future phase, this could use server-side search
@@ -503,7 +426,7 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
     }
 
     const itemId = active.id as string;
-    const validStatuses: KanbanStatus[] = ['backlog', 'prioritised', 'in_progress', 'completed', 'blocked', 'slow_burner', 'de_prioritised', 'on_hold'];
+    const validStatuses: KanbanStatus[] = ['intention', 'experimentation', 'commitment', 'implementation', 'integration', 'blocked', 'slow_burner', 'de_prioritised', 'on_hold'];
 
     // Find item in column states or reference map
     const item = allItemsRef.current.get(itemId);
@@ -511,9 +434,6 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
       console.error('Item not found:', itemId);
       return;
     }
-
-    const isAgent = 'agent_type' in item;
-    const isUseCase = 'category' in item;
 
     let newStatus: KanbanStatus;
 
@@ -527,8 +447,8 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
       // Dropped on another card - find which column that card is in
       const targetCard = allItemsRef.current.get(overIdString);
 
-      if (targetCard && targetCard.kanban_pillar) {
-        newStatus = targetCard.kanban_pillar;
+      if (targetCard && targetCard.status) {
+        newStatus = targetCard.status;
       } else {
         console.error('Could not determine target column. Over ID:', overIdString);
         alert('Could not determine where to drop the card. Please try again.');
@@ -536,7 +456,7 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
       }
     }
 
-    const oldStatus = item.kanban_pillar || 'backlog';
+    const oldStatus = item.status || 'intention';
 
     // Don't update if status hasn't changed
     if (oldStatus === newStatus) {
@@ -548,7 +468,7 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
 
     // Optimistically update the UI by moving item between columns
     setColumnStates(prev => {
-      const updatedItem = { ...item, kanban_pillar: newStatus };
+      const updatedItem = { ...item, status: newStatus };
       allItemsRef.current.set(itemId, updatedItem);
 
       return {
@@ -568,11 +488,7 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
 
     // Update the backend
     try {
-      if (isAgent) {
-        await agentAPI.updateKanbanStatus(itemId, newStatus);
-      } else if (isUseCase) {
-        await useCaseAPI.updateKanbanStatus(itemId, newStatus);
-      }
+      await useCaseAPI.updateStatus(itemId, newStatus);
     } catch (error: any) {
       console.error('Failed to update kanban status:', error);
 
@@ -585,7 +501,7 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
 
       // Revert the optimistic update on error
       setColumnStates(prev => {
-        const revertedItem = { ...item, kanban_pillar: oldStatus };
+        const revertedItem = { ...item, status: oldStatus };
         allItemsRef.current.set(itemId, revertedItem);
 
         return {
@@ -612,14 +528,9 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
   // Find active item for drag overlay
   const activeItem = activeId ? allItemsRef.current.get(activeId) : null;
 
-  // Handler that processes both UseCase and Agent clicks
-  const handleCardClick = (item: UseCase | Agent) => {
-    // Check if it's a UseCase (has category) or Agent (has agent_type)
-    if ('category' in item) {
-      onUseCaseClick(item as UseCase);
-    } else if ('agent_type' in item && onAgentClick) {
-      onAgentClick(item as Agent);
-    }
+  // Handler that processes UseCase clicks
+  const handleCardClick = (item: UseCase) => {
+    onUseCaseClick(item);
   };
 
   if (isLoading) {
@@ -641,32 +552,17 @@ const RoadmapKanban: React.FC<RoadmapKanbanProps> = ({
               fontWeight: '600',
               color: '#374151'
             }}>
-              {showAgents
-                ? `${totalCount} agent${totalCount !== 1 ? 's' : ''} found`
-                : `${totalCount} initiative${totalCount !== 1 ? 's' : ''} found`
-              }
+              {`${totalCount} initiative${totalCount !== 1 ? 's' : ''} found`}
             </div>
-            <button
-              className={`toggle-view-btn ${showAgents ? 'active' : ''}`}
-              onClick={() => {
-                setShowAgents(!showAgents);
-                // Reset filter key to trigger reload with new mode
-                initialLoadRef.current = null;
-              }}
-            >
-              {showAgents ? 'Show Initiatives' : 'Show Agents'}
-            </button>
           </div>
           <FilterPanel
             categories={categories}
             filters={filters}
             onFiltersChange={handleFiltersChange}
             onClearFilters={handleClearFilters}
-            showAgentTypeFilter={showAgents}
-            hideKanbanStatus={showAgents}
+            hideKanbanStatus={true}
             hideDeliveryDateFilters={true}
             initiatives={filteredInitiativesForDropdown}
-            agents={allAgents}
           />
         </div>
 

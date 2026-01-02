@@ -22,7 +22,7 @@ const DomainManagement: React.FC<DomainManagementProps> = ({ onBack }) => {
     name: '',
     type: 'custom',
     hero_message: '',
-    subtitle: 'Strategic Initiatives @ DoF',
+    subtitle: 'Family Initiatives',
     is_active: true
   });
 
@@ -91,7 +91,7 @@ const DomainManagement: React.FC<DomainManagementProps> = ({ onBack }) => {
       name: '',
       type: 'custom',
       hero_message: '',
-      subtitle: 'Strategic Initiatives @ DoF',
+      subtitle: 'Family Initiatives',
       is_active: true
     });
     setError(null);
@@ -119,7 +119,7 @@ const DomainManagement: React.FC<DomainManagementProps> = ({ onBack }) => {
       name: '',
       type: 'custom',
       hero_message: '',
-      subtitle: 'Strategic Initiatives @ DoF',
+      subtitle: 'Family Initiatives',
       is_active: true
     });
     setError(null);

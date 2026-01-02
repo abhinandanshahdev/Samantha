@@ -94,15 +94,23 @@ const RelatedInitiatives: React.FC<RelatedInitiativesProps> = ({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'concept':
+      case 'intention':
         return '#77787B';
-      case 'proof_of_concept':
+      case 'experimentation':
+        return '#9B59B6';
+      case 'commitment':
         return '#C68D6D';
-      case 'validation':
-        return '#F6BD60';
-      case 'pilot':
+      case 'implementation':
+        return '#4A90E2';
+      case 'integration':
         return '#00A79D';
-      case 'production':
+      case 'blocked':
+        return '#E74C3C';
+      case 'slow_burner':
+        return '#F6BD60';
+      case 'de_prioritised':
+        return '#9e9e9e';
+      case 'on_hold':
         return '#B79546';
       default:
         return '#77787B';
@@ -111,16 +119,24 @@ const RelatedInitiatives: React.FC<RelatedInitiativesProps> = ({
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'concept':
-        return 'Concept';
-      case 'proof_of_concept':
-        return 'Proof of Concept';
-      case 'validation':
-        return 'Validation';
-      case 'pilot':
-        return 'Pilot';
-      case 'production':
-        return 'Production';
+      case 'intention':
+        return 'Intention';
+      case 'experimentation':
+        return 'Experimentation';
+      case 'commitment':
+        return 'Commitment';
+      case 'implementation':
+        return 'Implementation';
+      case 'integration':
+        return 'Integration';
+      case 'blocked':
+        return 'Blocked';
+      case 'slow_burner':
+        return 'Slow Burner';
+      case 'de_prioritised':
+        return 'De-prioritised';
+      case 'on_hold':
+        return 'On Hold';
       default:
         return status;
     }
@@ -278,8 +294,6 @@ const RelatedInitiatives: React.FC<RelatedInitiativesProps> = ({
 
                 <div className="related-card-meta">
                   <span className="related-card-category">{association.category}</span>
-                  <span className="related-card-separator">•</span>
-                  <span className="related-card-department">{association.department}</span>
                 </div>
               </div>
 

@@ -123,7 +123,7 @@ const StrategicGoalsDashboard: React.FC<StrategicGoalsDashboardProps> = ({
         <div className="page-header">
           <button className="back-button" onClick={onBackToDashboard}>
             <FaArrowLeft />
-            Back to Dashboard
+            Back to Family Goals
           </button>
         </div>
 

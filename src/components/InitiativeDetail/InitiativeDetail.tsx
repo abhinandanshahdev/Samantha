@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { UseCase, UseCaseGoalAlignment, User, UseCaseAssociation, Agent } from '../../types';
-import { useCaseAPI, associationsAPI, agentAssociationsAPI, agentAPI } from '../../services/apiService';
+import { UseCase, UseCaseGoalAlignment, User, UseCaseAssociation, Task } from '../../types';
+import { useCaseAPI, associationsAPI, taskAssociationsAPI, taskAPI } from '../../services/apiService';
 import { motion } from 'framer-motion';
 import CommentThread from '../CommentThread/CommentThread';
 import './InitiativeDetail.css';
@@ -16,7 +16,7 @@ interface InitiativeDetailProps {
   canEdit: boolean;
   user?: User;
   onUseCaseClick?: (useCase: UseCase) => void;
-  onAgentClick?: (agent: Agent) => void;
+  onTaskClick?: (task: Task) => void;
   previousView?: ViewType;
 }
 
@@ -28,15 +28,15 @@ const InitiativeDetail: React.FC<InitiativeDetailProps> = ({
   canEdit,
   user,
   onUseCaseClick,
-  onAgentClick,
+  onTaskClick,
   previousView
 }) => {
   const [strategicGoalAlignments, setStrategicGoalAlignments] = useState<UseCaseGoalAlignment[]>([]);
   const [loadingAlignments, setLoadingAlignments] = useState(true);
   const [relatedUseCases, setRelatedUseCases] = useState<UseCaseAssociation[]>([]);
   const [loadingRelated, setLoadingRelated] = useState(true);
-  const [relatedAgents, setRelatedAgents] = useState<any[]>([]);
-  const [loadingAgents, setLoadingAgents] = useState(true);
+  const [relatedTasks, setRelatedTasks] = useState<any[]>([]);
+  const [loadingTasks, setLoadingTasks] = useState(true);
 
   // Use the user prop passed from parent (App.tsx)
   const currentUserId = user?.id || '';
@@ -83,24 +83,24 @@ const InitiativeDetail: React.FC<InitiativeDetailProps> = ({
     loadRelatedUseCases();
   }, [useCase.id]);
 
-  // Load related agents
+  // Load related tasks
   useEffect(() => {
-    const loadRelatedAgents = async () => {
+    const loadRelatedTasks = async () => {
       if (useCase.id) {
         try {
-          setLoadingAgents(true);
-          const agents = await agentAssociationsAPI.getAgentsForInitiative(useCase.id);
-          setRelatedAgents(agents);
+          setLoadingTasks(true);
+          const tasks = await taskAssociationsAPI.getTasksForInitiative(useCase.id);
+          setRelatedTasks(tasks);
         } catch (error) {
-          console.error('Failed to load related agents:', error);
-          setRelatedAgents([]);
+          console.error('Failed to load related tasks:', error);
+          setRelatedTasks([]);
         } finally {
-          setLoadingAgents(false);
+          setLoadingTasks(false);
         }
       }
     };
 
-    loadRelatedAgents();
+    loadRelatedTasks();
   }, [useCase.id]);
 
   const formatDate = (dateString: string) => {
@@ -114,35 +114,50 @@ const InitiativeDetail: React.FC<InitiativeDetailProps> = ({
   };
 
   const getStatusColor = (status: string) => {
-    // Using DoF Secondary Colors (Sea Green, Earthy Brown, Sunset Yellow) + Primary Colors
     switch (status) {
-      case 'concept':
-        return '#77787B'; // Metal Grey (Primary) - Neutral starting point
-      case 'proof_of_concept':
-        return '#C68D6D'; // Earthy Brown (Secondary) - Stability/Testing
-      case 'validation':
-        return '#F6BD60'; // Sunset Yellow (Secondary) - Dependability/Progress
-      case 'pilot':
-        return '#00A79D'; // Sea Green (Secondary) - Renewal/Active development
-      case 'production':
-        return '#B79546'; // Gold (Primary) - Wealth/Quality/Achievement
+      case 'intention':
+        return '#77787B'; // Metal Grey
+      case 'experimentation':
+        return '#9B59B6'; // Purple
+      case 'commitment':
+        return '#C68D6D'; // Earthy Brown
+      case 'implementation':
+        return '#4A90E2'; // Blue
+      case 'integration':
+        return '#00A79D'; // Sea Green
+      case 'blocked':
+        return '#E74C3C'; // Red
+      case 'slow_burner':
+        return '#F6BD60'; // Sunset Yellow
+      case 'de_prioritised':
+        return '#9e9e9e'; // Grey
+      case 'on_hold':
+        return '#B79546'; // Gold
       default:
-        return '#77787B'; // Metal Grey (Primary)
+        return '#77787B'; // Metal Grey
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'concept':
-        return 'Concept';
-      case 'proof_of_concept':
-        return 'Proof of Concept';
-      case 'validation':
-        return 'Validation';
-      case 'pilot':
-        return 'Pilot';
-      case 'production':
-        return 'Production';
+      case 'intention':
+        return 'Intention';
+      case 'experimentation':
+        return 'Experimentation';
+      case 'commitment':
+        return 'Commitment';
+      case 'implementation':
+        return 'Implementation';
+      case 'integration':
+        return 'Integration';
+      case 'blocked':
+        return 'Blocked';
+      case 'slow_burner':
+        return 'Slow Burner';
+      case 'de_prioritised':
+        return 'De-prioritised';
+      case 'on_hold':
+        return 'On Hold';
       default:
         return status;
     }
@@ -150,22 +165,24 @@ const InitiativeDetail: React.FC<InitiativeDetailProps> = ({
 
   const getKanbanStatusColor = (status: string) => {
     switch (status) {
-      case 'backlog':
+      case 'intention':
         return '#77787B'; // Metal Grey
-      case 'prioritised':
-        return '#F6BD60'; // Sunset Yellow
-      case 'in_progress':
-        return '#00A79D'; // Sea Green
-      case 'completed':
-        return '#B79546'; // Gold
-      case 'blocked':
-        return '#dc3545'; // Red
-      case 'slow_burner':
+      case 'experimentation':
+        return '#9B59B6'; // Purple
+      case 'commitment':
         return '#C68D6D'; // Earthy Brown
+      case 'implementation':
+        return '#4A90E2'; // Blue
+      case 'integration':
+        return '#00A79D'; // Sea Green
+      case 'blocked':
+        return '#E74C3C'; // Red
+      case 'slow_burner':
+        return '#F6BD60'; // Sunset Yellow
       case 'de_prioritised':
-        return '#6c757d'; // Grey
+        return '#9e9e9e'; // Grey
       case 'on_hold':
-        return '#ffc107'; // Amber
+        return '#B79546'; // Gold
       default:
         return '#77787B';
     }
@@ -173,14 +190,16 @@ const InitiativeDetail: React.FC<InitiativeDetailProps> = ({
 
   const getKanbanStatusLabel = (status: string) => {
     switch (status) {
-      case 'backlog':
-        return 'Backlog';
-      case 'prioritised':
-        return 'Prioritised';
-      case 'in_progress':
-        return 'In Progress';
-      case 'completed':
-        return 'Completed';
+      case 'intention':
+        return 'Intention';
+      case 'experimentation':
+        return 'Experimentation';
+      case 'commitment':
+        return 'Commitment';
+      case 'implementation':
+        return 'Implementation';
+      case 'integration':
+        return 'Integration';
       case 'blocked':
         return 'Blocked';
       case 'slow_burner':
@@ -267,10 +286,6 @@ const InitiativeDetail: React.FC<InitiativeDetailProps> = ({
               <span className="meta-label">Category:</span>
               <span className="meta-value">{useCase.category}</span>
             </div>
-            <div className="meta-item">
-              <span className="meta-label">Department:</span>
-              <span className="meta-value">{useCase.department}</span>
-            </div>
             {(useCase.owner_name || useCase.owner_email) && (
               <div className="meta-item">
                 <span className="meta-label">Initiative Owner:</span>
@@ -305,18 +320,18 @@ const InitiativeDetail: React.FC<InitiativeDetailProps> = ({
           </div>
 
           {/* Delivery Information Section */}
-          {(useCase.kanban_pillar || useCase.expected_delivery_date) && (
+          {(useCase.status || useCase.expected_delivery_date) && (
             <div className="detail-section delivery-info-section">
               <h2>Delivery Information</h2>
               <div className="delivery-info-grid">
-                {useCase.kanban_pillar && (
+                {useCase.status && (
                   <div className="delivery-info-item">
                     <span className="meta-label">Delivery Status:</span>
                     <span
                       className="kanban-status-badge"
-                      style={{ backgroundColor: getKanbanStatusColor(useCase.kanban_pillar) }}
+                      style={{ backgroundColor: getKanbanStatusColor(useCase.status) }}
                     >
-                      {getKanbanStatusLabel(useCase.kanban_pillar)}
+                      {getKanbanStatusLabel(useCase.status)}
                     </span>
                   </div>
                 )}
@@ -424,8 +439,7 @@ const InitiativeDetail: React.FC<InitiativeDetailProps> = ({
                           title: association.title,
                           description: association.description,
                           status: association.status as any,
-                          category: association.category,
-                          department: association.department
+                          category: association.category
                         } as UseCase;
                         onUseCaseClick(relatedUseCase);
                       }
@@ -438,7 +452,6 @@ const InitiativeDetail: React.FC<InitiativeDetailProps> = ({
                     />
                     <div className="related-list-title">{association.title}</div>
                     <div className="related-list-badge related-list-badge--category">{association.category}</div>
-                    <div className="related-list-badge related-list-badge--dept">{association.department}</div>
                   </motion.div>
                 ))}
               </div>
@@ -447,67 +460,48 @@ const InitiativeDetail: React.FC<InitiativeDetailProps> = ({
             )}
           </div>
 
-          {/* Related Agents Section */}
+          {/* Related Tasks Section */}
           <div className="detail-section">
-            <h2>Related Agents</h2>
-            {loadingAgents ? (
-              <div className="loading-message">Loading related agents...</div>
-            ) : relatedAgents.length > 0 ? (
+            <h2>Related Tasks</h2>
+            {loadingTasks ? (
+              <div className="loading-message">Loading related tasks...</div>
+            ) : relatedTasks.length > 0 ? (
               <div className="related-list-table">
-                {relatedAgents.map((agent, idx) => (
+                {relatedTasks.map((task, idx) => (
                   <motion.div
-                    key={agent.agent_id}
-                    className="related-list-row related-list-row--agent"
+                    key={task.task_id}
+                    className="related-list-row related-list-row--task"
                     initial={{ y: 8, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.03 * idx, duration: 0.2 }}
                     onClick={async () => {
-                      if (onAgentClick) {
+                      if (onTaskClick) {
                         try {
-                          const fullAgent = await agentAPI.getById(agent.agent_id);
-                          onAgentClick(fullAgent);
+                          const fullTask = await taskAPI.getById(task.task_id);
+                          onTaskClick(fullTask);
                         } catch (error) {
-                          console.error('Failed to load agent:', error);
+                          console.error('Failed to load task:', error);
                         }
                       }
                     }}
-                    style={{ cursor: onAgentClick ? 'pointer' : 'default' }}
+                    style={{ cursor: onTaskClick ? 'pointer' : 'default' }}
                   >
                     <div
                       className="related-list-status"
-                      style={{ backgroundColor: agent.status ? getStatusColor(agent.status) : '#77787B' }}
-                      title={agent.status ? getStatusLabel(agent.status) : 'Unknown'}
+                      style={{ backgroundColor: task.status ? getKanbanStatusColor(task.status) : '#77787B' }}
+                      title={task.status ? getKanbanStatusLabel(task.status) : 'Unknown'}
                     />
-                    <div className="related-list-title">{agent.title}</div>
-                    <div className="related-list-badge related-list-badge--type">{agent.agent_type}</div>
-                    <div className="related-list-badge related-list-badge--dept">{agent.department}</div>
+                    <div className="related-list-title">{task.title}</div>
+                    {task.effort_level && (
+                      <div className="related-list-badge related-list-badge--effort">{task.effort_level} effort</div>
+                    )}
                   </motion.div>
                 ))}
               </div>
             ) : (
-              <div className="no-alignments">No related agents found.</div>
+              <div className="no-alignments">No related tasks found.</div>
             )}
           </div>
-
-          {useCase.complexity && (
-            <div className="detail-section">
-              <h2>Complexity Analysis</h2>
-              <div className="complexity-grid">
-                <div className="complexity-item">
-                  <strong>Data Complexity:</strong> {useCase.complexity.data_complexity}
-                </div>
-                <div className="complexity-item">
-                  <strong>Integration Complexity:</strong> {useCase.complexity.integration_complexity}
-                </div>
-                <div className="complexity-item">
-                  <strong>Intelligence Complexity:</strong> {useCase.complexity.intelligence_complexity}
-                </div>
-                <div className="complexity-item">
-                  <strong>Functional Complexity:</strong> {useCase.complexity.functional_complexity}
-                </div>
-              </div>
-            </div>
-          )}
 
           {(useCase.tags && useCase.tags.length > 0) || (useCase.attachments && useCase.attachments.length > 0) ? (
             <div className="detail-section">

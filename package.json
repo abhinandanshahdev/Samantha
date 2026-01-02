@@ -1,6 +1,6 @@
 {
-  "name": "hekmah",
-  "version": "0.2.0",
+  "name": "samantha",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "@ant/html2pptx": "file:public/assets/html2pptx.tgz",
@@ -33,7 +33,6 @@
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.4",
     "lucide-react": "^0.548.0",
-    "mssql": "^11.0.1",
     "node-fetch": "^3.3.2",
     "novo-elements": "^10.16.0",
     "openai": "^5.8.2",
@@ -53,8 +52,6 @@
     "remark-gfm": "^4.0.1",
     "satori": "^0.18.3",
     "sharp": "^0.34.5",
-    "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7",
     "three": "^0.178.0",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4",
@@ -68,6 +65,7 @@
     "@types/jsonwebtoken": "^9.0.5",
     "@types/mysql2": "github:types/mysql2",
     "@types/react-window-infinite-loader": "^1.0.9",
+    "autoprefixer": "^10.4.23",
     "bcryptjs": "^2.4.3",
     "concurrently": "^8.2.2",
     "cors": "^2.8.5",
@@ -80,9 +78,10 @@
     "multer": "^1.4.5-lts.1",
     "mysql2": "^3.6.5",
     "nodemon": "^3.0.2",
-    "postcss": "^8.5.6"
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17"
   },
-  "proxy": "http://localhost:3001",
+  "proxy": "http://localhost:3003",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

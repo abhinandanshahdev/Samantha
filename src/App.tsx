@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { UseCase, StrategicGoal, SearchFilters, Agent, AgentFilters } from './types';
-import { useCaseAPI, strategicGoalsAPI, associationsAPI, agentAPI, userPreferencesAPI } from './services/apiService';
+import { UseCase, StrategicGoal, SearchFilters, Task, TaskFilters } from './types';
+import { useCaseAPI, strategicGoalsAPI, associationsAPI, taskAPI, userPreferencesAPI } from './services/apiService';
 import { useAuth } from './context/AuthContext';
 import { useMsalAuth } from './context/DynamicMsalAuthContext';
 import { useHistoryNavigation, ViewType } from './hooks/useHistoryNavigation';
 import InitiativesList from './components/InitiativesList/InitiativesList';
-import AgentsList from './components/AgentsList/AgentsList';
+import TasksList from './components/TasksList/TasksList';
 import ValueFlowDashboard from './components/ValueFlowDashboard/ValueFlowDashboard';
 import StrategyView from './components/StrategyView/StrategyView';
 import ModernNavigation from './components/ModernNavigation/ModernNavigation';
@@ -13,9 +13,9 @@ import RoadmapKanban from './components/RoadmapKanban/RoadmapKanban';
 import RoadmapTimeline from './components/RoadmapTimeline/RoadmapTimeline';
 import AuditLog from './components/AuditLog/AuditLog';
 import InitiativeDetail from './components/InitiativeDetail/InitiativeDetail';
-import AgentDetail from './components/AgentDetail/AgentDetail';
+import TaskDetail from './components/TaskDetail/TaskDetail';
 import InitiativeForm from './components/InitiativeForm/InitiativeForm';
-import AgentForm from './components/AgentForm/AgentForm';
+import TaskForm from './components/TaskForm/TaskForm';
 import StrategicGoalFormSimple from './components/StrategicGoalFormSimple/StrategicGoalFormSimple';
 import AuthSwitch from './components/Auth/AuthSwitch';
 import AuthLoadingScreen from './components/Loading/AuthLoadingScreen';
@@ -25,8 +25,7 @@ import ReferenceDataManagement from './components/ReferenceDataManagement/Refere
 import DomainManagement from './components/DomainManagement/DomainManagement';
 import Header from './components/Header/Header';
 import { ArtifactsBrowser } from './components/ArtifactsBrowser/ArtifactsBrowser';
-import VarianceReport from './components/VarianceReport/VarianceReport';
-import { FaTimes, FaUserCog, FaCog, FaSignOutAlt, FaDatabase, FaGlobe, FaClipboardList, FaFileDownload, FaMoon, FaChartPie, FaChartLine } from 'react-icons/fa';
+import { FaTimes, FaUserCog, FaCog, FaSignOutAlt, FaDatabase, FaGlobe, FaClipboardList, FaFileDownload, FaMoon, FaChartPie } from 'react-icons/fa';
 import './App.css';
 import './styles/brand-colors.css';
 
@@ -34,13 +33,13 @@ interface AppState {
   currentView: ViewType;
   previousView?: ViewType;
   selectedUseCase: UseCase | null;
-  selectedAgent: Agent | null;
+  selectedTask: Task | null;
   selectedStrategicGoal: StrategicGoal | null;
   useCases: UseCase[];
   strategicGoals: StrategicGoal[];
   searchQuery?: string;
-  initialFilters?: SearchFilters | AgentFilters;
-  currentFilters?: SearchFilters | AgentFilters;
+  initialFilters?: SearchFilters | TaskFilters;
+  currentFilters?: SearchFilters | TaskFilters;
 }
 
 function App() {
@@ -74,7 +73,7 @@ function App() {
   const [appState, setAppState] = useState<AppState>({
     currentView: getInitialView(),
     selectedUseCase: null,
-    selectedAgent: null,
+    selectedTask: null,
     selectedStrategicGoal: null,
     useCases: [],
     strategicGoals: [],
@@ -85,7 +84,6 @@ function App() {
   const [presentation, setPresentation] = useState(false);
   const [showAIChat, setShowAIChat] = useState(false);
   const [showArtifactsBrowser, setShowArtifactsBrowser] = useState(false);
-  const [showVarianceReport, setShowVarianceReport] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [goalDisplayMode, setGoalDisplayMode] = useState<'completion' | 'initiatives'>('initiatives');
 
@@ -295,12 +293,12 @@ function App() {
     }
   };
 
-  const handleAgentClick = (agent: Agent) => {
+  const handleTaskClick = (task: Task) => {
     setAppState(prev => ({
       ...prev,
       previousView: prev.currentView,
-      currentView: 'agent_detail',
-      selectedAgent: agent
+      currentView: 'task_detail',
+      selectedTask: task
     }));
   };
 
@@ -318,22 +316,22 @@ function App() {
     }
   };
 
-  const handleCreateAgentClick = () => {
+  const handleCreateTaskClick = () => {
     if (isAdmin) {
       setAppState(prev => ({
         ...prev,
-        currentView: 'agent_create',
-        selectedAgent: null
+        currentView: 'task_create',
+        selectedTask: null
       }));
     }
   };
 
-  const handleEditAgentClick = (agent: Agent) => {
+  const handleEditTaskClick = (task: Task) => {
     if (isAdmin) {
       setAppState(prev => ({
         ...prev,
-        currentView: 'agent_edit',
-        selectedAgent: agent
+        currentView: 'task_edit',
+        selectedTask: task
       }));
     }
   };
@@ -452,8 +450,8 @@ function App() {
         previousView: undefined,
         // Only clear selectedUseCase if not going back to a detail view
         selectedUseCase: targetView === 'detail' ? prev.selectedUseCase : null,
-        // Only clear selectedAgent if not going back to agent_detail view
-        selectedAgent: targetView === 'agent_detail' ? prev.selectedAgent : null,
+        // Only clear selectedTask if not going back to task_detail view
+        selectedTask: targetView === 'task_detail' ? prev.selectedTask : null,
         selectedStrategicGoal: null
       };
     });
@@ -626,42 +624,42 @@ function App() {
     }
   };
 
-  const handleSaveAgent = async (agent: Agent) => {
+  const handleSaveTask = async (task: Task) => {
     try {
-      if (appState.currentView === 'agent_create') {
+      if (appState.currentView === 'task_create') {
         setAppState(prev => ({
           ...prev,
-          currentView: 'agents'
+          currentView: 'tasks'
         }));
-      } else if (appState.currentView === 'agent_edit') {
+      } else if (appState.currentView === 'task_edit') {
         setAppState(prev => ({
           ...prev,
-          currentView: 'agents'
+          currentView: 'tasks'
         }));
       }
     } catch (error) {
-      console.error('Failed to save agent:', error);
+      console.error('Failed to save task:', error);
       throw error;
     }
   };
 
-  const handleDeleteAgent = async (agent: Agent) => {
-    if (window.confirm('Are you sure you want to delete this agent?')) {
+  const handleDeleteTask = async (task: Task) => {
+    if (window.confirm('Are you sure you want to delete this task?')) {
       try {
-        await agentAPI.delete(agent.id);
+        await taskAPI.delete(task.id);
         setAppState(prev => ({
           ...prev,
-          currentView: 'agents',
-          selectedAgent: null
+          currentView: 'tasks',
+          selectedTask: null
         }));
       } catch (error: any) {
-        console.error('Failed to delete agent:', error);
-        let errorMessage = 'Failed to delete agent. Please try again.';
+        console.error('Failed to delete task:', error);
+        let errorMessage = 'Failed to delete task. Please try again.';
 
         if (error.response?.status === 401) {
           errorMessage = 'Your session has expired. Please log in again.';
         } else if (error.response?.status === 403) {
-          errorMessage = 'You do not have permission to delete this agent.';
+          errorMessage = 'You do not have permission to delete this task.';
         } else if (error.response?.data?.error) {
           errorMessage = error.response.data.error;
         }
@@ -678,7 +676,7 @@ function App() {
     }));
   };
 
-  const handleFiltersChange = (filters: SearchFilters | AgentFilters) => {
+  const handleFiltersChange = (filters: SearchFilters | TaskFilters) => {
     setAppState(prev => ({
       ...prev,
       currentFilters: filters
@@ -783,7 +781,7 @@ function App() {
             canEdit={isAdmin}
             user={user || undefined}
             onUseCaseClick={handleUseCaseClick}
-            onAgentClick={handleAgentClick}
+            onTaskClick={handleTaskClick}
             previousView={appState.previousView}
           />
         ) : null;
@@ -804,7 +802,7 @@ function App() {
             isEditing={true}
           />
         ) : null;
-      case 'agents':
+      case 'tasks':
         return (
           <>
             <Header
@@ -820,49 +818,49 @@ function App() {
               onNavigate={handleTopNavigation}
               userRole={user?.role}
             />
-            <AgentsList
-              onAgentClick={handleAgentClick}
+            <TasksList
+              onTaskClick={handleTaskClick}
               onUseCaseClick={handleUseCaseClick}
-              onCreateClick={handleCreateAgentClick}
+              onCreateClick={handleCreateTaskClick}
               onSearch={handleSearch}
               onUserMenuClick={handleUserMenuClick}
               searchQuery={appState.searchQuery}
               user={user || undefined}
               showAIChat={showAIChat}
               onCloseChatClick={() => setShowAIChat(false)}
-              initialFilters={appState.initialFilters as AgentFilters}
+              initialFilters={appState.initialFilters as TaskFilters}
               onFiltersChange={handleFiltersChange}
             />
           </>
         );
-      case 'agent_detail':
-        return appState.selectedAgent ? (
-          <AgentDetail
-            agent={appState.selectedAgent}
+      case 'task_detail':
+        return appState.selectedTask ? (
+          <TaskDetail
+            task={appState.selectedTask}
             onBack={handleBackToDashboard}
-            onEdit={handleEditAgentClick}
-            onDelete={handleDeleteAgent}
+            onEdit={handleEditTaskClick}
+            onDelete={handleDeleteTask}
             canEdit={isAdmin}
             user={user || undefined}
             previousView={appState.previousView}
-            onAgentClick={handleAgentClick}
+            onTaskClick={handleTaskClick}
             onInitiativeClick={handleUseCaseClickById}
           />
         ) : null;
-      case 'agent_create':
+      case 'task_create':
         return (
-          <AgentForm
-            onSave={handleSaveAgent}
+          <TaskForm
+            onSave={handleSaveTask}
             onCancel={handleBackToDashboard}
             isEdit={false}
             user={user}
           />
         );
-      case 'agent_edit':
-        return appState.selectedAgent ? (
-          <AgentForm
-            agent={appState.selectedAgent}
-            onSave={handleSaveAgent}
+      case 'task_edit':
+        return appState.selectedTask ? (
+          <TaskForm
+            task={appState.selectedTask}
+            onSave={handleSaveTask}
             onCancel={handleBackToDashboard}
             isEdit={true}
             user={user}
@@ -1019,7 +1017,7 @@ function App() {
   return (
     <div className="App">
       {/* Main Content Container */}
-      <div 
+      <div
         className={`main-content ${showUserMenu ? 'menu-open' : ''}`}
         style={{
           transform: showUserMenu ? 'translateX(-300px)' : 'translateX(0)',
@@ -1124,6 +1122,32 @@ function App() {
           >
             <FaUserCog style={{ fontSize: '16px', color: darkMode ? '#8E8AA6' : '#6c757d' }} />
             Profile Settings
+          </button>
+
+          <button
+            onClick={() => {
+              setShowUserMenu(false);
+              handleTopNavigation('strategic_goals');
+            }}
+            style={{
+              width: '100%',
+              padding: '16px 20px',
+              border: 'none',
+              background: 'none',
+              cursor: 'pointer',
+              textAlign: 'left',
+              fontSize: '14px',
+              color: darkMode ? '#EDECF3' : '#333',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = darkMode ? '#252034' : '#f8f9fa'}
+            onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
+          >
+            <FaCog style={{ fontSize: '16px', color: darkMode ? '#8E8AA6' : '#6c757d' }} />
+            Manage Goals
           </button>
 
           {/* Hide Animation Toggle */}
@@ -1274,32 +1298,7 @@ function App() {
             <FaClipboardList style={{ fontSize: '16px', color: darkMode ? '#8E8AA6' : '#6c757d' }} />
             Audit Log
           </button>
-          <button
-            onClick={() => {
-              setShowUserMenu(false);
-              setShowVarianceReport(true);
-            }}
-            style={{
-              width: '100%',
-              padding: '16px 20px',
-              border: 'none',
-              background: 'none',
-              cursor: 'pointer',
-              textAlign: 'left',
-              fontSize: '14px',
-              color: darkMode ? '#EDECF3' : '#333',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              transition: 'background-color 0.2s'
-            }}
-            onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = darkMode ? '#252034' : '#f8f9fa'}
-            onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
-          >
-            <FaChartLine style={{ fontSize: '16px', color: darkMode ? '#8E8AA6' : '#6c757d' }} />
-            Portfolio Analytics
-          </button>
-          <button
+                    <button
             onClick={() => {
               setShowUserMenu(false);
               setShowArtifactsBrowser(true);
@@ -1433,7 +1432,7 @@ function App() {
               borderRadius: '12px',
               display: 'inline-block'
             }}>
-              Hekmah v1.90
+              Voyagers v1.0
             </div>
           </div>
         </div>
@@ -1454,13 +1453,6 @@ function App() {
             transition: 'all 0.3s ease',
             opacity: showUserMenu ? 1 : 0
           }}
-        />
-      )}
-
-      {/* Portfolio Analytics Modal */}
-      {showVarianceReport && (
-        <VarianceReport
-          onClose={() => setShowVarianceReport(false)}
         />
       )}
 

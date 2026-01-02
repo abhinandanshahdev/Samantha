@@ -120,11 +120,11 @@ const WRITE_TOOLS_REQUIRING_CONFIRMATION = [
   'align_initiative_to_goals',
   'add_initiative_comment',
   'link_related_initiatives',
-  'create_agent',
-  'update_agent',
-  'batch_update_agent_field',
-  'link_agent_to_initiatives',
-  'add_agent_comment'
+  'create_task',
+  'update_task',
+  'batch_update_task_field',
+  'link_task_to_initiatives',
+  'add_task_comment'
 ];
 
 /**
@@ -147,10 +147,10 @@ const ADMIN_ONLY_WRITE_TOOLS = [
   'add_initiative_tags',
   'align_initiative_to_goals',
   'link_related_initiatives',
-  'create_agent',
-  'update_agent',
-  'batch_update_agent_field',
-  'link_agent_to_initiatives'
+  'create_task',
+  'update_task',
+  'batch_update_task_field',
+  'link_task_to_initiatives'
 ];
 
 /**
@@ -214,22 +214,20 @@ const hasUserConfirmation = (userQuery) => {
  */
 const TOOL_STATUS_MESSAGES = {
   // Data retrieval tools
-  get_use_cases_by_criteria: (args) => `Searching use cases${args.department ? ` for ${args.department}` : ''}...`,
-  get_agents_by_criteria: (args) => `Searching agents${args.department ? ` for ${args.department}` : ''}...`,
+  get_use_cases_by_criteria: (args) => `Searching initiatives${args.status ? ` (${args.status})` : ''}...`,
+  get_tasks_by_criteria: (args) => `Searching tasks${args.status ? ` (${args.status})` : ''}...`,
   search_use_cases: (args) => `Searching for "${args.search_term || args.query || 'items'}"...`,
-  search_agents: (args) => `Searching agents for "${args.search_term || args.query || 'items'}"...`,
+  search_tasks: (args) => `Searching tasks for "${args.search_term || args.query || 'items'}"...`,
   get_strategic_goals_by_pillar: () => 'Loading strategic goals...',
   get_strategic_pillars: () => 'Loading strategic pillars...',
-  get_use_cases_by_goal: () => 'Loading related use cases...',
+  get_use_cases_by_goal: () => 'Loading related initiatives...',
   get_use_case_statistics: () => 'Loading statistics...',
-  get_agent_statistics: () => 'Loading agent statistics...',
-  get_use_case_details: () => 'Loading use case details...',
-  get_agent_details: () => 'Loading agent details...',
-  get_agents_by_initiative: () => 'Loading agents by initiative...',
-  get_use_cases_by_tag: () => 'Loading use cases by tag...',
+  get_task_statistics: () => 'Loading task statistics...',
+  get_use_case_details: () => 'Loading initiative details...',
+  get_task_details: () => 'Loading task details...',
+  get_tasks_by_initiative: () => 'Loading tasks by initiative...',
+  get_use_cases_by_tag: () => 'Loading initiatives by tag...',
   get_domain_metadata: () => 'Loading domain information...',
-  get_executive_brief: () => 'Preparing executive summary...',
-  get_variance_report: (args) => `Analyzing ${args.days || 7}-day variance${args.breakdown ? ` by ${args.breakdown}` : ''}...`,
 
   // Workspace tools (shared by presentation, dashboard, etc.)
   workspace_init: () => null, // Hidden - internal
@@ -268,12 +266,12 @@ const TOOL_STATUS_MESSAGES = {
   add_initiative_comment: () => 'Adding comment...',
   link_related_initiatives: () => 'Linking related initiatives...',
 
-  // Write operation tools (agents)
-  create_agent: () => 'Creating agent...',
-  update_agent: () => 'Updating agent...',
-  batch_update_agent_field: (args) => `Updating ${args.agent_ids?.length || 0} agents...`,
-  link_agent_to_initiatives: () => 'Linking agent to initiatives...',
-  add_agent_comment: () => 'Adding comment...'
+  // Write operation tools (tasks)
+  create_task: () => 'Creating task...',
+  update_task: () => 'Updating task...',
+  batch_update_task_field: (args) => `Updating ${args.task_ids?.length || 0} tasks...`,
+  link_task_to_initiatives: () => 'Linking task to initiatives...',
+  add_task_comment: () => 'Adding comment...'
 };
 
 /**
@@ -294,18 +292,18 @@ const getToolResultMessage = (toolName, result) => {
 
     // Show counts for data retrieval
     if (parsed.count !== undefined) {
-      const noun = toolName.includes('agent') ? 'agents' : 'use cases';
+      const noun = toolName.includes('task') ? 'tasks' : 'initiatives';
       return `Found ${parsed.count} ${noun}`;
     }
     if (Array.isArray(parsed)) {
-      const noun = toolName.includes('agent') ? 'agents' : 'items';
+      const noun = toolName.includes('task') ? 'tasks' : 'items';
       return `Found ${parsed.length} ${noun}`;
     }
     if (parsed.useCases && Array.isArray(parsed.useCases)) {
-      return `Found ${parsed.useCases.length} use cases`;
+      return `Found ${parsed.useCases.length} initiatives`;
     }
-    if (parsed.agents && Array.isArray(parsed.agents)) {
-      return `Found ${parsed.agents.length} agents`;
+    if (parsed.tasks && Array.isArray(parsed.tasks)) {
+      return `Found ${parsed.tasks.length} tasks`;
     }
 
     // Artifact creation
@@ -398,23 +396,22 @@ console.log('Claude Agent SDK Configuration:', {
 });
 
 /**
- * Create MCP Server with Hekmah-specific tools
+ * Create MCP Server with Samantha-specific tools
  * Uses the Claude Agent SDK's createSdkMcpServer for built-in orchestration
  */
-const createHekmahMcpServer = (domainId = null, userId = null, userRole = null) => {
+const createSamanthaMcpServer = (domainId = null, userId = null, userRole = null) => {
   return createSdkMcpServer({
-    name: "hekmah-tools",
+    name: "samantha-tools",
     version: "1.0.0",
     tools: [
       // Tool 1: Get use cases by criteria
       tool(
         "get_use_cases_by_criteria",
-        "Get use cases filtered by various criteria like department, status, strategic impact, kanban status, and delivery date",
+        "Get initiatives filtered by various criteria like status, strategic impact, effort level, and delivery date",
         {
-          department: z.string().optional().describe("Filter by department name"),
-          status: z.enum(["concept", "proof_of_concept", "validation", "pilot", "production"]).optional().describe("Filter by development stage"),
+          status: z.enum(["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"]).optional().describe("Filter by status"),
           strategic_impact: z.enum(["Low", "Medium", "High"]).optional().describe("Filter by strategic impact level"),
-          kanban_pillar: z.enum(["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"]).optional().describe("Filter by kanban/delivery status"),
+          effort_level: z.enum(["Low", "Medium", "High"]).optional().describe("Filter by effort level"),
           expected_delivery_date: z.string().optional().describe("Filter by expected delivery date (format: MMM YYYY, e.g., 'Jan 2025')"),
           has_delivery_date: z.boolean().optional().describe("Filter by whether initiative has a delivery date set"),
           limit: z.number().optional().describe("Maximum number of results to return (default 10)")
@@ -475,9 +472,9 @@ const createHekmahMcpServer = (domainId = null, userId = null, userRole = null) 
       // Tool 5: Get use case statistics
       tool(
         "get_use_case_statistics",
-        "Get real-time statistics about use cases, departments, goals, etc.",
+        "Get real-time statistics about initiatives and goals",
         {
-          group_by: z.enum(["department", "status", "strategic_impact", "pillar", "kanban_pillar"]).optional().describe("How to group the statistics")
+          group_by: z.enum(["status", "strategic_impact", "effort_level", "category"]).optional().describe("How to group the statistics")
         },
         async (args) => {
           const result = await FUNCTION_IMPLEMENTATIONS.get_use_case_statistics(args, domainId);
@@ -519,38 +516,7 @@ const createHekmahMcpServer = (domainId = null, userId = null, userRole = null) 
         }
       ),
 
-      // Tool 8: Get executive brief
-      tool(
-        "get_executive_brief",
-        "Get executive summary of recent activity and changes in the organization",
-        {
-          days: z.number().optional().describe("Number of days to look back (default 7)")
-        },
-        async (args) => {
-          const result = await FUNCTION_IMPLEMENTATIONS.get_executive_brief(args, domainId);
-          return {
-            content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
-          };
-        }
-      ),
-
-      // Tool 8b: Get variance report
-      tool(
-        "get_variance_report",
-        "Get variance/comparison report for initiatives and agents over a time period. Shows current vs previous period counts, daily trends, and breakdown by department/status/impact/category/kanban. Use this for portfolio analytics, trend analysis, or comparing activity across time periods.",
-        {
-          days: z.number().optional().describe("Number of days for the analysis period (7, 14, 30, or 90). Compares this period vs the previous equivalent period. Default: 7"),
-          breakdown: z.enum(["department", "status", "impact", "category", "kanban"]).optional().describe("How to break down the data. 'department' groups by department, 'status' by development stage, 'impact' by strategic impact level, 'category' by initiative category/agent type, 'kanban' by kanban pillar status. Default: department")
-        },
-        async (args) => {
-          const result = await FUNCTION_IMPLEMENTATIONS.get_variance_report(args, domainId);
-          return {
-            content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
-          };
-        }
-      ),
-
-      // Tool 9: Ask user clarification
+      // Tool 8: Ask user clarification
       tool(
         "ask_user_clarification",
         "Ask the user for clarification when their query is ambiguous or needs more context",
@@ -585,7 +551,7 @@ const createHekmahMcpServer = (domainId = null, userId = null, userRole = null) 
       // Tool 11: Get domain metadata
       tool(
         "get_domain_metadata",
-        "Get all metadata for the current domain including departments, categories, agent types, tags, sensitivity levels, and strategic pillars. Use this to understand what filter values are available.",
+        "Get all metadata for the current domain including categories, tags, and strategic pillars. Use this to understand what filter values are available.",
         {},
         async (args) => {
           const result = await FUNCTION_IMPLEMENTATIONS.get_domain_metadata(args, domainId);
@@ -595,84 +561,81 @@ const createHekmahMcpServer = (domainId = null, userId = null, userRole = null) 
         }
       ),
 
-      // Tool 12: Search agents
+      // Tool 12: Search tasks
       tool(
-        "search_agents",
-        "Search for AI agents by name, title, or description containing specific keywords",
+        "search_tasks",
+        "Search for tasks by name, title, or description containing specific keywords",
         {
-          search_term: z.string().describe("The term to search for in agent titles and descriptions"),
+          search_term: z.string().describe("The term to search for in task titles and descriptions"),
           limit: z.number().optional().describe("Maximum number of results to return (default 10)")
         },
         async (args) => {
-          const result = await FUNCTION_IMPLEMENTATIONS.search_agents(args, domainId);
+          const result = await FUNCTION_IMPLEMENTATIONS.search_tasks(args, domainId);
           return {
             content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
           };
         }
       ),
 
-      // Tool 13: Get agents by criteria
+      // Tool 13: Get tasks by criteria
       tool(
-        "get_agents_by_criteria",
-        "Get AI agents filtered by various criteria like agent type, department, status, strategic impact, kanban status, and data sensitivity",
+        "get_tasks_by_criteria",
+        "Get tasks filtered by various criteria like status, strategic impact, and effort level",
         {
-          agent_type: z.string().optional().describe("Filter by agent type name"),
-          department: z.string().optional().describe("Filter by department name"),
-          status: z.enum(["concept", "proof_of_concept", "validation", "pilot", "production"]).optional().describe("Filter by development stage"),
+          status: z.enum(["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"]).optional().describe("Filter by status"),
           strategic_impact: z.enum(["Low", "Medium", "High"]).optional().describe("Filter by strategic impact level"),
-          kanban_pillar: z.enum(["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"]).optional().describe("Filter by kanban/delivery status"),
-          data_sensitivity: z.string().optional().describe("Filter by data sensitivity level"),
+          effort_level: z.enum(["Low", "Medium", "High"]).optional().describe("Filter by effort level"),
           limit: z.number().optional().describe("Maximum number of results to return (default 10)")
         },
         async (args) => {
-          const result = await FUNCTION_IMPLEMENTATIONS.get_agents_by_criteria(args, domainId);
+          const result = await FUNCTION_IMPLEMENTATIONS.get_tasks_by_criteria(args, domainId);
           return {
             content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
           };
         }
       ),
 
-      // Tool 14: Get agents by initiative
+      // Tool 14: Get tasks by initiative
       tool(
-        "get_agents_by_initiative",
-        "Get AI agents associated with a specific initiative or use case by searching for the initiative name",
+        "get_tasks_by_initiative",
+        "Get tasks associated with a specific initiative by searching for the initiative name",
         {
-          initiative_name: z.string().describe("The name of the initiative or use case to find associated agents for"),
-          limit: z.number().optional().describe("Maximum number of agents to return (default 10)")
+          initiative_name: z.string().describe("The name of the initiative to find associated tasks for"),
+          limit: z.number().optional().describe("Maximum number of tasks to return (default 10)")
         },
         async (args) => {
-          const result = await FUNCTION_IMPLEMENTATIONS.get_agents_by_initiative(args, domainId);
+          const result = await FUNCTION_IMPLEMENTATIONS.get_tasks_by_initiative(args, domainId);
           return {
             content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
           };
         }
       ),
 
-      // Tool 15: Get agent statistics
+      // Tool 15: Get task statistics
       tool(
-        "get_agent_statistics",
-        "Get statistics about AI agents, grouped by status, agent type, department, strategic impact, or kanban status",
+        "get_task_statistics",
+        "Get statistics about tasks, grouped by status, strategic impact, or effort level",
         {
-          group_by: z.enum(["status", "agent_type", "department", "strategic_impact", "kanban_pillar"]).optional().describe("How to group the statistics (default: status)")
+          group_by: z.enum(["status", "strategic_impact", "effort_level"]).optional().describe("How to group the statistics (default: status)")
         },
         async (args) => {
-          const result = await FUNCTION_IMPLEMENTATIONS.get_agent_statistics(args, domainId);
+          const result = await FUNCTION_IMPLEMENTATIONS.get_task_statistics(args, domainId);
           return {
             content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
           };
         }
       ),
 
-      // Tool 16: Get agent details
+      // Tool 16: Get task details
       tool(
-        "get_agent_details",
-        "Get detailed information about a specific AI agent including full description, technical details, and linked initiatives",
+        "get_task_details",
+        "Get detailed information about a specific task including full description, technical details, and linked initiatives",
         {
-          agent_id: z.string().optional().describe("ID of the agent"),
-          agent_title: z.string().optional().describe("Title or name of the agent (alternative to ID)")
+          task_id: z.string().optional().describe("ID of the task"),
+          task_title: z.string().optional().describe("Title or name of the task (alternative to ID)")
         },
         async (args) => {
-          const result = await FUNCTION_IMPLEMENTATIONS.get_agent_details(args, domainId);
+          const result = await FUNCTION_IMPLEMENTATIONS.get_task_details(args, domainId);
           return {
             content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
           };
@@ -1362,7 +1325,7 @@ const createHekmahMcpServer = (domainId = null, userId = null, userRole = null) 
             const ExcelJS = require('exceljs');
             const workbook = new ExcelJS.Workbook();
 
-            workbook.creator = args.options?.author || 'Hekmah AI';
+            workbook.creator = args.options?.author || 'Samantha';
             workbook.created = new Date();
 
             // Create sheets
@@ -1452,15 +1415,15 @@ const createHekmahMcpServer = (domainId = null, userId = null, userRole = null) 
       // Tool 25: Create Word Document
       tool(
         "create_docx",
-        "Create a professional Word document (.docx) with DoF branding. Supports sections, paragraphs, bullet/numbered lists, tables, and highlighted boxes. Returns a download link.",
+        "Create a professional Word document (.docx). Supports sections, paragraphs, bullet/numbered lists, tables, and highlighted boxes. Returns a download link.",
         {
           sessionId: z.string().describe("The workspace session ID from workspace_init"),
           title: z.string().describe("Document title"),
           subtitle: z.string().optional().describe("Document subtitle"),
-          author: z.string().optional().describe("Author name (default: Department of Finance)"),
+          author: z.string().optional().describe("Author name"),
           includeTableOfContents: z.boolean().optional().describe("Include table of contents (default: false)"),
           headerText: z.string().optional().describe("Header text for all pages"),
-          footerText: z.string().optional().describe("Footer text (default: Department of Finance)"),
+          footerText: z.string().optional().describe("Footer text"),
           sections: z.array(z.object({
             heading: z.string().optional().describe("Section heading"),
             level: z.number().optional().describe("Heading level: 1, 2, or 3 (default: 1)"),
@@ -1673,7 +1636,7 @@ const createHekmahMcpServer = (domainId = null, userId = null, userRole = null) 
       // Tool 29: Create Initiative
       tool(
         "create_initiative",
-        "Create a new initiative/use case. Executes immediately - confirm with user before calling.",
+        "Create a new initiative. Executes immediately - confirm with user before calling.",
         {
           // Required fields
           title: z.string().describe("Title of the initiative"),
@@ -1681,26 +1644,17 @@ const createHekmahMcpServer = (domainId = null, userId = null, userRole = null) 
           problem_statement: z.string().describe("The problem this initiative solves"),
           solution_overview: z.string().describe("Overview of the proposed solution"),
           category: z.string().describe("Category name (must exist in domain)"),
-          department: z.string().describe("Department name (must exist)"),
           strategic_impact: z.enum(["Low", "Medium", "High"]).describe("Strategic impact level"),
           // Optional fields
-          status: z.enum(["concept", "proof_of_concept", "validation", "pilot", "production"]).optional().describe("Development stage (default: concept)"),
-          kanban_pillar: z.enum(["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"]).optional().describe("Kanban/delivery status"),
+          status: z.enum(["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"]).optional().describe("Initiative status (default: backlog)"),
+          effort_level: z.enum(["Low", "Medium", "High"]).optional().describe("Effort level"),
           technical_implementation: z.string().optional().describe("Technical implementation details"),
           justification: z.string().optional().describe("Business justification"),
           owner_name: z.string().optional().describe("Initiative owner name"),
           owner_email: z.string().optional().describe("Initiative owner email"),
           expected_delivery_date: z.string().optional().describe("Expected delivery date (format: MMM YYYY)"),
-          data_sensitivity: z.enum(["Public", "Restricted", "Confidential", "Secret"]).optional().describe("Data sensitivity level"),
           roadmap_link: z.string().optional().describe("Link to roadmap"),
-          value_realisation_link: z.string().optional().describe("Link to value realisation"),
           tags: z.array(z.string()).optional().describe("Tags to add to the initiative"),
-          complexity: z.object({
-            data_complexity: z.enum(["Low", "Medium", "High"]).optional(),
-            integration_complexity: z.enum(["Low", "Medium", "High"]).optional(),
-            intelligence_complexity: z.enum(["Low", "Medium", "High"]).optional(),
-            functional_complexity: z.enum(["Low", "Medium", "High"]).optional()
-          }).optional().describe("Complexity assessment"),
           strategic_goal_ids: z.array(z.number()).optional().describe("IDs of strategic goals to align to")
         },
         async (args) => {
@@ -1720,38 +1674,21 @@ const createHekmahMcpServer = (domainId = null, userId = null, userRole = null) 
             }
             const categoryId = categoryResult[0].id;
 
-            // Get department ID
-            const deptResult = await new Promise((resolve, reject) => {
-              db.query('SELECT id FROM departments WHERE name = ?', [args.department], (err, rows) => {
-                if (err) reject(err);
-                else resolve(rows);
-              });
-            });
-            if (deptResult.length === 0) {
-              return { content: [{ type: "text", text: JSON.stringify({ success: false, error: `Department '${args.department}' not found` }) }] };
-            }
-            const departmentId = deptResult[0].id;
-
-            const complexity = args.complexity || {};
             const insertQuery = `
               INSERT INTO use_cases (
                 title, description, problem_statement, solution_overview,
                 technical_implementation, category_id, status, author_id,
-                owner_name, owner_email, department_id, strategic_impact,
-                data_complexity, integration_complexity, intelligence_complexity,
-                functional_complexity, justification, kanban_pillar, expected_delivery_date,
-                data_sensitivity, roadmap_link, value_realisation_link, domain_id
-              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                owner_name, owner_email, strategic_impact, effort_level,
+                justification, expected_delivery_date, roadmap_link, domain_id
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
 
             const values = [
               args.title, args.description, args.problem_statement, args.solution_overview,
-              args.technical_implementation || null, categoryId, args.status || 'concept', userId,
-              args.owner_name || null, args.owner_email || null, departmentId, args.strategic_impact,
-              complexity.data_complexity || 'Low', complexity.integration_complexity || 'Low',
-              complexity.intelligence_complexity || 'Low', complexity.functional_complexity || 'Low',
-              args.justification || null, args.kanban_pillar || 'backlog', args.expected_delivery_date || null,
-              args.data_sensitivity || 'Public', args.roadmap_link || null, args.value_realisation_link || null, domainId
+              args.technical_implementation || null, categoryId, args.status || 'intention', userId,
+              args.owner_name || null, args.owner_email || null, args.strategic_impact,
+              args.effort_level || 'Medium', args.justification || null, args.expected_delivery_date || null,
+              args.roadmap_link || null, domainId
             ];
 
             await new Promise((resolve, reject) => {
@@ -1786,7 +1723,6 @@ const createHekmahMcpServer = (domainId = null, userId = null, userRole = null) 
             if (args.strategic_goal_ids && args.strategic_goal_ids.length > 0 && useCaseId) {
               for (const goalId of args.strategic_goal_ids) {
                 await new Promise((resolve, reject) => {
-                  // Note: use_case_goal_alignments table doesn't have created_by column
                   db.query('INSERT INTO use_case_goal_alignments (use_case_id, strategic_goal_id) VALUES (?, ?)', [useCaseId, goalId], (err) => {
                     if (err) return reject(err);
                     resolve();
@@ -1805,7 +1741,7 @@ const createHekmahMcpServer = (domainId = null, userId = null, userRole = null) 
       // Tool 26: Update Initiative
       tool(
         "update_initiative",
-        "Update an existing initiative/use case. Executes immediately - confirm with user before calling.",
+        "Update an existing initiative. Executes immediately - confirm with user before calling.",
         {
           initiative_id: z.string().optional().describe("ID of the initiative to update"),
           initiative_title: z.string().optional().describe("Title of the initiative (alternative lookup)"),
@@ -1816,17 +1752,14 @@ const createHekmahMcpServer = (domainId = null, userId = null, userRole = null) 
             solution_overview: z.string().optional(),
             technical_implementation: z.string().optional(),
             category: z.string().optional(),
-            department: z.string().optional(),
-            status: z.enum(["concept", "proof_of_concept", "validation", "pilot", "production"]).optional(),
+            status: z.enum(["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"]).optional(),
             strategic_impact: z.enum(["Low", "Medium", "High"]).optional(),
-            kanban_pillar: z.enum(["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"]).optional(),
+            effort_level: z.enum(["Low", "Medium", "High"]).optional(),
             expected_delivery_date: z.string().optional(),
-            data_sensitivity: z.enum(["Public", "Restricted", "Confidential", "Secret"]).optional(),
             justification: z.string().optional(),
             owner_name: z.string().optional(),
             owner_email: z.string().optional(),
-            roadmap_link: z.string().optional(),
-            value_realisation_link: z.string().optional()
+            roadmap_link: z.string().optional()
           }).describe("Fields to update")
         },
         async (args) => {
@@ -1897,7 +1830,7 @@ const createHekmahMcpServer = (domainId = null, userId = null, userRole = null) 
         "Update a single field across multiple initiatives. Executes immediately - confirm with user before calling.",
         {
           initiative_ids: z.array(z.string()).describe("Array of initiative IDs to update"),
-          field: z.enum(["status", "kanban_pillar", "strategic_impact", "expected_delivery_date", "department", "category", "data_sensitivity"]).describe("The field to update"),
+          field: z.enum(["status", "strategic_impact", "effort_level", "expected_delivery_date", "category"]).describe("The field to update"),
           value: z.string().describe("The new value for the field")
         },
         async (args) => {
@@ -2285,105 +2218,66 @@ const createHekmahMcpServer = (domainId = null, userId = null, userRole = null) 
         }
       ),
 
-      // Tool 32: Create Agent
+      // Tool 32: Create Task
       tool(
-        "create_agent",
-        "Create a new AI agent. Executes immediately - confirm with user before calling. At least one initiative must be linked.",
+        "create_task",
+        "Create a new task. Executes immediately - confirm with user before calling. At least one initiative must be linked.",
         {
           // Required fields
-          title: z.string().describe("Title of the agent"),
-          description: z.string().describe("Full description of the agent"),
-          problem_statement: z.string().describe("The problem this agent solves"),
-          solution_overview: z.string().describe("Overview of the agent's solution"),
-          agent_type: z.string().describe("Agent type name (must exist in domain)"),
-          department: z.string().describe("Department name (must exist)"),
-          status: z.enum(["concept", "proof_of_concept", "validation", "pilot", "production"]).describe("Development stage"),
+          title: z.string().describe("Title of the task"),
+          description: z.string().describe("Full description of the task"),
+          problem_statement: z.string().describe("The problem this task solves"),
+          solution_overview: z.string().describe("Overview of the task's solution"),
           linked_initiative_ids: z.array(z.string()).min(1).describe("IDs of initiatives to link (at least one required)"),
           // Optional fields
+          status: z.enum(["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"]).optional().describe("Task status"),
           strategic_impact: z.enum(["Low", "Medium", "High"]).optional().describe("Strategic impact level"),
-          kanban_pillar: z.enum(["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"]).optional().describe("Kanban/delivery status"),
+          effort_level: z.enum(["Low", "Medium", "High"]).optional().describe("Effort level"),
           technical_implementation: z.string().optional().describe("Technical implementation details"),
           justification: z.string().optional().describe("Business justification"),
-          owner_name: z.string().optional().describe("Agent owner name"),
-          owner_email: z.string().optional().describe("Agent owner email"),
-          expected_delivery_date: z.string().optional().describe("Expected delivery date (format: MMM YYYY)"),
-          data_sensitivity: z.enum(["Public", "Restricted", "Confidential", "Secret"]).optional().describe("Data sensitivity level"),
-          complexity: z.object({
-            data_complexity: z.enum(["Low", "Medium", "High"]).optional(),
-            integration_complexity: z.enum(["Low", "Medium", "High"]).optional(),
-            intelligence_complexity: z.enum(["Low", "Medium", "High"]).optional(),
-            functional_complexity: z.enum(["Low", "Medium", "High"]).optional()
-          }).optional().describe("Complexity assessment")
+          owner_name: z.string().optional().describe("Task owner name"),
+          owner_email: z.string().optional().describe("Task owner email"),
+          expected_delivery_date: z.string().optional().describe("Expected delivery date (format: MMM YYYY)")
         },
         async (args) => {
           // RBAC: Admin only
           if (userRole !== 'admin') return createRbacError();
 
           try {
-            // Get agent type ID
-            const typeResult = await new Promise((resolve, reject) => {
-              db.query('SELECT id FROM agent_types WHERE name = ? AND domain_id = ?', [args.agent_type, domainId], (err, rows) => {
-                if (err) reject(err);
-                else resolve(rows);
-              });
-            });
-            if (typeResult.length === 0) {
-              return { content: [{ type: "text", text: JSON.stringify({ success: false, error: `Agent type '${args.agent_type}' not found in this domain` }) }] };
-            }
-            const agentTypeId = typeResult[0].id;
-
-            // Get department ID
-            const deptResult = await new Promise((resolve, reject) => {
-              db.query('SELECT id FROM departments WHERE name = ?', [args.department], (err, rows) => {
-                if (err) reject(err);
-                else resolve(rows);
-              });
-            });
-            if (deptResult.length === 0) {
-              return { content: [{ type: "text", text: JSON.stringify({ success: false, error: `Department '${args.department}' not found` }) }] };
-            }
-            const departmentId = deptResult[0].id;
-
-            const complexity = args.complexity || {};
             const insertQuery = `
-              INSERT INTO agents (
+              INSERT INTO tasks (
                 title, description, problem_statement, solution_overview,
-                technical_implementation, agent_type_id, status, author_id,
-                owner_name, owner_email, department_id, strategic_impact,
-                data_complexity, integration_complexity, intelligence_complexity,
-                functional_complexity, justification, kanban_pillar, expected_delivery_date,
-                data_sensitivity, domain_id
-              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                technical_implementation, status, author_id,
+                owner_name, owner_email, strategic_impact,
+                effort_level, justification, expected_delivery_date, domain_id
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
 
             const values = [
               args.title, args.description, args.problem_statement, args.solution_overview,
-              args.technical_implementation || null, agentTypeId, args.status, userId,
-              args.owner_name || null, args.owner_email || null, departmentId, args.strategic_impact || 'Medium',
-              complexity.data_complexity || 'Low', complexity.integration_complexity || 'Low',
-              complexity.intelligence_complexity || 'Low', complexity.functional_complexity || 'Low',
-              args.justification || null, args.kanban_pillar || 'backlog', args.expected_delivery_date || null,
-              args.data_sensitivity || 'Public', domainId
+              args.technical_implementation || null, args.status || 'intention', userId,
+              args.owner_name || null, args.owner_email || null, args.strategic_impact || 'Medium',
+              args.effort_level || 'Medium', args.justification || null, args.expected_delivery_date || null, domainId
             ];
 
             await new Promise((resolve, reject) => {
               db.query(insertQuery, values, (err) => err ? reject(err) : resolve());
             });
 
-            // Get the created agent ID
+            // Get the created task ID
             const newResult = await new Promise((resolve, reject) => {
-              db.query('SELECT id FROM agents WHERE title = ? AND author_id = ? ORDER BY created_date DESC LIMIT 1', [args.title, userId], (err, rows) => {
+              db.query('SELECT id FROM tasks WHERE title = ? AND author_id = ? ORDER BY created_date DESC LIMIT 1', [args.title, userId], (err, rows) => {
                 if (err) reject(err);
                 else resolve(rows);
               });
             });
-            const agentId = newResult[0]?.id;
+            const taskId = newResult[0]?.id;
 
             // Link to initiatives
-            if (args.linked_initiative_ids && args.linked_initiative_ids.length > 0 && agentId) {
+            if (args.linked_initiative_ids && args.linked_initiative_ids.length > 0 && taskId) {
               for (const initiativeId of args.linked_initiative_ids) {
                 await new Promise((resolve, reject) => {
-                  db.query('INSERT INTO agent_initiative_associations (agent_id, use_case_id, created_by) VALUES (?, ?, ?)', [agentId, initiativeId, userId], (err) => {
+                  db.query('INSERT INTO task_initiative_associations (task_id, use_case_id, created_by) VALUES (?, ?, ?)', [taskId, initiativeId, userId], (err) => {
                     if (err) reject(err);
                     else resolve();
                   });
@@ -2391,33 +2285,30 @@ const createHekmahMcpServer = (domainId = null, userId = null, userRole = null) 
               }
             }
 
-            return { content: [{ type: "text", text: JSON.stringify({ success: true, id: agentId, title: args.title, message: `Agent "${args.title}" created successfully` }) }] };
+            return { content: [{ type: "text", text: JSON.stringify({ success: true, id: taskId, title: args.title, message: `Task "${args.title}" created successfully` }) }] };
           } catch (error) {
             return { content: [{ type: "text", text: JSON.stringify({ success: false, error: error.message }) }] };
           }
         }
       ),
 
-      // Tool 32: Update Agent
+      // Tool 33: Update Task
       tool(
-        "update_agent",
-        "Update an existing AI agent. Executes immediately - confirm with user before calling.",
+        "update_task",
+        "Update an existing task. Executes immediately - confirm with user before calling.",
         {
-          agent_id: z.string().optional().describe("ID of the agent to update"),
-          agent_title: z.string().optional().describe("Title of the agent (alternative lookup)"),
+          task_id: z.string().optional().describe("ID of the task to update"),
+          task_title: z.string().optional().describe("Title of the task (alternative lookup)"),
           updates: z.object({
             title: z.string().optional(),
             description: z.string().optional(),
             problem_statement: z.string().optional(),
             solution_overview: z.string().optional(),
             technical_implementation: z.string().optional(),
-            agent_type: z.string().optional(),
-            department: z.string().optional(),
-            status: z.enum(["concept", "proof_of_concept", "validation", "pilot", "production"]).optional(),
+            status: z.enum(["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"]).optional(),
             strategic_impact: z.enum(["Low", "Medium", "High"]).optional(),
-            kanban_pillar: z.enum(["backlog", "prioritised", "in_progress", "completed", "blocked", "slow_burner", "de_prioritised", "on_hold"]).optional(),
+            effort_level: z.enum(["Low", "Medium", "High"]).optional(),
             expected_delivery_date: z.string().optional(),
-            data_sensitivity: z.enum(["Public", "Restricted", "Confidential", "Secret"]).optional(),
             justification: z.string().optional(),
             owner_name: z.string().optional(),
             owner_email: z.string().optional()
@@ -2428,28 +2319,28 @@ const createHekmahMcpServer = (domainId = null, userId = null, userRole = null) 
           if (userRole !== 'admin') return createRbacError();
 
           try {
-            // Look up agent
-            let agentInfo = null;
-            if (args.agent_id) {
+            // Look up task
+            let taskInfo = null;
+            if (args.task_id) {
               const result = await new Promise((resolve, reject) => {
-                db.query('SELECT id, title FROM agents WHERE id = ?', [args.agent_id], (err, rows) => {
+                db.query('SELECT id, title FROM tasks WHERE id = ?', [args.task_id], (err, rows) => {
                   if (err) reject(err);
                   else resolve(rows[0] || null);
                 });
               });
-              agentInfo = result;
-            } else if (args.agent_title) {
+              taskInfo = result;
+            } else if (args.task_title) {
               const result = await new Promise((resolve, reject) => {
-                db.query('SELECT id, title FROM agents WHERE title LIKE ? LIMIT 1', [`%${args.agent_title}%`], (err, rows) => {
+                db.query('SELECT id, title FROM tasks WHERE title LIKE ? LIMIT 1', [`%${args.task_title}%`], (err, rows) => {
                   if (err) reject(err);
                   else resolve(rows[0] || null);
                 });
               });
-              agentInfo = result;
+              taskInfo = result;
             }
 
-            if (!agentInfo) {
-              return { content: [{ type: "text", text: JSON.stringify({ success: false, error: 'Agent not found' }) }] };
+            if (!taskInfo) {
+              return { content: [{ type: "text", text: JSON.stringify({ success: false, error: 'Task not found' }) }] };
             }
 
             // Build dynamic update query
@@ -2457,20 +2348,19 @@ const createHekmahMcpServer = (domainId = null, userId = null, userRole = null) 
             const values = [];
             for (const [key, value] of Object.entries(args.updates)) {
               if (value !== undefined && value !== null) {
-                if (key === 'agent_type' || key === 'department') continue; // Handle separately if needed
                 updateFields.push(`${key} = ?`);
                 values.push(value);
               }
             }
 
             if (updateFields.length === 0) {
-              return { content: [{ type: "text", text: JSON.stringify({ success: true, id: agentInfo.id, message: 'No fields to update' }) }] };
+              return { content: [{ type: "text", text: JSON.stringify({ success: true, id: taskInfo.id, message: 'No fields to update' }) }] };
             }
 
             updateFields.push('updated_date = NOW()');
-            values.push(agentInfo.id);
+            values.push(taskInfo.id);
 
-            const updateQuery = `UPDATE agents SET ${updateFields.join(', ')} WHERE id = ?`;
+            const updateQuery = `UPDATE tasks SET ${updateFields.join(', ')} WHERE id = ?`;
             const result = await new Promise((resolve, reject) => {
               db.query(updateQuery, values, (err, res) => {
                 if (err) reject(err);
@@ -2478,20 +2368,20 @@ const createHekmahMcpServer = (domainId = null, userId = null, userRole = null) 
               });
             });
 
-            return { content: [{ type: "text", text: JSON.stringify({ success: true, id: agentInfo.id, title: agentInfo.title, message: `Agent "${agentInfo.title}" updated successfully`, affectedRows: result.affectedRows }) }] };
+            return { content: [{ type: "text", text: JSON.stringify({ success: true, id: taskInfo.id, title: taskInfo.title, message: `Task "${taskInfo.title}" updated successfully`, affectedRows: result.affectedRows }) }] };
           } catch (error) {
             return { content: [{ type: "text", text: JSON.stringify({ success: false, error: error.message }) }] };
           }
         }
       ),
 
-      // Tool 33: Batch Update Agent Field
+      // Tool 34: Batch Update Task Field
       tool(
-        "batch_update_agent_field",
-        "Update a single field across multiple agents. Executes immediately - confirm with user before calling.",
+        "batch_update_task_field",
+        "Update a single field across multiple tasks. Executes immediately - confirm with user before calling.",
         {
-          agent_ids: z.array(z.string()).describe("Array of agent IDs to update"),
-          field: z.enum(["status", "kanban_pillar", "strategic_impact", "expected_delivery_date", "department", "agent_type", "data_sensitivity"]).describe("The field to update"),
+          task_ids: z.array(z.string()).describe("Array of task IDs to update"),
+          field: z.enum(["status", "strategic_impact", "effort_level", "expected_delivery_date"]).describe("The field to update"),
           value: z.string().describe("The new value for the field")
         },
         async (args) => {
@@ -2499,34 +2389,34 @@ const createHekmahMcpServer = (domainId = null, userId = null, userRole = null) 
           if (userRole !== 'admin') return createRbacError();
 
           try {
-            if (!args.agent_ids || args.agent_ids.length === 0) {
-              return { content: [{ type: "text", text: JSON.stringify({ success: false, error: 'No agent IDs provided' }) }] };
+            if (!args.task_ids || args.task_ids.length === 0) {
+              return { content: [{ type: "text", text: JSON.stringify({ success: false, error: 'No task IDs provided' }) }] };
             }
 
-            const placeholders = args.agent_ids.map(() => '?').join(',');
-            const updateQuery = `UPDATE agents SET ${args.field} = ?, updated_date = NOW() WHERE id IN (${placeholders})`;
+            const placeholders = args.task_ids.map(() => '?').join(',');
+            const updateQuery = `UPDATE tasks SET ${args.field} = ?, updated_date = NOW() WHERE id IN (${placeholders})`;
 
             const result = await new Promise((resolve, reject) => {
-              db.query(updateQuery, [args.value, ...args.agent_ids], (err, res) => {
+              db.query(updateQuery, [args.value, ...args.task_ids], (err, res) => {
                 if (err) reject(err);
                 else resolve(res);
               });
             });
 
-            return { content: [{ type: "text", text: JSON.stringify({ success: true, affectedRows: result.affectedRows, message: `Updated ${args.field} to "${args.value}" for ${result.affectedRows} agents` }) }] };
+            return { content: [{ type: "text", text: JSON.stringify({ success: true, affectedRows: result.affectedRows, message: `Updated ${args.field} to "${args.value}" for ${result.affectedRows} tasks` }) }] };
           } catch (error) {
             return { content: [{ type: "text", text: JSON.stringify({ success: false, error: error.message }) }] };
           }
         }
       ),
 
-      // Tool 34: Link Agent to Initiatives
+      // Tool 35: Link Task to Initiatives
       tool(
-        "link_agent_to_initiatives",
-        "Link an agent to additional initiatives. Executes immediately - confirm with user before calling.",
+        "link_task_to_initiatives",
+        "Link a task to additional initiatives. Executes immediately - confirm with user before calling.",
         {
-          agent_id: z.string().optional().describe("ID of the agent"),
-          agent_title: z.string().optional().describe("Title of the agent (alternative lookup)"),
+          task_id: z.string().optional().describe("ID of the task"),
+          task_title: z.string().optional().describe("Title of the task (alternative lookup)"),
           initiative_ids: z.array(z.string()).describe("IDs of initiatives to link")
         },
         async (args) => {
@@ -2534,93 +2424,93 @@ const createHekmahMcpServer = (domainId = null, userId = null, userRole = null) 
           if (userRole !== 'admin') return createRbacError();
 
           try {
-            // Look up agent
-            let agentInfo = null;
-            if (args.agent_id) {
+            // Look up task
+            let taskInfo = null;
+            if (args.task_id) {
               const result = await new Promise((resolve, reject) => {
-                db.query('SELECT id, title FROM agents WHERE id = ?', [args.agent_id], (err, rows) => {
+                db.query('SELECT id, title FROM tasks WHERE id = ?', [args.task_id], (err, rows) => {
                   if (err) reject(err);
                   else resolve(rows[0] || null);
                 });
               });
-              agentInfo = result;
-            } else if (args.agent_title) {
+              taskInfo = result;
+            } else if (args.task_title) {
               const result = await new Promise((resolve, reject) => {
-                db.query('SELECT id, title FROM agents WHERE title LIKE ? LIMIT 1', [`%${args.agent_title}%`], (err, rows) => {
+                db.query('SELECT id, title FROM tasks WHERE title LIKE ? LIMIT 1', [`%${args.task_title}%`], (err, rows) => {
                   if (err) reject(err);
                   else resolve(rows[0] || null);
                 });
               });
-              agentInfo = result;
+              taskInfo = result;
             }
 
-            if (!agentInfo) {
-              return { content: [{ type: "text", text: JSON.stringify({ success: false, error: 'Agent not found' }) }] };
+            if (!taskInfo) {
+              return { content: [{ type: "text", text: JSON.stringify({ success: false, error: 'Task not found' }) }] };
             }
 
             // Link to initiatives
             let linkedCount = 0;
             for (const initiativeId of args.initiative_ids) {
               await new Promise((resolve, reject) => {
-                db.query('INSERT IGNORE INTO agent_initiative_associations (agent_id, use_case_id, created_by) VALUES (?, ?, ?)', [agentInfo.id, initiativeId, userId], (err) => {
+                db.query('INSERT IGNORE INTO task_initiative_associations (task_id, use_case_id, created_by) VALUES (?, ?, ?)', [taskInfo.id, initiativeId, userId], (err) => {
                   if (err) reject(err);
                   else { linkedCount++; resolve(); }
                 });
               });
             }
 
-            return { content: [{ type: "text", text: JSON.stringify({ success: true, agent_id: agentInfo.id, agent_title: agentInfo.title, initiatives_linked: linkedCount, message: `Linked agent "${agentInfo.title}" to ${linkedCount} initiative(s)` }) }] };
+            return { content: [{ type: "text", text: JSON.stringify({ success: true, task_id: taskInfo.id, task_title: taskInfo.title, initiatives_linked: linkedCount, message: `Linked task "${taskInfo.title}" to ${linkedCount} initiative(s)` }) }] };
           } catch (error) {
             return { content: [{ type: "text", text: JSON.stringify({ success: false, error: error.message }) }] };
           }
         }
       ),
 
-      // Tool 35: Add Agent Comment
+      // Tool 36: Add Task Comment
       tool(
-        "add_agent_comment",
-        "Add a comment to an agent. Executes immediately - confirm with user before calling.",
+        "add_task_comment",
+        "Add a comment to a task. Executes immediately - confirm with user before calling.",
         {
-          agent_id: z.string().optional().describe("ID of the agent"),
-          agent_title: z.string().optional().describe("Title of the agent (alternative lookup)"),
+          task_id: z.string().optional().describe("ID of the task"),
+          task_title: z.string().optional().describe("Title of the task (alternative lookup)"),
           content: z.string().describe("Comment content")
         },
         async (args) => {
           try {
-            // Look up agent
-            let agentInfo = null;
-            if (args.agent_id) {
+            // Look up task
+            let taskInfo = null;
+            if (args.task_id) {
               const result = await new Promise((resolve, reject) => {
-                db.query('SELECT id, title FROM agents WHERE id = ?', [args.agent_id], (err, rows) => {
+                db.query('SELECT id, title FROM tasks WHERE id = ?', [args.task_id], (err, rows) => {
                   if (err) reject(err);
                   else resolve(rows[0] || null);
                 });
               });
-              agentInfo = result;
-            } else if (args.agent_title) {
+              taskInfo = result;
+            } else if (args.task_title) {
               const result = await new Promise((resolve, reject) => {
-                db.query('SELECT id, title FROM agents WHERE title LIKE ? LIMIT 1', [`%${args.agent_title}%`], (err, rows) => {
+                db.query('SELECT id, title FROM tasks WHERE title LIKE ? LIMIT 1', [`%${args.task_title}%`], (err, rows) => {
                   if (err) reject(err);
                   else resolve(rows[0] || null);
                 });
               });
-              agentInfo = result;
+              taskInfo = result;
             }
 
-            if (!agentInfo) {
-              return { content: [{ type: "text", text: JSON.stringify({ success: false, error: 'Agent not found' }) }] };
+            if (!taskInfo) {
+              return { content: [{ type: "text", text: JSON.stringify({ success: false, error: 'Task not found' }) }] };
             }
 
             // Use current user's ID and prefix content with (AI generated)
             const aiPrefixedContent = `(AI generated) ${args.content}`;
             await new Promise((resolve, reject) => {
-              db.query('INSERT INTO comments (id, agent_id, user_id, content) VALUES (UUID(), ?, ?, ?)', [agentInfo.id, userId, aiPrefixedContent], (err, res) => {
+              db.query('INSERT INTO comments (id, task_id, user_id, content) VALUES (UUID(), ?, ?, ?)', [taskInfo.id, userId, aiPrefixedContent], (err, res) => {
                 if (err) reject(err);
                 else resolve(res);
               });
             });
 
-            return { content: [{ type: "text", text: JSON.stringify({ success: true, agent_id: agentInfo.id, agent_title: agentInfo.title, message: `Comment added to agent "${agentInfo.title}"` }) }] };
+            return { content: [{ type: "text", text: JSON.stringify({ success: true, task_id: taskInfo.id, task_title: taskInfo.title, message: `Comment added to task "${taskInfo.title}"` }) }] };
           } catch (error) {
             return { content: [{ type: "text", text: JSON.stringify({ success: false, error: error.message }) }] };
           }
@@ -2686,7 +2576,7 @@ const buildClaudeSystemPrompt = async (userName, domainId = null, activeSkills =
   });
   const pillarNames = pillars.map(p => p.name).join(', ');
 
-  const basePrompt = `You are Hekmah, an intelligent ${domainName} assistant at Department of Finance, Abu Dhabi. You're having a conversation with ${userName}.
+  const basePrompt = `You are Samantha, an intelligent ${domainName} assistant. You're having a conversation with ${userName}.
 
 PERSONALITY: Be warm, conversational, and personable. Use ${userName}'s name occasionally but not excessively. Be professional yet friendly. Keep responses concise but informative.
 
@@ -2694,19 +2584,19 @@ RESPONSE STYLE - CRITICAL FOR ALL RESPONSES:
 Write like you're speaking to a colleague, not writing a report. All responses must sound natural when spoken aloud. Never use structured labels like "Objective:", "Solution:", "Technical:", "Comments:", or "Description:". Speak in flowing paragraphs, not bullet lists or formatted sections. Weave comments, status, and details into a natural narrative. Lead with what's most important (status, purpose, key updates). Don't mention technical complexity, dates, authors, or granular details unless specifically requested.
 
 CONTEXT YOU SHOULD KNOW:
-The strategic pillars guiding all ${domainName} ${initiativePlural} are: ${pillarNames}. Strategic goals are high-level organizational objectives aligned to these pillars. ${domainName} ${initiativePlural.charAt(0).toUpperCase() + initiativePlural.slice(1)} are specific projects aligned to one or more strategic goals. We prioritize ${initiativePlural} based on strategic alignment (40%), business impact (40%), and technical feasibility (20%). Development stages progress from concept → proof_of_concept → validation → pilot → production.
+The strategic pillars guiding all ${domainName} ${initiativePlural} are: ${pillarNames}. Strategic goals are high-level objectives aligned to these pillars. ${domainName} ${initiativePlural.charAt(0).toUpperCase() + initiativePlural.slice(1)} are specific projects aligned to one or more strategic goals. Status values are: backlog, prioritised, in_progress, completed, blocked, slow_burner, de_prioritised, on_hold.
 
 YOUR CAPABILITIES:
-You can help ${userName} with questions about ${domainName} ${initiativePlural} at Department of Finance, including strategic pillars and goals, prioritization analysis, project status and progress, departmental activities, and technical implementation details.
+You can help ${userName} with questions about ${domainName} ${initiativePlural}, including strategic pillars and goals, prioritization analysis, project status and progress, and tasks associated with initiatives.
 
 DATA ACCESS:
-You have real-time tools to query use cases by department, status, strategic goal, pillar, or impact level. You can also get strategic goals by pillar, current statistics and counts, and detailed use case information.
+You have real-time tools to query initiatives by status, strategic goal, pillar, or impact level. You can also get strategic goals by pillar, current statistics and counts, and detailed initiative information. You can search and filter tasks as well.
 
 ANTI-HALLUCINATION RULES (CRITICAL):
-Never make up or guess information about use cases, departments, goals, or statistics. If you don't have specific data, always use the available tools to get current information. If a tool call fails or returns no data, say "I don't have that specific information available right now." Never provide numbers, names, or details unless they come from tool calls. When asked about specific use cases, departments, or statistics, always call the appropriate tool first. Do not respond with example data or hypothetical scenarios - only real data from tools.
+Never make up or guess information about initiatives, goals, or statistics. If you don't have specific data, always use the available tools to get current information. If a tool call fails or returns no data, say "I don't have that specific information available right now." Never provide numbers, names, or details unless they come from tool calls. When asked about specific initiatives or statistics, always call the appropriate tool first. Do not respond with example data or hypothetical scenarios - only real data from tools.
 
 BEHAVIORAL GUIDELINES:
-If asked about topics outside ${domainName} at DoF, politely decline: "I apologize ${userName}, but I can only help with questions about ${domainName} ${initiativePlural} at Department of Finance. What would you like to know about our ${domainName} strategy?" Use the available tools to get current, accurate data rather than making assumptions.
+If asked about topics outside ${domainName}, politely guide the conversation back: "I can help with questions about ${domainName} ${initiativePlural}. What would you like to know?" Use the available tools to get current, accurate data rather than making assumptions.
 
 FORMATTING:
 Use markdown formatting to make responses clear and scannable:
@@ -2718,25 +2608,25 @@ Use markdown formatting to make responses clear and scannable:
 - Avoid excessive whitespace
 
 CRITICAL - WRITE OPERATIONS REQUIRE USER CONFIRMATION (THIS IS MANDATORY):
-You have tools that can create, update, and modify initiatives and agents in the database. These execute IMMEDIATELY and make PERMANENT changes.
+You have tools that can create, update, and modify initiatives and tasks in the database. These execute IMMEDIATELY and make PERMANENT changes.
 
 **STOP AND ASK BEFORE ANY WRITE OPERATION** - This is your most important rule:
 1. FIRST: Explain what you plan to do and list ALL items that will be affected
 2. SECOND: Ask explicitly "Would you like me to proceed with these changes?" and WAIT for user response
 3. THIRD: Only call write tools AFTER the user explicitly confirms (e.g., "yes", "go ahead", "proceed", "confirm")
 
-Write tools that REQUIRE confirmation: create_initiative, update_initiative, batch_update_initiative_field, add_initiative_tags, align_initiative_to_goals, add_initiative_comment, create_agent, update_agent, batch_update_agent_field, link_agent_to_initiatives, add_agent_comment
+Write tools that REQUIRE confirmation: create_initiative, update_initiative, batch_update_initiative_field, add_initiative_tags, align_initiative_to_goals, add_initiative_comment, create_task, update_task, batch_update_task_field, link_task_to_initiatives, add_task_comment
 
 VIOLATION: If you call ANY write tool without first asking and receiving user confirmation, you have violated your core operating rules. Even if the user's request seems clear, you MUST ask for confirmation before executing writes.
 
 Example of CORRECT behavior:
-User: "Tag all REFA initiatives with 'DoF Initiative'"
-You: "I found 11 REFA initiatives. I'll add the tag 'DoF Initiative' to all of them. Would you like me to proceed with tagging these 11 initiatives?"
+User: "Tag all home improvement initiatives with 'Priority'"
+You: "I found 5 home improvement initiatives. I'll add the tag 'Priority' to all of them. Would you like me to proceed with tagging these 5 initiatives?"
 [Wait for user to say yes]
 Then call add_initiative_tags
 
 Example of INCORRECT behavior (DO NOT DO THIS):
-User: "Tag all REFA initiatives with 'DoF Initiative'"
+User: "Tag all home improvement initiatives with 'Priority'"
 You: [Immediately calls add_initiative_tags without asking] - THIS IS WRONG
 
 MANDATORY: When users ask about priorities, specific use cases, departmental activities, or strategic alignments, you must use the available tools to provide accurate, current information.`;
@@ -2809,11 +2699,11 @@ const generateClaudeAgentResponse = async (
     // Create MCP server with tools bound to domainId, userId, and userRole (for RBAC)
     const userId = options.userId || null;
     const userRole = options.userRole || null;
-    const hekmahServer = createHekmahMcpServer(domainId, userId, userRole);
+    const samanthaServer = createSamanthaMcpServer(domainId, userId, userRole);
 
     // Build conversation context
     const contextMessages = conversationHistory
-      .filter(msg => msg.text && !msg.text.includes('Welcome! I am Hekmah'))
+      .filter(msg => msg.text && !msg.text.includes('Welcome! I am Samantha'))
       .map(msg => `${msg.isUser ? 'User' : 'Assistant'}: ${msg.text}`)
       .join('\n');
 
@@ -2839,7 +2729,7 @@ const generateClaudeAgentResponse = async (
         systemPrompt: systemPrompt,
         permissionMode: 'default', // Default mode with hooks and canUseTool for human-in-the-loop
         mcpServers: {
-          "hekmah-tools": hekmahServer
+          "samantha-tools": samanthaServer
         },
         // PreToolUse hooks - return 'ask' for write tools to trigger canUseTool
         hooks: {
@@ -2874,57 +2764,55 @@ const generateClaudeAgentResponse = async (
         ...(resumeSessionId && { resume: resumeSessionId }),
         allowedTools: [
           // Read-only tools
-          "mcp__hekmah-tools__get_use_cases_by_criteria",
-          "mcp__hekmah-tools__get_strategic_goals_by_pillar",
-          "mcp__hekmah-tools__get_strategic_pillars",
-          "mcp__hekmah-tools__get_use_cases_by_goal",
-          "mcp__hekmah-tools__get_use_case_statistics",
-          "mcp__hekmah-tools__search_use_cases",
-          "mcp__hekmah-tools__get_use_case_details",
-          "mcp__hekmah-tools__get_executive_brief",
-          "mcp__hekmah-tools__get_variance_report",
-          "mcp__hekmah-tools__ask_user_clarification",
-          "mcp__hekmah-tools__get_use_cases_by_tag",
-          "mcp__hekmah-tools__get_domain_metadata",
-          "mcp__hekmah-tools__search_agents",
-          "mcp__hekmah-tools__get_agents_by_criteria",
-          "mcp__hekmah-tools__get_agents_by_initiative",
-          "mcp__hekmah-tools__get_agent_statistics",
-          "mcp__hekmah-tools__get_agent_details",
-          "mcp__hekmah-tools__create_artifact",
-          "mcp__hekmah-tools__workspace_init",
-          "mcp__hekmah-tools__workspace_write_file",
-          "mcp__hekmah-tools__workspace_read_file",
-          "mcp__hekmah-tools__workspace_list_files",
-          "mcp__hekmah-tools__execute_code",
-          "mcp__hekmah-tools__create_pptx",
-          "mcp__hekmah-tools__workspace_cleanup",
-          "mcp__hekmah-tools__render_html_to_image",
-          "mcp__hekmah-tools__view_thumbnail_grid",
-          "mcp__hekmah-tools__excel_init",
-          "mcp__hekmah-tools__excel_add_sheet",
-          "mcp__hekmah-tools__excel_add_rows",
-          "mcp__hekmah-tools__excel_preview",
-          "mcp__hekmah-tools__excel_generate",
+          "mcp__samantha-tools__get_use_cases_by_criteria",
+          "mcp__samantha-tools__get_strategic_goals_by_pillar",
+          "mcp__samantha-tools__get_strategic_pillars",
+          "mcp__samantha-tools__get_use_cases_by_goal",
+          "mcp__samantha-tools__get_use_case_statistics",
+          "mcp__samantha-tools__search_use_cases",
+          "mcp__samantha-tools__get_use_case_details",
+          "mcp__samantha-tools__ask_user_clarification",
+          "mcp__samantha-tools__get_use_cases_by_tag",
+          "mcp__samantha-tools__get_domain_metadata",
+          "mcp__samantha-tools__search_tasks",
+          "mcp__samantha-tools__get_tasks_by_criteria",
+          "mcp__samantha-tools__get_tasks_by_initiative",
+          "mcp__samantha-tools__get_task_statistics",
+          "mcp__samantha-tools__get_task_details",
+          "mcp__samantha-tools__create_artifact",
+          "mcp__samantha-tools__workspace_init",
+          "mcp__samantha-tools__workspace_write_file",
+          "mcp__samantha-tools__workspace_read_file",
+          "mcp__samantha-tools__workspace_list_files",
+          "mcp__samantha-tools__execute_code",
+          "mcp__samantha-tools__create_pptx",
+          "mcp__samantha-tools__workspace_cleanup",
+          "mcp__samantha-tools__render_html_to_image",
+          "mcp__samantha-tools__view_thumbnail_grid",
+          "mcp__samantha-tools__excel_init",
+          "mcp__samantha-tools__excel_add_sheet",
+          "mcp__samantha-tools__excel_add_rows",
+          "mcp__samantha-tools__excel_preview",
+          "mcp__samantha-tools__excel_generate",
           // DOCX document tools
-          "mcp__hekmah-tools__create_docx",
-          "mcp__hekmah-tools__extract_docx_text",
-          "mcp__hekmah-tools__unpack_docx",
-          "mcp__hekmah-tools__pack_docx",
+          "mcp__samantha-tools__create_docx",
+          "mcp__samantha-tools__extract_docx_text",
+          "mcp__samantha-tools__unpack_docx",
+          "mcp__samantha-tools__pack_docx",
           // Write operation tools - in allowedTools so Claude knows they exist,
           // but PreToolUse hook returns 'ask' to trigger canUseTool for approval
-          "mcp__hekmah-tools__create_initiative",
-          "mcp__hekmah-tools__update_initiative",
-          "mcp__hekmah-tools__batch_update_initiative_field",
-          "mcp__hekmah-tools__add_initiative_tags",
-          "mcp__hekmah-tools__align_initiative_to_goals",
-          "mcp__hekmah-tools__add_initiative_comment",
-          "mcp__hekmah-tools__link_related_initiatives",
-          "mcp__hekmah-tools__create_agent",
-          "mcp__hekmah-tools__update_agent",
-          "mcp__hekmah-tools__batch_update_agent_field",
-          "mcp__hekmah-tools__link_agent_to_initiatives",
-          "mcp__hekmah-tools__add_agent_comment"
+          "mcp__samantha-tools__create_initiative",
+          "mcp__samantha-tools__update_initiative",
+          "mcp__samantha-tools__batch_update_initiative_field",
+          "mcp__samantha-tools__add_initiative_tags",
+          "mcp__samantha-tools__align_initiative_to_goals",
+          "mcp__samantha-tools__add_initiative_comment",
+          "mcp__samantha-tools__link_related_initiatives",
+          "mcp__samantha-tools__create_task",
+          "mcp__samantha-tools__update_task",
+          "mcp__samantha-tools__batch_update_task_field",
+          "mcp__samantha-tools__link_task_to_initiatives",
+          "mcp__samantha-tools__add_task_comment"
         ],
         maxTurns: options.maxTurns || 25,
         ...options,
@@ -3165,8 +3053,6 @@ const CLAUDE_TOOL_NAMES = [
   'get_use_case_statistics',
   'search_use_cases',
   'get_use_case_details',
-  'get_executive_brief',
-  'get_variance_report',
   'ask_user_clarification',
   'create_artifact',
   'workspace_init',
@@ -3195,12 +3081,12 @@ const CLAUDE_TOOL_NAMES = [
   'add_initiative_tags',
   'align_initiative_to_goals',
   'add_initiative_comment',
-  // Write operation tools (agents)
-  'create_agent',
-  'update_agent',
-  'batch_update_agent_field',
-  'link_agent_to_initiatives',
-  'add_agent_comment'
+  // Write operation tools (tasks)
+  'create_task',
+  'update_task',
+  'batch_update_task_field',
+  'link_task_to_initiatives',
+  'add_task_comment'
 ];
 
 /**
@@ -3263,11 +3149,11 @@ async function* generateClaudeAgentResponseStream(
     const userId = options.userId || null;
     const userRole = options.userRole || null;
     console.log('🔐 RBAC: Creating MCP server with userRole:', userRole, 'userId:', userId);
-    const hekmahServer = createHekmahMcpServer(domainId, userId, userRole);
+    const samanthaServer = createSamanthaMcpServer(domainId, userId, userRole);
 
     // Build conversation context
     const contextMessages = conversationHistory
-      .filter(msg => msg.text && !msg.text.includes('Welcome! I am Hekmah'))
+      .filter(msg => msg.text && !msg.text.includes('Welcome! I am Samantha'))
       .map(msg => `${msg.isUser ? 'User' : 'Assistant'}: ${msg.text}`)
       .join('\n');
 
@@ -3297,60 +3183,58 @@ async function* generateClaudeAgentResponseStream(
         abortController: abortController, // For aborting on permission request
         maxThinkingTokens: 8000, // Enable extended thinking to show Claude's reasoning
         mcpServers: {
-          "hekmah-tools": hekmahServer
+          "samantha-tools": samanthaServer
         },
         ...(resumeSessionId && { resume: resumeSessionId }),
         allowedTools: [
           // All tools in allowedTools - we handle permission in message processing
-          "mcp__hekmah-tools__get_use_cases_by_criteria",
-          "mcp__hekmah-tools__get_strategic_goals_by_pillar",
-          "mcp__hekmah-tools__get_strategic_pillars",
-          "mcp__hekmah-tools__get_use_cases_by_goal",
-          "mcp__hekmah-tools__get_use_case_statistics",
-          "mcp__hekmah-tools__search_use_cases",
-          "mcp__hekmah-tools__get_use_case_details",
-          "mcp__hekmah-tools__get_executive_brief",
-          "mcp__hekmah-tools__get_variance_report",
-          "mcp__hekmah-tools__ask_user_clarification",
-          "mcp__hekmah-tools__get_use_cases_by_tag",
-          "mcp__hekmah-tools__get_domain_metadata",
-          "mcp__hekmah-tools__search_agents",
-          "mcp__hekmah-tools__get_agents_by_criteria",
-          "mcp__hekmah-tools__get_agents_by_initiative",
-          "mcp__hekmah-tools__get_agent_statistics",
-          "mcp__hekmah-tools__get_agent_details",
-          "mcp__hekmah-tools__create_artifact",
-          "mcp__hekmah-tools__workspace_init",
-          "mcp__hekmah-tools__workspace_write_file",
-          "mcp__hekmah-tools__workspace_read_file",
-          "mcp__hekmah-tools__workspace_list_files",
-          "mcp__hekmah-tools__execute_code",
-          "mcp__hekmah-tools__create_pptx",
-          "mcp__hekmah-tools__workspace_cleanup",
-          "mcp__hekmah-tools__render_html_to_image",
-          "mcp__hekmah-tools__view_thumbnail_grid",
-          "mcp__hekmah-tools__excel_init",
-          "mcp__hekmah-tools__excel_add_sheet",
-          "mcp__hekmah-tools__excel_add_rows",
-          "mcp__hekmah-tools__excel_preview",
-          "mcp__hekmah-tools__excel_generate",
+          "mcp__samantha-tools__get_use_cases_by_criteria",
+          "mcp__samantha-tools__get_strategic_goals_by_pillar",
+          "mcp__samantha-tools__get_strategic_pillars",
+          "mcp__samantha-tools__get_use_cases_by_goal",
+          "mcp__samantha-tools__get_use_case_statistics",
+          "mcp__samantha-tools__search_use_cases",
+          "mcp__samantha-tools__get_use_case_details",
+          "mcp__samantha-tools__ask_user_clarification",
+          "mcp__samantha-tools__get_use_cases_by_tag",
+          "mcp__samantha-tools__get_domain_metadata",
+          "mcp__samantha-tools__search_agents",
+          "mcp__samantha-tools__get_agents_by_criteria",
+          "mcp__samantha-tools__get_agents_by_initiative",
+          "mcp__samantha-tools__get_agent_statistics",
+          "mcp__samantha-tools__get_agent_details",
+          "mcp__samantha-tools__create_artifact",
+          "mcp__samantha-tools__workspace_init",
+          "mcp__samantha-tools__workspace_write_file",
+          "mcp__samantha-tools__workspace_read_file",
+          "mcp__samantha-tools__workspace_list_files",
+          "mcp__samantha-tools__execute_code",
+          "mcp__samantha-tools__create_pptx",
+          "mcp__samantha-tools__workspace_cleanup",
+          "mcp__samantha-tools__render_html_to_image",
+          "mcp__samantha-tools__view_thumbnail_grid",
+          "mcp__samantha-tools__excel_init",
+          "mcp__samantha-tools__excel_add_sheet",
+          "mcp__samantha-tools__excel_add_rows",
+          "mcp__samantha-tools__excel_preview",
+          "mcp__samantha-tools__excel_generate",
           // DOCX document tools
-          "mcp__hekmah-tools__create_docx",
-          "mcp__hekmah-tools__extract_docx_text",
-          "mcp__hekmah-tools__unpack_docx",
-          "mcp__hekmah-tools__pack_docx",
-          "mcp__hekmah-tools__create_initiative",
-          "mcp__hekmah-tools__update_initiative",
-          "mcp__hekmah-tools__batch_update_initiative_field",
-          "mcp__hekmah-tools__add_initiative_tags",
-          "mcp__hekmah-tools__align_initiative_to_goals",
-          "mcp__hekmah-tools__add_initiative_comment",
-          "mcp__hekmah-tools__link_related_initiatives",
-          "mcp__hekmah-tools__create_agent",
-          "mcp__hekmah-tools__update_agent",
-          "mcp__hekmah-tools__batch_update_agent_field",
-          "mcp__hekmah-tools__link_agent_to_initiatives",
-          "mcp__hekmah-tools__add_agent_comment"
+          "mcp__samantha-tools__create_docx",
+          "mcp__samantha-tools__extract_docx_text",
+          "mcp__samantha-tools__unpack_docx",
+          "mcp__samantha-tools__pack_docx",
+          "mcp__samantha-tools__create_initiative",
+          "mcp__samantha-tools__update_initiative",
+          "mcp__samantha-tools__batch_update_initiative_field",
+          "mcp__samantha-tools__add_initiative_tags",
+          "mcp__samantha-tools__align_initiative_to_goals",
+          "mcp__samantha-tools__add_initiative_comment",
+          "mcp__samantha-tools__link_related_initiatives",
+          "mcp__samantha-tools__create_task",
+          "mcp__samantha-tools__update_task",
+          "mcp__samantha-tools__batch_update_task_field",
+          "mcp__samantha-tools__link_task_to_initiatives",
+          "mcp__samantha-tools__add_task_comment"
         ],
         maxTurns: maxTurns,
         ...options
@@ -3404,7 +3288,7 @@ async function* generateClaudeAgentResponseStream(
           // Check for tool_use blocks - HUMAN-IN-THE-LOOP for write tools
           for (const block of message.message.content) {
             if (block.type === 'tool_use') {
-              const toolName = block.name.replace('mcp__hekmah-tools__', '');
+              const toolName = block.name.replace('mcp__samantha-tools__', '');
               const toolArgs = block.input || {};
               
               // Check if this is a write tool that needs permission
@@ -3478,7 +3362,7 @@ async function* generateClaudeAgentResponseStream(
           }
         }
       } else if (message.type === 'tool_use') {
-        const toolName = message.name.replace('mcp__hekmah-tools__', '');
+        const toolName = message.name.replace('mcp__samantha-tools__', '');
         pendingToolUse = {
           iteration: iterationsUsed,
           function_name: toolName,
@@ -3698,7 +3582,7 @@ async function* generateClaudeAgentResponseStream(
 }
 
 module.exports = {
-  createHekmahMcpServer,
+  createSamanthaMcpServer,
   generateClaudeAgentResponse,
   generateClaudeAgentResponseStream, // New streaming version
   buildClaudeSystemPrompt,

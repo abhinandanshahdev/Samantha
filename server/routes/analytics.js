@@ -12,7 +12,7 @@ router.get('/variance', verifyToken, requireConsumerOrAdmin, async (req, res) =>
       start_date,
       end_date,
       domain_id,
-      breakdown = 'department'
+      breakdown = 'status'
     } = req.query;
 
     if (!domain_id) {
@@ -55,8 +55,8 @@ router.get('/variance', verifyToken, requireConsumerOrAdmin, async (req, res) =>
       SELECT
         (SELECT COUNT(*) FROM use_cases WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?) as initiatives_current,
         (SELECT COUNT(*) FROM use_cases WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?) as initiatives_previous,
-        (SELECT COUNT(*) FROM agents WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?) as agents_current,
-        (SELECT COUNT(*) FROM agents WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?) as agents_previous
+        (SELECT COUNT(*) FROM tasks WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?) as tasks_current,
+        (SELECT COUNT(*) FROM tasks WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?) as tasks_previous
     `;
 
     const summaryParams = [
@@ -78,9 +78,9 @@ router.get('/variance', verifyToken, requireConsumerOrAdmin, async (req, res) =>
       UNION ALL
       SELECT
         DATE(created_date) as date,
-        'agent' as type,
+        'task' as type,
         COUNT(*) as count
-      FROM agents
+      FROM tasks
       WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?
       GROUP BY DATE(created_date)
       ORDER BY date ASC
@@ -96,66 +96,20 @@ router.get('/variance', verifyToken, requireConsumerOrAdmin, async (req, res) =>
     let breakdownParams;
 
     switch (breakdown) {
-      case 'department':
-        breakdownQuery = `
-          SELECT
-            d.name as name,
-            COALESCE(uc_current.count, 0) as initiatives_current,
-            COALESCE(uc_previous.count, 0) as initiatives_previous,
-            COALESCE(ag_current.count, 0) as agents_current,
-            COALESCE(ag_previous.count, 0) as agents_previous
-          FROM departments d
-          LEFT JOIN (
-            SELECT department_id, COUNT(*) as count
-            FROM use_cases
-            WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?
-            GROUP BY department_id
-          ) uc_current ON d.id = uc_current.department_id
-          LEFT JOIN (
-            SELECT department_id, COUNT(*) as count
-            FROM use_cases
-            WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?
-            GROUP BY department_id
-          ) uc_previous ON d.id = uc_previous.department_id
-          LEFT JOIN (
-            SELECT department_id, COUNT(*) as count
-            FROM agents
-            WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?
-            GROUP BY department_id
-          ) ag_current ON d.id = ag_current.department_id
-          LEFT JOIN (
-            SELECT department_id, COUNT(*) as count
-            FROM agents
-            WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?
-            GROUP BY department_id
-          ) ag_previous ON d.id = ag_previous.department_id
-          WHERE d.domain_id = ?
-          HAVING initiatives_current > 0 OR initiatives_previous > 0 OR agents_current > 0 OR agents_previous > 0
-          ORDER BY (initiatives_current + agents_current) DESC
-        `;
-        breakdownParams = [
-          domain_id, currentStartStr, currentEndStr,
-          domain_id, previousStartStr, previousEndStr,
-          domain_id, currentStartStr, currentEndStr,
-          domain_id, previousStartStr, previousEndStr,
-          domain_id
-        ];
-        break;
-
       case 'status':
         breakdownQuery = `
           SELECT
             status as name,
             (SELECT COUNT(*) FROM use_cases WHERE domain_id = ? AND status = s.status AND DATE(created_date) BETWEEN ? AND ?) as initiatives_current,
             (SELECT COUNT(*) FROM use_cases WHERE domain_id = ? AND status = s.status AND DATE(created_date) BETWEEN ? AND ?) as initiatives_previous,
-            (SELECT COUNT(*) FROM agents WHERE domain_id = ? AND status = s.status AND DATE(created_date) BETWEEN ? AND ?) as agents_current,
-            (SELECT COUNT(*) FROM agents WHERE domain_id = ? AND status = s.status AND DATE(created_date) BETWEEN ? AND ?) as agents_previous
+            (SELECT COUNT(*) FROM tasks WHERE domain_id = ? AND status = s.status AND DATE(created_date) BETWEEN ? AND ?) as tasks_current,
+            (SELECT COUNT(*) FROM tasks WHERE domain_id = ? AND status = s.status AND DATE(created_date) BETWEEN ? AND ?) as tasks_previous
           FROM (
             SELECT DISTINCT status FROM use_cases WHERE domain_id = ?
             UNION
-            SELECT DISTINCT status FROM agents WHERE domain_id = ?
+            SELECT DISTINCT status FROM tasks WHERE domain_id = ?
           ) s
-          ORDER BY FIELD(status, 'production', 'pilot', 'validation', 'proof_of_concept', 'concept')
+          ORDER BY FIELD(status, 'integration', 'implementation', 'commitment', 'experimentation', 'intention', 'blocked', 'slow_burner', 'on_hold', 'de_prioritised')
         `;
         breakdownParams = [
           domain_id, currentStartStr, currentEndStr,
@@ -172,8 +126,8 @@ router.get('/variance', verifyToken, requireConsumerOrAdmin, async (req, res) =>
             impact as name,
             (SELECT COUNT(*) FROM use_cases WHERE domain_id = ? AND strategic_impact = i.impact AND DATE(created_date) BETWEEN ? AND ?) as initiatives_current,
             (SELECT COUNT(*) FROM use_cases WHERE domain_id = ? AND strategic_impact = i.impact AND DATE(created_date) BETWEEN ? AND ?) as initiatives_previous,
-            (SELECT COUNT(*) FROM agents WHERE domain_id = ? AND strategic_impact = i.impact AND DATE(created_date) BETWEEN ? AND ?) as agents_current,
-            (SELECT COUNT(*) FROM agents WHERE domain_id = ? AND strategic_impact = i.impact AND DATE(created_date) BETWEEN ? AND ?) as agents_previous
+            (SELECT COUNT(*) FROM tasks WHERE domain_id = ? AND strategic_impact = i.impact AND DATE(created_date) BETWEEN ? AND ?) as tasks_current,
+            (SELECT COUNT(*) FROM tasks WHERE domain_id = ? AND strategic_impact = i.impact AND DATE(created_date) BETWEEN ? AND ?) as tasks_previous
           FROM (
             SELECT 'High' as impact UNION SELECT 'Medium' UNION SELECT 'Low'
           ) i
@@ -194,8 +148,8 @@ router.get('/variance', verifyToken, requireConsumerOrAdmin, async (req, res) =>
             'category' as breakdown_type,
             COALESCE(uc_current.count, 0) as initiatives_current,
             COALESCE(uc_previous.count, 0) as initiatives_previous,
-            0 as agents_current,
-            0 as agents_previous
+            0 as tasks_current,
+            0 as tasks_previous
           FROM categories c
           LEFT JOIN (
             SELECT category_id, COUNT(*) as count
@@ -219,25 +173,25 @@ router.get('/variance', verifyToken, requireConsumerOrAdmin, async (req, res) =>
             'agent_type' as breakdown_type,
             0 as initiatives_current,
             0 as initiatives_previous,
-            COALESCE(ag_current.count, 0) as agents_current,
-            COALESCE(ag_previous.count, 0) as agents_previous
+            COALESCE(ag_current.count, 0) as tasks_current,
+            COALESCE(ag_previous.count, 0) as tasks_previous
           FROM agent_types at
           LEFT JOIN (
             SELECT agent_type_id, COUNT(*) as count
-            FROM agents
+            FROM tasks
             WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?
             GROUP BY agent_type_id
           ) ag_current ON at.id = ag_current.agent_type_id
           LEFT JOIN (
             SELECT agent_type_id, COUNT(*) as count
-            FROM agents
+            FROM tasks
             WHERE domain_id = ? AND DATE(created_date) BETWEEN ? AND ?
             GROUP BY agent_type_id
           ) ag_previous ON at.id = ag_previous.agent_type_id
           WHERE at.domain_id = ?
-          HAVING agents_current > 0 OR agents_previous > 0
+          HAVING tasks_current > 0 OR tasks_previous > 0
 
-          ORDER BY (initiatives_current + agents_current) DESC
+          ORDER BY (initiatives_current + tasks_current) DESC
         `;
         breakdownParams = [
           domain_id, currentStartStr, currentEndStr,
@@ -246,30 +200,6 @@ router.get('/variance', verifyToken, requireConsumerOrAdmin, async (req, res) =>
           domain_id, currentStartStr, currentEndStr,
           domain_id, previousStartStr, previousEndStr,
           domain_id
-        ];
-        break;
-
-      case 'kanban':
-        breakdownQuery = `
-          SELECT
-            pillar as name,
-            (SELECT COUNT(*) FROM use_cases WHERE domain_id = ? AND kanban_pillar = k.pillar AND DATE(created_date) BETWEEN ? AND ?) as initiatives_current,
-            (SELECT COUNT(*) FROM use_cases WHERE domain_id = ? AND kanban_pillar = k.pillar AND DATE(created_date) BETWEEN ? AND ?) as initiatives_previous,
-            (SELECT COUNT(*) FROM agents WHERE domain_id = ? AND kanban_pillar = k.pillar AND DATE(created_date) BETWEEN ? AND ?) as agents_current,
-            (SELECT COUNT(*) FROM agents WHERE domain_id = ? AND kanban_pillar = k.pillar AND DATE(created_date) BETWEEN ? AND ?) as agents_previous
-          FROM (
-            SELECT 'backlog' as pillar UNION SELECT 'prioritised' UNION SELECT 'in_progress'
-            UNION SELECT 'completed' UNION SELECT 'blocked' UNION SELECT 'slow_burner'
-            UNION SELECT 'de_prioritised' UNION SELECT 'on_hold'
-          ) k
-          HAVING initiatives_current > 0 OR initiatives_previous > 0 OR agents_current > 0 OR agents_previous > 0
-          ORDER BY FIELD(pillar, 'backlog', 'prioritised', 'in_progress', 'completed', 'blocked', 'slow_burner', 'de_prioritised', 'on_hold')
-        `;
-        breakdownParams = [
-          domain_id, currentStartStr, currentEndStr,
-          domain_id, previousStartStr, previousEndStr,
-          domain_id, currentStartStr, currentEndStr,
-          domain_id, previousStartStr, previousEndStr
         ];
         break;
 
@@ -290,13 +220,13 @@ router.get('/variance', verifyToken, requireConsumerOrAdmin, async (req, res) =>
       ? ((initiativesVariance / summary.initiatives_previous) * 100).toFixed(1)
       : (summary.initiatives_current > 0 ? 100 : 0);
 
-    const agentsVariance = summary.agents_current - summary.agents_previous;
-    const agentsPercent = summary.agents_previous > 0
-      ? ((agentsVariance / summary.agents_previous) * 100).toFixed(1)
-      : (summary.agents_current > 0 ? 100 : 0);
+    const agentsVariance = summary.tasks_current - summary.tasks_previous;
+    const agentsPercent = summary.tasks_previous > 0
+      ? ((agentsVariance / summary.tasks_previous) * 100).toFixed(1)
+      : (summary.tasks_current > 0 ? 100 : 0);
 
-    const ratio = summary.agents_current > 0
-      ? (summary.initiatives_current / summary.agents_current).toFixed(1)
+    const ratio = summary.tasks_current > 0
+      ? (summary.initiatives_current / summary.tasks_current).toFixed(1)
       : summary.initiatives_current;
 
     // Process daily data into a more usable format
@@ -331,9 +261,9 @@ router.get('/variance', verifyToken, requireConsumerOrAdmin, async (req, res) =>
       initiatives_current: row.initiatives_current || 0,
       initiatives_previous: row.initiatives_previous || 0,
       initiatives_variance: (row.initiatives_current || 0) - (row.initiatives_previous || 0),
-      agents_current: row.agents_current || 0,
-      agents_previous: row.agents_previous || 0,
-      agents_variance: (row.agents_current || 0) - (row.agents_previous || 0)
+      tasks_current: row.tasks_current || 0,
+      tasks_previous: row.tasks_previous || 0,
+      agents_variance: (row.tasks_current || 0) - (row.tasks_previous || 0)
     }));
 
     res.json({
@@ -354,8 +284,8 @@ router.get('/variance', verifyToken, requireConsumerOrAdmin, async (req, res) =>
           percent: parseFloat(initiativesPercent)
         },
         agents: {
-          current: summary.agents_current,
-          previous: summary.agents_previous,
+          current: summary.tasks_current,
+          previous: summary.tasks_previous,
           variance: agentsVariance,
           percent: parseFloat(agentsPercent)
         },

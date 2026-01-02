@@ -148,19 +148,14 @@ const PrioritizationMatrix: React.FC<PrioritizationMatrixProps> = ({ useCases, o
     return Math.round(MIN_SIZE + (ratio * (MAX_SIZE - MIN_SIZE)));
   };
 
-  // Calculate feasibility based on data and integration complexity
-  const calculateFeasibility = (dataComplexity?: string, integrationComplexity?: string): string => {
-    const data = dataComplexity || 'Medium';
-    const integration = integrationComplexity || 'Medium';
-    
-    // Both low = high feasibility
-    if (data === 'Low' && integration === 'Low') return 'High';
-    
-    // Any high = low feasibility 
-    if (data === 'High' || integration === 'High') return 'Low';
-    
-    // Everything else = medium feasibility
-    return 'Medium';
+  // Calculate feasibility based on effort level (simplified - no complexity data available)
+  const calculateFeasibility = (effortLevel?: string): string => {
+    // Map effort level to feasibility: Low effort = High feasibility, High effort = Low feasibility
+    switch (effortLevel) {
+      case 'Low': return 'High';
+      case 'High': return 'Low';
+      default: return 'Medium';
+    }
   };
 
   // Calculate min and max weights for scaling
@@ -242,7 +237,7 @@ const PrioritizationMatrix: React.FC<PrioritizationMatrixProps> = ({ useCases, o
     const impactScores: { [key: string]: number } = { 'Low': 1, 'Medium': 2, 'High': 3 };
     const feasibilityScores: { [key: string]: number } = { 'Low': 1, 'Medium': 2, 'High': 3 };
     
-    const feasibility = calculateFeasibility(uc.complexity?.data_complexity, uc.complexity?.integration_complexity);
+    const feasibility = calculateFeasibility(uc.effort_level);
     
     const baseX = impactScores[uc.strategic_impact] || 2;
     const baseY = feasibilityScores[feasibility] || 2;
@@ -421,15 +416,13 @@ const PrioritizationMatrix: React.FC<PrioritizationMatrixProps> = ({ useCases, o
             const uc = context.dataset.data[context.dataIndex].useCase;
             const strategicImpact = uc.strategic_impact || 'Unknown';
             const feasibility = context.dataset.data[context.dataIndex].feasibility || 'Unknown';
-            const dataComplexity = uc.complexity?.data_complexity || 'Unknown';
-            const integrationComplexity = uc.complexity?.integration_complexity || 'Unknown';
+            const effortLevel = uc.effort_level || 'Unknown';
             const goalCount = uc.goal_alignment_count || 0;
             return [
               `${uc.title}`,
               `Strategic Impact: ${strategicImpact}`,
               `Feasibility: ${feasibility}`,
-              `Data Complexity: ${dataComplexity}`,
-              `Integration Complexity: ${integrationComplexity}`,
+              `Effort Level: ${effortLevel}`,
               `Goal Alignments: ${goalCount}`
             ];
           },
@@ -447,7 +440,7 @@ const PrioritizationMatrix: React.FC<PrioritizationMatrixProps> = ({ useCases, o
 
   // Create debug data for table
   const debugData = useCases.map(uc => {
-    const feasibility = calculateFeasibility(uc.complexity?.data_complexity, uc.complexity?.integration_complexity);
+    const feasibility = calculateFeasibility(uc.effort_level);
     const impactWeight = impactWeights[uc.strategic_impact] || 2.0;
     const totalWeight = impactWeight + ((uc.goal_alignment_count || 0) * 0.5);
     const bubbleSize = calculateBubbleSize(uc.strategic_impact, uc.goal_alignment_count || 0, minWeight, maxWeight);
@@ -471,9 +464,9 @@ const PrioritizationMatrix: React.FC<PrioritizationMatrixProps> = ({ useCases, o
       </div>
       <div className="matrix-legend">
         <p><strong>X-axis:</strong> Strategic Impact (Low, Medium, High)</p>
-        <p><strong>Y-axis:</strong> Feasibility (derived from Data + Integration complexity)</p>
+        <p><strong>Y-axis:</strong> Feasibility (derived from Effort Level)</p>
         <p><strong>Bubble Size:</strong> Weighted by Strategic Impact (High=3, Med=2, Low=1) + Goal Alignments (0.5 each) | 8-24px scale</p>
-        <p><strong>Feasibility Logic:</strong> Both Low = High | Any High = Low | Otherwise = Medium</p>
+        <p><strong>Feasibility Logic:</strong> Low Effort = High Feasibility | High Effort = Low Feasibility | Otherwise = Medium</p>
         <p><strong>Colors:</strong> Initiative Categories</p>
       </div>
       

@@ -13,8 +13,8 @@ import {
   Modifier,
 } from '@dnd-kit/core';
 import { motion } from 'framer-motion';
-import { UseCase, SearchFilters, Category, Agent, AgentFilters } from '../../types';
-import { useCaseAPI, categoryAPI, agentAPI } from '../../services/apiService';
+import { UseCase, SearchFilters, Category } from '../../types';
+import { useCaseAPI, categoryAPI } from '../../services/apiService';
 import { useActiveDomainId } from '../../context/DomainContext';
 import TimelineColumn from './TimelineColumn';
 import TimelineCard from './TimelineCard';
@@ -28,7 +28,7 @@ const ITEMS_PER_LOAD = 20;
 
 // Column state for grouped loading
 interface ColumnState {
-  items: (UseCase | Agent)[];
+  items: UseCase[];
   totalCount: number;
   hasMore: boolean;
   isLoading: boolean;
@@ -36,7 +36,6 @@ interface ColumnState {
 
 interface RoadmapTimelineProps {
   onUseCaseClick: (useCase: UseCase) => void;
-  onAgentClick?: (agent: Agent) => void;
   showAIChat?: boolean;
   onCloseChatClick?: () => void;
   user?: any;
@@ -66,11 +65,10 @@ const generateMonthColumns = (monthsCount: number) => {
   return columns;
 };
 
-const FILTER_STORAGE_KEY = 'hekmah_roadmap_filter_preferences';
+const FILTER_STORAGE_KEY = 'samantha_roadmap_filter_preferences';
 
 const RoadmapTimeline: React.FC<RoadmapTimelineProps> = ({
   onUseCaseClick,
-  onAgentClick,
   showAIChat = false,
   onCloseChatClick,
   user,
@@ -91,7 +89,6 @@ const RoadmapTimeline: React.FC<RoadmapTimelineProps> = ({
     return {};
   };
 
-  const [showAgents, setShowAgents] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [filters, setFilters] = useState<SearchFilters>(getInitialFilters);
@@ -110,7 +107,7 @@ const RoadmapTimeline: React.FC<RoadmapTimelineProps> = ({
   const initialLoadRef = useRef<string | null>(null);
 
   // Keep a reference to all items for drag-drop purposes
-  const allItemsRef = useRef<Map<string, UseCase | Agent>>(new Map());
+  const allItemsRef = useRef<Map<string, UseCase>>(new Map());
 
   // Ref for the scrollable board container (for auto-scroll during drag)
   const boardRef = useRef<HTMLDivElement>(null);
@@ -246,14 +243,14 @@ const RoadmapTimeline: React.FC<RoadmapTimelineProps> = ({
   }, [filters, activeDomainId]);
 
   // Helper to get month key from expected_delivery_month format
-  const getMonthKey = (item: UseCase | Agent): string => {
+  const getMonthKey = (item: UseCase): string => {
     if (!item.expected_delivery_date) return 'unplanned';
     const dateParts = item.expected_delivery_date.split('-');
     return `${dateParts[0]}-${dateParts[1]}`;
   };
 
   // Helper to get the column key for an item (considering 'past' column)
-  const getColumnKey = (item: UseCase | Agent): string => {
+  const getColumnKey = (item: UseCase): string => {
     const monthKey = getMonthKey(item);
     if (monthKey === 'unplanned') return 'unplanned';
 
@@ -272,9 +269,6 @@ const RoadmapTimeline: React.FC<RoadmapTimelineProps> = ({
     offset: number = 0,
     append: boolean = false
   ) => {
-    const isAgentsMode = showAgents;
-    const agentFilters = filters as AgentFilters;
-
     // Mark column as loading
     setColumnStates(prev => ({
       ...prev,
@@ -282,8 +276,6 @@ const RoadmapTimeline: React.FC<RoadmapTimelineProps> = ({
     }));
 
     try {
-      let items: (UseCase | Agent)[];
-
       // Parse month ID to get year and month for filtering
       const isUnplanned = monthId === 'unplanned';
       const isPast = monthId === 'past';
@@ -296,32 +288,13 @@ const RoadmapTimeline: React.FC<RoadmapTimelineProps> = ({
         filterMonth = month;
       }
 
-      if (isAgentsMode) {
-        items = await agentAPI.getAll({
-          domain_id: activeDomainId || undefined,
-          limit: ITEMS_PER_LOAD,
-          offset,
-          tags: filters.tags,
-          data_sensitivity: filters.data_sensitivity,
-          departments: filters.departments,
-          statuses: filters.statuses,
-          strategic_impact: filters.strategic_impact,
-          kanban_pillar: filters.kanban_pillar,
-          expected_delivery_year: (isUnplanned || isPast) ? undefined : filterYear,
-          expected_delivery_month: isUnplanned ? 'unplanned' : isPast ? 'past' : filterMonth,
-          agent_types: filters.agent_types,
-          initiative_ids: agentFilters.initiative_ids,
-          search: filters.search
-        });
-      } else {
-        items = await useCaseAPI.getAll({
-          ...filtersWithDomain,
-          expected_delivery_year: (isUnplanned || isPast) ? undefined : filterYear,
-          expected_delivery_month: isUnplanned ? 'unplanned' : isPast ? 'past' : filterMonth,
-          limit: ITEMS_PER_LOAD,
-          offset
-        });
-      }
+      const items = await useCaseAPI.getAll({
+        ...filtersWithDomain,
+        expected_delivery_year: (isUnplanned || isPast) ? undefined : filterYear,
+        expected_delivery_month: isUnplanned ? 'unplanned' : isPast ? 'past' : filterMonth,
+        limit: ITEMS_PER_LOAD,
+        offset
+      });
 
       // Update items reference for drag-drop
       items.forEach(item => allItemsRef.current.set(item.id, item));
@@ -349,12 +322,12 @@ const RoadmapTimeline: React.FC<RoadmapTimelineProps> = ({
       }));
       return [];
     }
-  }, [showAgents, filters, filtersWithDomain, activeDomainId]);
+  }, [filtersWithDomain]);
 
   // Load grouped stats and initial items for all columns
   useEffect(() => {
     const loadData = async () => {
-      const filterKey = JSON.stringify({ ...filtersWithDomain, showAgents, selectedRange });
+      const filterKey = JSON.stringify({ ...filtersWithDomain, selectedRange });
 
       // Skip if already loading the same filter combination
       if (initialLoadRef.current === filterKey) return;
@@ -365,25 +338,7 @@ const RoadmapTimeline: React.FC<RoadmapTimelineProps> = ({
 
       try {
         // First, get grouped counts by expected_delivery_month
-        let groupedStats: { groups: Record<string, { count: number }>; total_count: number };
-
-        if (showAgents) {
-          const agentFilters = filters as AgentFilters;
-          groupedStats = await agentAPI.getGroupedStats('expected_delivery_month', {
-            domain_id: activeDomainId || undefined,
-            tags: filters.tags,
-            data_sensitivity: filters.data_sensitivity,
-            departments: filters.departments,
-            statuses: filters.statuses,
-            strategic_impact: filters.strategic_impact,
-            kanban_pillar: filters.kanban_pillar,
-            agent_types: filters.agent_types,
-            initiative_ids: agentFilters.initiative_ids,
-            search: filters.search
-          });
-        } else {
-          groupedStats = await useCaseAPI.getGroupedStats('expected_delivery_month', filtersWithDomain);
-        }
+        const groupedStats = await useCaseAPI.getGroupedStats('expected_delivery_month', filtersWithDomain);
 
         console.log('RoadmapTimeline: groupedStats received:', groupedStats);
         console.log('RoadmapTimeline: monthColumns:', monthColumns.map(c => c.id));
@@ -436,8 +391,6 @@ const RoadmapTimeline: React.FC<RoadmapTimelineProps> = ({
           // Get count from the appropriate source (pastCount for 'past', groupedStats for others)
           const count = colId === 'past' ? pastCount : (groupedStats.groups[colId]?.count || 0);
           if (count > 0) {
-            const agentFilters = filters as AgentFilters;
-            let items: (UseCase | Agent)[];
             const isUnplanned = colId === 'unplanned';
             const isPast = colId === 'past';
             let filterMonth: string | undefined;
@@ -449,32 +402,13 @@ const RoadmapTimeline: React.FC<RoadmapTimelineProps> = ({
               filterMonth = month;
             }
 
-            if (showAgents) {
-              items = await agentAPI.getAll({
-                domain_id: activeDomainId || undefined,
-                limit: ITEMS_PER_LOAD,
-                offset: 0,
-                tags: filters.tags,
-                data_sensitivity: filters.data_sensitivity,
-                departments: filters.departments,
-                statuses: filters.statuses,
-                strategic_impact: filters.strategic_impact,
-                kanban_pillar: filters.kanban_pillar,
-                expected_delivery_year: (isUnplanned || isPast) ? undefined : filterYear,
-                expected_delivery_month: isUnplanned ? 'unplanned' : isPast ? 'past' : filterMonth,
-                agent_types: filters.agent_types,
-                initiative_ids: agentFilters.initiative_ids,
-                search: filters.search
-              });
-            } else {
-              items = await useCaseAPI.getAll({
-                ...filtersWithDomain,
-                expected_delivery_year: (isUnplanned || isPast) ? undefined : filterYear,
-                expected_delivery_month: isUnplanned ? 'unplanned' : isPast ? 'past' : filterMonth,
-                limit: ITEMS_PER_LOAD,
-                offset: 0
-              });
-            }
+            const items = await useCaseAPI.getAll({
+              ...filtersWithDomain,
+              expected_delivery_year: (isUnplanned || isPast) ? undefined : filterYear,
+              expected_delivery_month: isUnplanned ? 'unplanned' : isPast ? 'past' : filterMonth,
+              limit: ITEMS_PER_LOAD,
+              offset: 0
+            });
 
             // Store items in reference map
             items.forEach(item => allItemsRef.current.set(item.id, item));
@@ -509,7 +443,7 @@ const RoadmapTimeline: React.FC<RoadmapTimelineProps> = ({
     };
 
     loadData();
-  }, [filtersWithDomain, showAgents, filters, activeDomainId, monthColumns, selectedRange]);
+  }, [filtersWithDomain, filters, activeDomainId, monthColumns, selectedRange]);
 
   // Handler for loading more items in a column
   const handleLoadMore = useCallback(async (monthId: string) => {
@@ -531,26 +465,14 @@ const RoadmapTimeline: React.FC<RoadmapTimelineProps> = ({
 
   // Get all loaded items as arrays for backwards compatibility
   const allUseCases = useMemo(() => {
-    if (showAgents) return [];
     const items: UseCase[] = [];
     Object.values(columnStates).forEach(col => {
       col.items.forEach(item => {
-        if ('category' in item) items.push(item as UseCase);
+        items.push(item);
       });
     });
     return items;
-  }, [columnStates, showAgents]);
-
-  const allAgents = useMemo(() => {
-    if (!showAgents) return [];
-    const items: Agent[] = [];
-    Object.values(columnStates).forEach(col => {
-      col.items.forEach(item => {
-        if ('agent_type' in item) items.push(item as Agent);
-      });
-    });
-    return items;
-  }, [columnStates, showAgents]);
+  }, [columnStates]);
 
   // Filter initiatives for the dropdown - now just returns loaded items
   const filteredInitiativesForDropdown = useMemo(() => {
@@ -594,9 +516,6 @@ const RoadmapTimeline: React.FC<RoadmapTimelineProps> = ({
       console.error('Item not found:', itemId);
       return;
     }
-
-    const isAgent = 'agent_type' in item;
-    const isUseCase = 'category' in item;
 
     // Determine old column key (uses 'past' for past months)
     const oldColumnKey = getColumnKey(item);
@@ -697,11 +616,7 @@ const RoadmapTimeline: React.FC<RoadmapTimelineProps> = ({
 
     // Update the backend
     try {
-      if (isAgent) {
-        await agentAPI.updateDeliveryDate(itemId, newDeliveryDateString);
-      } else if (isUseCase) {
-        await useCaseAPI.updateDeliveryDate(itemId, newDeliveryDateString);
-      }
+      await useCaseAPI.updateDeliveryDate(itemId, newDeliveryDateString);
     } catch (error: any) {
       console.error('Failed to update delivery date:', error);
 
@@ -744,14 +659,9 @@ const RoadmapTimeline: React.FC<RoadmapTimelineProps> = ({
   // Find active item for drag overlay
   const activeItem = activeId ? allItemsRef.current.get(activeId) : null;
 
-  // Handler that processes both UseCase and Agent clicks
-  const handleCardClick = (item: UseCase | Agent) => {
-    // Check if it's a UseCase (has category) or Agent (has agent_type)
-    if ('category' in item) {
-      onUseCaseClick(item as UseCase);
-    } else if ('agent_type' in item && onAgentClick) {
-      onAgentClick(item as Agent);
-    }
+  // Handler that processes UseCase clicks
+  const handleCardClick = (item: UseCase) => {
+    onUseCaseClick(item);
   };
 
   if (isLoading) {
@@ -773,32 +683,17 @@ const RoadmapTimeline: React.FC<RoadmapTimelineProps> = ({
               fontWeight: '600',
               color: '#374151'
             }}>
-              {showAgents
-                ? `${totalCount} agent${totalCount !== 1 ? 's' : ''} found`
-                : `${totalCount} initiative${totalCount !== 1 ? 's' : ''} found`
-              }
+              {`${totalCount} initiative${totalCount !== 1 ? 's' : ''} found`}
             </div>
-            <button
-              className={`toggle-view-btn ${showAgents ? 'active' : ''}`}
-              onClick={() => {
-                setShowAgents(!showAgents);
-                // Reset filter key to trigger reload with new mode
-                initialLoadRef.current = null;
-              }}
-            >
-              {showAgents ? 'Show Initiatives' : 'Show Agents'}
-            </button>
           </div>
           <FilterPanel
             categories={categories}
             filters={filters}
             onFiltersChange={handleFiltersChange}
             onClearFilters={handleClearFilters}
-            showAgentTypeFilter={showAgents}
-            hideKanbanStatus={showAgents}
+            hideKanbanStatus={true}
             hideDeliveryDateFilters={true}
             initiatives={filteredInitiativesForDropdown}
-            agents={allAgents}
           />
         </div>
 

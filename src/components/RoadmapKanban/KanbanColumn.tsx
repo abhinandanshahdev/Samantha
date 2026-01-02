@@ -1,18 +1,18 @@
 import React from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { UseCase, KanbanStatus, Agent } from '../../types';
+import { UseCase, KanbanStatus } from '../../types';
 import KanbanCard from './KanbanCard';
 
 interface KanbanColumnProps {
   id: KanbanStatus;
   title: string;
-  useCases: (UseCase | Agent)[];
+  useCases: UseCase[];
   totalCount?: number;
   hasMore?: boolean;
   isLoadingMore?: boolean;
   onLoadMore?: () => void;
-  onCardClick: (useCase: UseCase | Agent) => void;
+  onCardClick: (useCase: UseCase) => void;
 }
 
 const KanbanColumn: React.FC<KanbanColumnProps> = ({

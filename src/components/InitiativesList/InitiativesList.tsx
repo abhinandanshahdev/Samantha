@@ -13,21 +13,29 @@ import { emptyStateMessages } from '../../data/emptyStates';
 import { FaThLarge, FaList, FaSortAmountDown, FaPlus, FaChartLine, FaBuilding, FaLayerGroup, FaBolt, FaTag } from 'react-icons/fa';
 import './InitiativesList.css';
 
-// Status colors from UseCaseCard
+// Status colors matching new family workflow
 const STATUS_COLORS = {
-  concept: '#77787B', // Metal Grey
-  proof_of_concept: '#C68D6D', // Earthy Brown
-  validation: '#F6BD60', // Sunset Yellow
-  pilot: '#00A79D', // Sea Green
-  production: '#B79546' // Gold
+  intention: '#77787B', // Metal Grey
+  experimentation: '#9B59B6', // Purple
+  commitment: '#C68D6D', // Earthy Brown
+  implementation: '#4A90E2', // Blue
+  integration: '#00A79D', // Sea Green
+  blocked: '#E74C3C', // Red
+  slow_burner: '#F6BD60', // Sunset Yellow
+  de_prioritised: '#9e9e9e', // Grey
+  on_hold: '#B79546' // Gold
 };
 
 const STATUS_LABELS = {
-  concept: 'Concept',
-  proof_of_concept: 'PoC',
-  validation: 'Validation',
-  pilot: 'Pilot',
-  production: 'Production'
+  intention: 'Intention',
+  experimentation: 'Experimentation',
+  commitment: 'Commitment',
+  implementation: 'Implementation',
+  integration: 'Integration',
+  blocked: 'Blocked',
+  slow_burner: 'Slow Burner',
+  de_prioritised: 'De-prioritised',
+  on_hold: 'On Hold'
 };
 
 interface StatusCount {
@@ -41,7 +49,7 @@ interface InitiativesCountBarProps {
   useCases: UseCase[];
 }
 
-const STATUS_ORDER = ['concept', 'proof_of_concept', 'validation', 'pilot', 'production'];
+const STATUS_ORDER = ['intention', 'experimentation', 'commitment', 'implementation', 'integration'];
 
 const InitiativesCountBar: React.FC<InitiativesCountBarProps> = ({ useCases }) => {
   const statusCounts = useMemo(() => {
@@ -54,7 +62,7 @@ const InitiativesCountBar: React.FC<InitiativesCountBarProps> = ({ useCases }) =
     return STATUS_ORDER.map(status => ({
       status,
       count: counts[status] || 0,
-      color: STATUS_COLORS[status as keyof typeof STATUS_COLORS] || STATUS_COLORS.concept,
+      color: STATUS_COLORS[status as keyof typeof STATUS_COLORS] || STATUS_COLORS.intention,
       label: STATUS_LABELS[status as keyof typeof STATUS_LABELS] || status
     }));
   }, [useCases]);

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { SearchFilters, Category, Department, StrategicPillar, StrategicGoal } from '../../types';
-import { categoryAPI, departmentAPI, strategicPillarsAPI, strategicGoalsAPI } from '../../services/apiService';
+import { SearchFilters, Category, StrategicPillar, StrategicGoal } from '../../types';
+import { categoryAPI, strategicPillarsAPI, strategicGoalsAPI } from '../../services/apiService';
 import { useActiveDomainId } from '../../context/DomainContext';
-import { FaSearch, FaFilter, FaTimes } from 'react-icons/fa';
+import { FaFilter, FaTimes } from 'react-icons/fa';
 import './EnhancedInitiativeFilters.css';
 
 interface EnhancedInitiativeFiltersProps {
@@ -22,7 +22,6 @@ const EnhancedInitiativeFilters: React.FC<EnhancedInitiativeFiltersProps> = ({
 }) => {
   const activeDomainId = useActiveDomainId();
   const [categories, setCategories] = useState<Category[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
   const [pillars, setPillars] = useState<StrategicPillar[]>([]);
   const [goals, setGoals] = useState<StrategicGoal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,15 +32,13 @@ const EnhancedInitiativeFilters: React.FC<EnhancedInitiativeFiltersProps> = ({
     const loadFilterData = async () => {
       try {
         setLoading(true);
-        const [categoriesData, departmentsData, pillarsData, goalsData] = await Promise.all([
+        const [categoriesData, pillarsData, goalsData] = await Promise.all([
           categoryAPI.getAll(activeDomainId),
-          departmentAPI.getAll(activeDomainId || undefined),
           strategicPillarsAPI.getAll(activeDomainId),
           strategicGoalsAPI.getAll(activeDomainId ? { domain_id: activeDomainId } : undefined)
         ]);
 
         setCategories(categoriesData);
-        setDepartments(departmentsData);
         setPillars(pillarsData);
         setGoals(goalsData);
       } catch (error) {
@@ -170,26 +167,14 @@ const EnhancedInitiativeFilters: React.FC<EnhancedInitiativeFiltersProps> = ({
                 onChange={(e) => handleFilterChange('status', e.target.value || undefined)}
               >
                 <option value="">All Statuses</option>
-                <option value="concept">Concept</option>
-                <option value="proof_of_concept">Proof of Concept</option>
-                <option value="validation">Validation</option>
-                <option value="pilot">Pilot</option>
-                <option value="production">Production</option>
-              </select>
-            </div>
-
-            <div className="filter-group">
-              <label>Department</label>
-              <select
-                value={filters.department || ''}
-                onChange={(e) => handleFilterChange('department', e.target.value || undefined)}
-              >
-                <option value="">All Departments</option>
-                {departments.map((dept) => (
-                  <option key={dept.id} value={dept.name}>
-                    {dept.name}
-                  </option>
-                ))}
+                <option value="backlog">Backlog</option>
+                <option value="prioritised">Prioritised</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+                <option value="blocked">Blocked</option>
+                <option value="slow_burner">Slow Burner</option>
+                <option value="de_prioritised">De-prioritised</option>
+                <option value="on_hold">On Hold</option>
               </select>
             </div>
           </div>
@@ -243,24 +228,6 @@ const EnhancedInitiativeFilters: React.FC<EnhancedInitiativeFiltersProps> = ({
           </div>
 
           <div className="filter-row">
-            <div className="filter-group">
-              <label>Delivery Status</label>
-              <select
-                value={filters.kanban_pillar || ''}
-                onChange={(e) => handleFilterChange('kanban_pillar', e.target.value || undefined)}
-              >
-                <option value="">All Statuses</option>
-                <option value="backlog">Backlog</option>
-                <option value="prioritised">Prioritised</option>
-                <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
-                <option value="blocked">Blocked</option>
-                <option value="slow_burner">Slow Burner</option>
-                <option value="de_prioritised">De-prioritised</option>
-                <option value="on_hold">On Hold</option>
-              </select>
-            </div>
-
             <div className="filter-group">
               <label>Expected Delivery Year</label>
               <select
@@ -332,16 +299,7 @@ const EnhancedInitiativeFilters: React.FC<EnhancedInitiativeFiltersProps> = ({
               </button>
             </div>
           )}
-          
-          {filters.department && (
-            <div className="filter-tag">
-              <span>Department: {filters.department}</span>
-              <button onClick={() => handleFilterChange('department', undefined)}>
-                <FaTimes />
-              </button>
-            </div>
-          )}
-          
+
           {filters.strategic_pillar_id && (
             <div className="filter-tag">
               <span>Pillar: {pillars.find(p => p.id === filters.strategic_pillar_id)?.name}</span>

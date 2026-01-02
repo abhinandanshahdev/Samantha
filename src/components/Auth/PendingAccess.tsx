@@ -44,13 +44,13 @@ const PendingAccess: React.FC<PendingAccessProps> = ({ user, onLogout }) => {
             color: '#D4AF37',
             margin: '0 0 8px 0',
             fontFamily: 'Montserrat, sans-serif'
-          }}>Hekmah</h1>
+          }}>Samantha</h1>
           <p style={{
             color: '#2C3E50',
             fontSize: '18px',
             margin: '0',
             fontWeight: '600'
-          }}>AI Use Case Repository</p>
+          }}>Family Management</p>
         </div>
 
         {/* Pending Access Message */}
@@ -89,7 +89,7 @@ const PendingAccess: React.FC<PendingAccessProps> = ({ user, onLogout }) => {
             lineHeight: '1.6',
             marginBottom: '24px'
           }}>
-            You don't have access to Hekmah yet. Your account ({user.email}) has been logged, 
+            You don't have access to Samantha yet. Your account ({user.email}) has been logged, 
             and an administrator will review your access request shortly.
           </p>
           

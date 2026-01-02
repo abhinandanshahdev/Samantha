@@ -15,7 +15,6 @@ export interface DomainConfig {
     initiative_plural: string;
   };
   features?: {
-    complexity_fields: boolean;
     ai_autocomplete: boolean;
   };
 }
@@ -36,18 +35,9 @@ export interface Domain {
   category_count?: number;
 }
 
-export type ComplexityLevel = 'High' | 'Medium' | 'Low';
+export type EffortLevel = 'Low' | 'Medium' | 'High';
 
-export type KanbanStatus = 'backlog' | 'prioritised' | 'in_progress' | 'completed' | 'blocked' | 'slow_burner' | 'de_prioritised' | 'on_hold';
-
-export type DataSensitivityLevel = 'Public' | 'Restricted' | 'Confidential' | 'Secret';
-
-export interface ComplexityCategories {
-  data_complexity: ComplexityLevel;
-  integration_complexity: ComplexityLevel;
-  intelligence_complexity: ComplexityLevel;
-  functional_complexity: ComplexityLevel;
-}
+export type KanbanStatus = 'intention' | 'experimentation' | 'commitment' | 'implementation' | 'integration' | 'blocked' | 'slow_burner' | 'de_prioritised' | 'on_hold';
 
 export interface UseCase {
   id: string;
@@ -61,7 +51,7 @@ export interface UseCase {
   lessons_learned?: string;
   category: string;
   tags?: string[];
-  status: 'concept' | 'proof_of_concept' | 'validation' | 'pilot' | 'production';
+  status: KanbanStatus;
   author_name: string;
   owner_name?: string;
   owner_email?: string;
@@ -70,18 +60,15 @@ export interface UseCase {
   view_count: number;
   rating: number;
   strategic_impact: 'Low' | 'Medium' | 'High';
-  complexity: ComplexityCategories;
-  department: string;
+  effort_level?: EffortLevel;
   justification?: string;
   attachments?: string[];
   strategic_goal_alignments?: UseCaseGoalAlignment[];
   goal_alignment_count?: number;
   likes_count?: number;
   comments_count?: number;
-  agent_count?: number; // Count of linked agents
-  kanban_pillar?: KanbanStatus;
+  task_count?: number; // Count of linked tasks
   expected_delivery_date?: string; // Format: 'MMM YYYY' like 'Jan 2025'
-  data_sensitivity?: DataSensitivityLevel;
   roadmap_link?: string;
   value_realisation_link?: string;
 }
@@ -107,49 +94,33 @@ export interface Outcome {
   updated_date?: string;
 }
 
-export interface Department {
-  id: string;
-  name: string;
-  domain_id?: number;
-}
-
 export interface SearchFilters {
   search?: string;
   domain_id?: number; // Filter by domain
-  categories?: string[];  // Changed to array for multi-select
-  statuses?: string[];    // Changed to array for multi-select
-  departments?: string[]; // Changed to array for multi-select
+  categories?: string[];  // Array for multi-select
+  statuses?: KanbanStatus[];    // Array for multi-select
   tags?: string[];        // Array for multi-select tags (AND logic: must have ALL selected tags)
   strategic_pillars?: number[]; // Array for multi-select strategic pillars
   strategic_goals?: string[];   // Array for multi-select strategic goals
-  // Legacy single-select (for backward compatibility, will be removed)
+  // Legacy single-select (for backward compatibility)
   category?: string;
-  status?: string;
-  department?: string;
+  status?: KanbanStatus;
   strategic_pillar_id?: number; // Single strategic pillar filter
   strategic_goal_id?: string;   // Single strategic goal filter
   strategic_impact?: 'Low' | 'Medium' | 'High'; // Strategic impact filter
-  complexity?: {
-    data_complexity?: ComplexityLevel;
-    integration_complexity?: ComplexityLevel;
-    intelligence_complexity?: ComplexityLevel;
-    functional_complexity?: ComplexityLevel;
-  };
+  effort_level?: EffortLevel; // Effort level filter
   dateRange?: {
     start: string;
     end: string;
   };
-  kanban_pillar?: KanbanStatus; // Kanban delivery status filter
   expected_delivery_year?: number; // Expected delivery year filter
   expected_delivery_month?: string; // Expected delivery month filter (e.g., 'Jan', 'Feb')
-  data_sensitivity?: DataSensitivityLevel[]; // Data sensitivity filter (multi-select with AND logic)
-  agent_types?: string[]; // Filter use cases by their linked agents' types (used in Linked Initiatives view)
 }
 
 export interface PrioritizationMatrix {
-  complexity: 'High' | 'Medium' | 'Low';
+  effort: EffortLevel;
   impact: 'High' | 'Medium' | 'Low';
-} 
+}
 
 export interface StrategicPillar {
   id: number;
@@ -225,24 +196,14 @@ export interface UseCaseAssociation {
   use_case_id: string;
   title: string;
   description: string;
-  status: string;
+  status: KanbanStatus;
   category: string;
-  department: string;
   created_date: string;
   created_by_name: string;
 }
 
-// Agent types
-export interface AgentType {
-  id: number;
-  name: string;
-  description: string;
-  domain_id: number;
-  created_date?: string;
-  updated_date?: string;
-}
-
-export interface Agent {
+// Task types (renamed from Agent)
+export interface Task {
   id: string;
   domain_id: number;
   title: string;
@@ -252,81 +213,63 @@ export interface Agent {
   technical_implementation?: string;
   results_metrics?: string;
   lessons_learned?: string;
-  agent_type: string;
-  status: 'concept' | 'proof_of_concept' | 'validation' | 'pilot' | 'production';
+  status: KanbanStatus;
   author_name: string;
   owner_name?: string;
   owner_email?: string;
   created_date: string;
   updated_date: string;
   strategic_impact: 'Low' | 'Medium' | 'High';
-  complexity: ComplexityCategories;
-  department: string;
+  effort_level?: EffortLevel;
   justification?: string;
   initiative_count?: number;
   likes_count?: number;
   comments_count?: number;
-  kanban_pillar?: KanbanStatus;
   expected_delivery_date?: string; // Format: 'MMM YYYY' like 'Jan 2025'
   linked_initiatives?: string[]; // Array of use case IDs
-  data_sensitivity?: DataSensitivityLevel;
   roadmap_link?: string;
   value_realisation_link?: string;
 }
 
-export interface AgentFilters {
+export interface TaskFilters {
   search?: string;
   domain_id?: number;
-  agent_types?: string[];
-  statuses?: string[];
-  departments?: string[];
-  tags?: string[];        // Array for multi-select tags (filters agents by linked initiatives' tags with AND logic)
-  initiative_ids?: string[]; // Filter agents by linked initiatives (multi-select)
-  agent_type?: string; // Legacy single-select
-  status?: string; // Legacy single-select
-  department?: string; // Legacy single-select
+  statuses?: KanbanStatus[];
+  tags?: string[];        // Array for multi-select tags (filters tasks by linked initiatives' tags with AND logic)
+  initiative_ids?: string[]; // Filter tasks by linked initiatives (multi-select)
+  status?: KanbanStatus; // Legacy single-select
   strategic_impact?: 'Low' | 'Medium' | 'High';
-  complexity?: {
-    data_complexity?: ComplexityLevel;
-    integration_complexity?: ComplexityLevel;
-    intelligence_complexity?: ComplexityLevel;
-    functional_complexity?: ComplexityLevel;
-  };
-  kanban_pillar?: KanbanStatus;
+  effort_level?: EffortLevel;
   expected_delivery_year?: number;
   expected_delivery_month?: string;
-  data_sensitivity?: DataSensitivityLevel[]; // Data sensitivity filter (multi-select with AND logic)
 }
 
-export interface AgentLike {
+export interface TaskLike {
   id: number;
-  agent_id: string;
+  task_id: string;
   user_id: string;
   user_name?: string;
   user_email?: string;
   created_date: string;
 }
 
-export interface AgentInitiativeAssociation {
+export interface TaskInitiativeAssociation {
   association_id: number;
   use_case_id: string;
   title: string;
   description: string;
-  status: string;
+  status: KanbanStatus;
   category: string;
-  department: string;
   created_date: string;
   created_by_name: string;
 }
 
-export interface InitiativeAgentAssociation {
+export interface InitiativeTaskAssociation {
   association_id: number;
-  agent_id: string;
+  task_id: string;
   title: string;
   description: string;
-  status: string;
-  agent_type: string;
-  department: string;
+  status: KanbanStatus;
   created_date: string;
   created_by_name: string;
 }
@@ -336,11 +279,11 @@ export type AuditLogEventType =
   | 'roadmap_change'
   | 'status_change'
   | 'use_case_created'
-  | 'agent_created'
+  | 'task_created'
   | 'comment_added'
   | 'like_added';
 
-export type AuditLogEntityType = 'use_case' | 'agent';
+export type AuditLogEntityType = 'use_case' | 'task';
 
 export interface AuditLog {
   id: string;
@@ -373,20 +316,18 @@ export interface ExportPreviewDomain {
   type: DomainType;
   counts: {
     initiatives: number;
-    agents: number;
+    tasks: number;
     strategic_pillars: number;
     strategic_goals: number;
     categories: number;
-    departments: number;
-    agent_types: number;
     outcomes: number;
     tags: number;
     comments: number;
     initiative_likes: number;
-    agent_likes: number;
+    task_likes: number;
     initiative_associations: number;
     goal_alignments: number;
-    agent_initiative_associations: number;
+    task_initiative_associations: number;
   };
   total: number;
 }

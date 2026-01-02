@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Samantha ports (different from Hekmah to allow both to run)
+BACKEND_PORT=3003
+FRONTEND_PORT=3002
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -108,7 +112,7 @@ ensure_jwks_keys() {
 
 # Function to start backend server
 start_backend() {
-    print_status "Starting backend server on port 3001..."
+    print_status "Starting backend server on port $BACKEND_PORT..."
 
     # Ensure JWKS keys are available for Microsoft auth
     ensure_jwks_keys
@@ -119,8 +123,8 @@ start_backend() {
         return 1
     fi
 
-    # Start server in background
-    nohup node index.js > ../backend.log 2>&1 &
+    # Start server in background with custom port
+    BACKEND_PORT=$BACKEND_PORT nohup node index.js > ../backend.log 2>&1 &
     local backend_pid=$!
 
     # Wait a moment for server to start
@@ -140,25 +144,25 @@ start_backend() {
 
 # Function to start frontend server
 start_frontend() {
-    print_status "Starting frontend server on port 3000..."
-    
+    print_status "Starting frontend server on port $FRONTEND_PORT..."
+
     if [ ! -f "package.json" ]; then
         print_error "Frontend package.json not found. Make sure you're in the correct directory."
         return 1
     fi
-    
-    # Start frontend in background
-    nohup npm start > frontend.log 2>&1 &
+
+    # Start frontend in background with custom port
+    PORT=$FRONTEND_PORT nohup npm start > frontend.log 2>&1 &
     local frontend_pid=$!
-    
+
     # Wait a moment for server to start
     sleep 5
-    
+
     # Check if server is running by checking the port
-    if lsof -ti:3000 > /dev/null; then
+    if lsof -ti:$FRONTEND_PORT > /dev/null; then
         print_success "Frontend server started successfully"
         print_status "Frontend logs: tail -f frontend.log"
-        print_status "Frontend URL: http://localhost:3000"
+        print_status "Frontend URL: http://localhost:$FRONTEND_PORT"
     else
         print_error "Failed to start frontend server. Check frontend.log for errors."
         return 1
@@ -168,38 +172,38 @@ start_frontend() {
 # Function to check server status
 check_status() {
     print_status "Checking server status..."
-    
+
     # Check backend
-    if lsof -ti:3001 > /dev/null; then
-        print_success "Backend server is running on port 3001"
+    if lsof -ti:$BACKEND_PORT > /dev/null; then
+        print_success "Backend server is running on port $BACKEND_PORT"
     else
-        print_warning "Backend server is not running on port 3001"
+        print_warning "Backend server is not running on port $BACKEND_PORT"
     fi
-    
+
     # Check frontend
-    if lsof -ti:3000 > /dev/null; then
-        print_success "Frontend server is running on port 3000"
+    if lsof -ti:$FRONTEND_PORT > /dev/null; then
+        print_success "Frontend server is running on port $FRONTEND_PORT"
     else
-        print_warning "Frontend server is not running on port 3000"
+        print_warning "Frontend server is not running on port $FRONTEND_PORT"
     fi
 }
 
 # Function to restart specific server
 restart_server() {
     local server_type=$1
-    
+
     case $server_type in
         "backend")
-            kill_port 3001 "Backend"
+            kill_port $BACKEND_PORT "Backend"
             start_backend
             ;;
         "frontend")
-            kill_port 3000 "Frontend"
+            kill_port $FRONTEND_PORT "Frontend"
             start_frontend
             ;;
         "both")
-            kill_port 3001 "Backend"
-            kill_port 3000 "Frontend"
+            kill_port $BACKEND_PORT "Backend"
+            kill_port $FRONTEND_PORT "Frontend"
             start_backend
             start_frontend
             ;;
@@ -212,8 +216,8 @@ restart_server() {
 
 # Main script logic
 main() {
-    print_status "AI Use Case Repository - Server Management Script"
-    print_status "=============================================="
+    print_status "Samantha - Server Management Script"
+    print_status "===================================="
     
     case "${1:-}" in
         "status")
@@ -225,14 +229,14 @@ main() {
         "stop")
             case "${2:-both}" in
                 "backend")
-                    kill_port 3001 "Backend"
+                    kill_port $BACKEND_PORT "Backend"
                     ;;
                 "frontend")
-                    kill_port 3000 "Frontend"
+                    kill_port $FRONTEND_PORT "Frontend"
                     ;;
                 "both")
-                    kill_port 3001 "Backend"
-                    kill_port 3000 "Frontend"
+                    kill_port $BACKEND_PORT "Backend"
+                    kill_port $FRONTEND_PORT "Frontend"
                     ;;
                 *)
                     print_error "Invalid option. Use: backend, frontend, or both"
@@ -261,6 +265,8 @@ main() {
         "help"|"--help"|"-h")
             echo "Usage: $0 [COMMAND] [SERVER_TYPE]"
             echo ""
+            echo "Samantha Family Management - Server Manager"
+            echo ""
             echo "Commands:"
             echo "  status           - Check if servers are running"
             echo "  restart [type]   - Restart servers (default: both)"
@@ -269,8 +275,8 @@ main() {
             echo "  help             - Show this help message"
             echo ""
             echo "Server Types:"
-            echo "  backend          - Backend API server (port 3001)"
-            echo "  frontend         - Frontend React server (port 3000)"
+            echo "  backend          - Backend API server (port $BACKEND_PORT)"
+            echo "  frontend         - Frontend React server (port $FRONTEND_PORT)"
             echo "  both             - Both servers (default)"
             echo ""
             echo "Examples:"

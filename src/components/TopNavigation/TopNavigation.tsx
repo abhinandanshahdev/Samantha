@@ -8,7 +8,7 @@ interface NavigationItem {
 }
 
 const NAVIGATION_ITEMS: NavigationItem[] = [
-  { id: 'value-dashboard', label: 'Dashboard', view: 'value_dashboard' },
+  { id: 'value-dashboard', label: 'Family Goals', view: 'value_dashboard' },
   { id: 'strategy', label: 'Strategy (Pillars and Goals)', view: 'strategic_goals' },
   { id: 'initiatives', label: 'Initiatives', view: 'dashboard' }
 ];

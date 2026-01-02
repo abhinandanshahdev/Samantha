@@ -1,26 +1,9 @@
 .dashboard {
   min-height: 100vh;
   max-height: 100vh;
-  background-color: #ffffff;
+  background-color: transparent;
   overflow: hidden;
   position: relative;
-}
-
-.dashboard::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url("data:image/svg+xml,%3Csvg width='100' height='87' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='50,5 85,25 85,65 50,85 15,65 15,25' fill='none' stroke='%23a0a0a0' stroke-width='1' opacity='0.15'/%3E%3C/svg%3E");
-  background-size: 100px 87px;
-  background-position: 0 0, 50px 43.5px;
-  background-repeat: repeat;
-  pointer-events: none;
-  z-index: 0;
-  width: 100%;
-  height: 100%;
 }
 
 .dashboard-content {
@@ -215,8 +198,8 @@
   box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
 }
 
-/* Agents Count Bar */
-.agents-count-bar {
+/* Tasks Count Bar */
+.tasks-count-bar {
   display: flex;
   align-items: center;
   background: #F9FAFB;
@@ -226,20 +209,20 @@
   gap: 8px;
 }
 
-.agents-count-bar .count-bar-item {
+.tasks-count-bar .count-bar-item {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.agents-count-bar .count-bar-dot {
+.tasks-count-bar .count-bar-dot {
   width: 12px;
   height: 12px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
-.agents-count-bar .count-bar-label {
+.tasks-count-bar .count-bar-label {
   font-size: 12px;
   font-weight: 500;
   color: #6B7280;
@@ -557,32 +540,32 @@
 
 /* Every 5th card is TALL (1x2) */
 .use-cases-container.grid-view .initiative-card:nth-child(5n + 1),
-.use-cases-container.grid-view .agent-card:nth-child(5n + 1),
-.use-cases-container.grid-view .usecase-with-agents:nth-child(5n + 1) {
+.use-cases-container.grid-view .task-card:nth-child(5n + 1),
+.use-cases-container.grid-view .usecase-with-tasks:nth-child(5n + 1) {
   grid-column: span 1;
   grid-row: span 2;
 }
 
 /* Every 3rd card is WIDE (2x1) */
 .use-cases-container.grid-view .initiative-card:nth-child(3n),
-.use-cases-container.grid-view .agent-card:nth-child(3n),
-.use-cases-container.grid-view .usecase-with-agents:nth-child(3n) {
+.use-cases-container.grid-view .task-card:nth-child(3n),
+.use-cases-container.grid-view .usecase-with-tasks:nth-child(3n) {
   grid-column: span 2;
   grid-row: span 1;
 }
 
 /* Every 7th card is TALL (1x2) */
 .use-cases-container.grid-view .initiative-card:nth-child(7n),
-.use-cases-container.grid-view .agent-card:nth-child(7n),
-.use-cases-container.grid-view .usecase-with-agents:nth-child(7n) {
+.use-cases-container.grid-view .task-card:nth-child(7n),
+.use-cases-container.grid-view .usecase-with-tasks:nth-child(7n) {
   grid-column: span 1;
   grid-row: span 2;
 }
 
 /* Every 11th card is EXTRA LARGE (2x2) - Spotlight cards */
 .use-cases-container.grid-view .initiative-card:nth-child(11n),
-.use-cases-container.grid-view .agent-card:nth-child(11n),
-.use-cases-container.grid-view .usecase-with-agents:nth-child(11n) {
+.use-cases-container.grid-view .task-card:nth-child(11n),
+.use-cases-container.grid-view .usecase-with-tasks:nth-child(11n) {
   grid-column: span 2;
   grid-row: span 2;
 }
@@ -602,7 +585,7 @@
     inset 0 -1px 0 rgba(0, 0, 0, 0.05);
 }
 
-.use-cases-container.grid-view .agent-card:nth-child(11n) {
+.use-cases-container.grid-view .task-card:nth-child(11n) {
   background:
     linear-gradient(135deg, rgba(102, 126, 234, 0.18) 0%, transparent 50%, rgba(118, 75, 162, 0.18) 100%),
     rgba(255, 255, 255, 0.6);
@@ -629,7 +612,7 @@
     inset 0 -1px 0 rgba(0, 0, 0, 0.05);
 }
 
-.use-cases-container.grid-view .agent-card:nth-child(11n):hover {
+.use-cases-container.grid-view .task-card:nth-child(11n):hover {
   background:
     linear-gradient(135deg, rgba(102, 126, 234, 0.25) 0%, transparent 50%, rgba(118, 75, 162, 0.25) 100%),
     rgba(255, 255, 255, 0.7);
@@ -644,8 +627,8 @@
 
 /* Default cards (1x1) - no specific rule needed */
 
-/* Use case view with agents */
-.usecase-with-agents {
+/* Use case view with tasks */
+.usecase-with-tasks {
   display: flex;
   flex-direction: column;
   border-radius: 12px;
@@ -656,12 +639,12 @@
 }
 
 /* When expanded, bring the card above others */
-.usecase-with-agents:has(.expanded-agents) {
+.usecase-with-tasks:has(.expanded-tasks) {
   z-index: 20;
   box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
 }
 
-.usecase-with-agents > .initiative-card {
+.usecase-with-tasks > .initiative-card {
   flex: 1;
   min-height: 0;
   border-bottom-left-radius: 0;
@@ -669,12 +652,12 @@
 }
 
 /* Hide the initiative card's footer in usecase view */
-.usecase-with-agents .initiative-card .card-footer-row,
-.usecase-with-agents .initiative-card .card-footer {
+.usecase-with-tasks .initiative-card .card-footer-row,
+.usecase-with-tasks .initiative-card .card-footer {
   display: none !important;
 }
 
-.agents-footer {
+.tasks-footer {
   background:
     linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, transparent 50%, rgba(118, 75, 162, 0.12) 100%),
     rgba(255, 255, 255, 0.9);
@@ -695,27 +678,27 @@
   min-height: 36px;
 }
 
-.agents-footer:hover {
+.tasks-footer:hover {
   background:
     linear-gradient(135deg, rgba(102, 126, 234, 0.18) 0%, transparent 50%, rgba(118, 75, 162, 0.18) 100%),
     rgba(255, 255, 255, 0.95);
   border-top-color: rgba(102, 126, 234, 0.4);
 }
 
-.agents-footer.no-agents {
+.tasks-footer.no-tasks {
   opacity: 0.6;
   color: #9ca3af;
   cursor: default;
 }
 
-.agents-footer.no-agents:hover {
+.tasks-footer.no-tasks:hover {
   background:
     linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, transparent 50%, rgba(118, 75, 162, 0.12) 100%),
     rgba(255, 255, 255, 0.9);
   border-top-color: rgba(102, 126, 234, 0.2);
 }
 
-.agents-count {
+.tasks-count {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -723,11 +706,11 @@
   font-weight: 500;
 }
 
-.agents-count svg {
+.tasks-count svg {
   font-size: 11px;
 }
 
-.expanded-agents {
+.expanded-tasks {
   background: rgba(102, 126, 234, 0.05);
   padding: 12px;
   display: flex;
@@ -746,33 +729,33 @@
 }
 
 /* Custom scrollbar for expanded agents */
-.expanded-agents::-webkit-scrollbar {
+.expanded-tasks::-webkit-scrollbar {
   width: 8px;
 }
 
-.expanded-agents::-webkit-scrollbar-track {
+.expanded-tasks::-webkit-scrollbar-track {
   background: rgba(102, 126, 234, 0.15);
   border-radius: 4px;
   margin: 4px 0;
 }
 
-.expanded-agents::-webkit-scrollbar-thumb {
+.expanded-tasks::-webkit-scrollbar-thumb {
   background: rgba(102, 126, 234, 0.5);
   border-radius: 4px;
   border: 2px solid rgba(102, 126, 234, 0.05);
 }
 
-.expanded-agents::-webkit-scrollbar-thumb:hover {
+.expanded-tasks::-webkit-scrollbar-thumb:hover {
   background: rgba(102, 126, 234, 0.7);
 }
 
 /* When expanded, remove bottom radius from footer */
-.usecase-with-agents:has(.expanded-agents) .agents-footer {
+.usecase-with-tasks:has(.expanded-tasks) .tasks-footer {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-.mini-agent-card {
+.mini-task-card {
   background: rgba(255, 255, 255, 0.9);
   padding: 8px 10px;
   border-radius: 6px;
@@ -785,14 +768,14 @@
   gap: 12px;
 }
 
-.mini-agent-card:hover {
+.mini-task-card:hover {
   background: white;
   border-color: rgba(102, 126, 234, 0.4);
   transform: translateX(4px);
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
 }
 
-.mini-agent-title {
+.mini-task-title {
   font-size: 12px;
   font-weight: 600;
   color: #2c3e50;
@@ -802,7 +785,7 @@
   text-overflow: ellipsis;
 }
 
-.mini-agent-stats {
+.mini-task-stats {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -811,17 +794,17 @@
   flex-shrink: 0;
 }
 
-.mini-agent-stats > span {
+.mini-task-stats > span {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.mini-agent-stats svg {
+.mini-task-stats svg {
   font-size: 12px;
 }
 
-.agent-type-badge {
+.task-type-badge {
   font-size: 10px;
   color: #667eea;
   background: rgba(102, 126, 234, 0.1);
@@ -847,8 +830,8 @@
 
   /* Reset all spanning on mobile for simpler layout */
   .use-cases-container.grid-view .initiative-card,
-  .use-cases-container.grid-view .agent-card,
-  .use-cases-container.grid-view .usecase-with-agents {
+  .use-cases-container.grid-view .task-card,
+  .use-cases-container.grid-view .usecase-with-tasks {
     grid-column: span 1 !important;
     grid-row: span 1 !important;
   }
@@ -1156,17 +1139,17 @@
   }
 
   /* Mini agent cards on mobile */
-  .mini-agent-card {
+  .mini-task-card {
     flex-wrap: wrap;
     gap: 8px;
   }
 
-  .mini-agent-stats {
+  .mini-task-stats {
     width: 100%;
     justify-content: flex-start;
   }
 
-  .expanded-agents {
+  .expanded-tasks {
     max-height: 150px;
   }
 }

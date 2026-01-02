@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { FaMagic } from 'react-icons/fa';
 import { FaLightbulb } from 'react-icons/fa';
-import { UseCase, Category, Department, StrategicGoal, Agent } from '../../types';
-import { categoryAPI, departmentAPI, strategicGoalsAPI, useCaseAPI, aiAutoCompleteAPI, agentAPI, agentAssociationsAPI, dataSensitivityLevelsAPI } from '../../services/apiService';
+import { UseCase, Category, StrategicGoal, Task } from '../../types';
+import { categoryAPI, strategicGoalsAPI, useCaseAPI, aiAutoCompleteAPI, taskAPI, taskAssociationsAPI } from '../../services/apiService';
 import { useActiveDomainId } from '../../context/DomainContext';
 import RelatedInitiatives from '../RelatedInitiatives/RelatedInitiatives';
-import AIAgentLinkingModal from '../AIAgentLinkingModal/AIAgentLinkingModal';
+import TaskLinkingModal from '../TaskLinkingModal/TaskLinkingModal';
 import './InitiativeForm.css';
 import { useRef } from 'react';
 
@@ -30,20 +30,12 @@ const InitiativeForm: React.FC<InitiativeFormProps> = ({
     solution_overview: '',
     technical_implementation: '',
     category: '',
-    department: '',
-    status: 'concept',
     strategic_impact: 'Low',
-    complexity: {
-      data_complexity: 'Low',
-      integration_complexity: 'Low',
-      intelligence_complexity: 'Low',
-      functional_complexity: 'Low'
-    },
+    effort_level: 'Medium',
     justification: '',
-    kanban_pillar: 'backlog',
+    status: 'intention',
     expected_delivery_date: '',
     tags: [],
-    data_sensitivity: 'Public',
     roadmap_link: '',
     value_realisation_link: '',
   });
@@ -54,16 +46,14 @@ const InitiativeForm: React.FC<InitiativeFormProps> = ({
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
   const [strategicGoals, setStrategicGoals] = useState<StrategicGoal[]>([]);
-  const [dataSensitivityLevels, setDataSensitivityLevels] = useState<Array<{ name: string; description: string }>>([]);
   const [selectedGoalIds, setSelectedGoalIds] = useState<string[]>([]);
   const [selectedRelatedUseCaseIds, setSelectedRelatedUseCaseIds] = useState<string[]>([]);
-  const [selectedAgentIds, setSelectedAgentIds] = useState<string[]>([]);
-  const [linkedAgents, setLinkedAgents] = useState<Agent[]>([]);
+  const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([]);
+  const [linkedTasks, setLinkedTasks] = useState<Task[]>([]);
   const [allUseCases, setAllUseCases] = useState<UseCase[]>([]);
   const [relatedUseCasesSearchTerm, setRelatedUseCasesSearchTerm] = useState('');
-  const [showAIAgentModal, setShowAIAgentModal] = useState(false);
+  const [showTaskModal, setShowTaskModal] = useState(false);
   const [currentTagInput, setCurrentTagInput] = useState('');
   const autoSaveTimer = useRef<NodeJS.Timeout | null>(null);
   const formDataRef = useRef<Partial<UseCase>>(formData);
@@ -73,41 +63,22 @@ const InitiativeForm: React.FC<InitiativeFormProps> = ({
     formDataRef.current = formData;
   }, [formData]);
 
-  // Load categories, strategic goals, and data sensitivity levels filtered by domain
+  // Load categories and strategic goals filtered by domain
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [fetchedCategories, fetchedGoals, fetchedDataSensitivityLevels] = await Promise.all([
+        const [fetchedCategories, fetchedGoals] = await Promise.all([
           categoryAPI.getAll(activeDomainId),
-          strategicGoalsAPI.getAll({ status: 'active', domain_id: activeDomainId }),
-          dataSensitivityLevelsAPI.getAll()
+          strategicGoalsAPI.getAll({ status: 'active', domain_id: activeDomainId })
         ]);
         setCategories(fetchedCategories);
         setStrategicGoals(fetchedGoals);
-        setDataSensitivityLevels(fetchedDataSensitivityLevels.map(level => ({
-          name: level.name,
-          description: level.description
-        })));
       } catch (error) {
         console.error('Failed to load form data:', error);
       }
     };
 
     loadData();
-  }, [activeDomainId]);
-
-  // Load departments (filtered by domain)
-  useEffect(() => {
-    const loadDepartments = async () => {
-      try {
-        const fetchedDepartments = await departmentAPI.getAll(activeDomainId || undefined);
-        setDepartments(fetchedDepartments);
-      } catch (error) {
-        console.error('Failed to load departments:', error);
-      }
-    };
-
-    loadDepartments();
   }, [activeDomainId]);
 
   // Load all use cases for related use cases selection (filtered by domain)
@@ -158,23 +129,23 @@ const InitiativeForm: React.FC<InitiativeFormProps> = ({
     }
   }, [useCase, isEditing]);
 
-  // Load linked agents when editing
+  // Load linked tasks when editing
   useEffect(() => {
     if (useCase && isEditing && useCase.id) {
-      const loadLinkedAgents = async () => {
+      const loadLinkedTasks = async () => {
         try {
-          const associations = await agentAssociationsAPI.getAgentsForInitiative(useCase.id);
-          // Fetch full agent details for each association
-          const agentPromises = associations.map(assoc => agentAPI.getById(assoc.agent_id));
-          const agents = await Promise.all(agentPromises);
-          setLinkedAgents(agents);
-          setSelectedAgentIds(agents.map(a => a.id));
+          const associations = await taskAssociationsAPI.getTasksForInitiative(useCase.id);
+          // Fetch full task details for each association
+          const taskPromises = associations.map(assoc => taskAPI.getById(assoc.task_id));
+          const tasks = await Promise.all(taskPromises);
+          setLinkedTasks(tasks);
+          setSelectedTaskIds(tasks.map(t => t.id));
         } catch (error) {
-          console.error('Failed to load linked agents:', error);
+          console.error('Failed to load linked tasks:', error);
         }
       };
 
-      loadLinkedAgents();
+      loadLinkedTasks();
     }
   }, [useCase, isEditing, activeDomainId]);
 
@@ -262,9 +233,6 @@ const InitiativeForm: React.FC<InitiativeFormProps> = ({
     if (!formData.category) {
       newErrors.category = 'Category is required';
     }
-    if (!formData.department) {
-      newErrors.department = 'Department is required';
-    }
     if (!formData.strategic_impact) {
       newErrors.strategic_impact = 'Strategic impact is required';
     }
@@ -287,17 +255,6 @@ const InitiativeForm: React.FC<InitiativeFormProps> = ({
     }
   };
 
-  const handleComplexityChange = (complexityType: keyof UseCase['complexity'], value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      complexity: {
-        ...prev.complexity!,
-        [complexityType]: value
-      }
-    }));
-  };
-
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -315,77 +272,75 @@ const InitiativeForm: React.FC<InitiativeFormProps> = ({
         return;
       }
 
-      // Create temp agents before saving the initiative (only in edit mode)
-      const tempAgents = linkedAgents.filter(a => a.id.startsWith('temp-'));
-      const existingAgents = linkedAgents.filter(a => !a.id.startsWith('temp-'));
-      let finalAgentIds = existingAgents.map(a => a.id);
+      // Create temp tasks before saving the initiative (only in edit mode)
+      const tempTasks = linkedTasks.filter(t => t.id.startsWith('temp-'));
+      const existingTasks = linkedTasks.filter(t => !t.id.startsWith('temp-'));
+      let finalTaskIds = existingTasks.map(t => t.id);
 
-      console.log('🔍 Checking agents:', {
-        totalAgents: linkedAgents.length,
-        tempAgents: tempAgents.length,
-        existingAgents: existingAgents.length,
+      console.log('Checking tasks:', {
+        totalTasks: linkedTasks.length,
+        tempTasks: tempTasks.length,
+        existingTasks: existingTasks.length,
         isEditing,
         useCaseId: useCase?.id
       });
 
-      if (tempAgents.length > 0) {
-        console.log(`💾 Creating ${tempAgents.length} temp agent(s) before saving initiative...`);
+      if (tempTasks.length > 0) {
+        console.log(`Creating ${tempTasks.length} temp task(s) before saving initiative...`);
 
         if (isEditing && useCase?.id) {
-          // Edit mode: create agents linked to current initiative
-          for (let i = 0; i < tempAgents.length; i++) {
-            const tempAgent = tempAgents[i];
+          // Edit mode: create tasks linked to current initiative
+          for (let i = 0; i < tempTasks.length; i++) {
+            const tempTask = tempTasks[i];
             try {
-              console.log(`Creating agent ${i + 1}/${tempAgents.length}: "${tempAgent.title}"`);
+              console.log(`Creating task ${i + 1}/${tempTasks.length}: "${tempTask.title}"`);
 
               // Convert object fields to strings if needed
-              const agentData = {
-                ...tempAgent,
+              const taskData = {
+                ...tempTask,
                 // Ensure results_metrics is a string, not an object
-                results_metrics: typeof tempAgent.results_metrics === 'object'
-                  ? JSON.stringify(tempAgent.results_metrics)
-                  : tempAgent.results_metrics || '',
+                results_metrics: typeof tempTask.results_metrics === 'object'
+                  ? JSON.stringify(tempTask.results_metrics)
+                  : tempTask.results_metrics || '',
                 // Ensure lessons_learned is a string
-                lessons_learned: tempAgent.lessons_learned || '',
+                lessons_learned: tempTask.lessons_learned || '',
                 selectedInitiatives: [useCase.id]
               };
 
-              const response = await agentAPI.create(agentData);
-              console.log(`✅ Agent ${i + 1} created with ID: ${response.id}`);
-              finalAgentIds.push(response.id);
+              const response = await taskAPI.create(taskData);
+              console.log(`Task ${i + 1} created with ID: ${response.id}`);
+              finalTaskIds.push(response.id);
             } catch (error: any) {
-              console.error(`❌ Failed to create agent ${i + 1}:`, {
-                title: tempAgent.title,
-                agent_type: tempAgent.agent_type,
-                department: tempAgent.department,
+              console.error(`Failed to create task ${i + 1}:`, {
+                title: tempTask.title,
                 error: error.response?.data
               });
-              // Rollback: delete successfully created agents
-              console.log(`🔄 Rolling back ${finalAgentIds.length} successfully created agents...`);
-              for (const createdId of finalAgentIds) {
+              // Rollback: delete successfully created tasks
+              console.log(`Rolling back ${finalTaskIds.length} successfully created tasks...`);
+              for (const createdId of finalTaskIds) {
                 try {
-                  await agentAPI.delete(createdId);
-                  console.log(`✅ Rolled back agent: ${createdId}`);
+                  await taskAPI.delete(createdId);
+                  console.log(`Rolled back task: ${createdId}`);
                 } catch (rollbackError) {
-                  console.error(`Failed to rollback agent: ${createdId}`, rollbackError);
+                  console.error(`Failed to rollback task: ${createdId}`, rollbackError);
                 }
               }
-              throw new Error(`Failed to create agent "${tempAgent.title}": ${error.response?.data?.error || error.message}`);
+              throw new Error(`Failed to create task "${tempTask.title}": ${error.response?.data?.error || error.message}`);
             }
           }
         } else {
-          // Create mode: shouldn't have temp agents (prevented by modal)
-          console.warn('⚠️ Temp agents found in create mode - this should not happen');
+          // Create mode: shouldn't have temp tasks (prevented by modal)
+          console.warn('Temp tasks found in create mode - this should not happen');
         }
       }
 
-      // Save the use case with selected strategic goals, related use cases, and agents
+      // Save the use case with selected strategic goals, related use cases, and tasks
       const useCaseData = {
         ...formData,
         domain_id: activeDomainId, // Include active domain ID
         selectedStrategicGoals: selectedGoalIds,
         selectedRelatedUseCases: selectedRelatedUseCaseIds,
-        selectedAgents: finalAgentIds // Use updated IDs (temp agents now have real IDs)
+        selectedTasks: finalTaskIds // Use updated IDs (temp tasks now have real IDs)
       };
 
       await onSave(useCaseData);
@@ -448,17 +403,17 @@ const InitiativeForm: React.FC<InitiativeFormProps> = ({
   };
 
 
-  const handleAgentsChange = (agents: Agent[]) => {
-    console.log('📋 handleAgentsChange called with:', agents.map(a => ({ id: a.id, title: a.title })));
+  const handleTasksChange = (tasks: Task[]) => {
+    console.log('handleTasksChange called with:', tasks.map(t => ({ id: t.id, title: t.title })));
 
-    // Simply update state - don't create agents yet
-    // Agents will be created when the form is submitted
-    setLinkedAgents(agents);
-    setSelectedAgentIds(agents.map(a => a.id));
+    // Simply update state - don't create tasks yet
+    // Tasks will be created when the form is submitted
+    setLinkedTasks(tasks);
+    setSelectedTaskIds(tasks.map(t => t.id));
 
-    const tempCount = agents.filter(a => a.id.startsWith('temp-')).length;
+    const tempCount = tasks.filter(t => t.id.startsWith('temp-')).length;
     if (tempCount > 0) {
-      console.log(`📝 ${tempCount} temp agent(s) will be created when initiative is saved`);
+      console.log(`${tempCount} temp task(s) will be created when initiative is saved`);
     }
   };
 
@@ -617,26 +572,6 @@ const InitiativeForm: React.FC<InitiativeFormProps> = ({
             </div>
 
             <div className="form-group">
-              <label htmlFor="department">
-                Department <span className="required-indicator">*</span>
-              </label>
-              <select
-                id="department"
-                value={formData.department || ''}
-                onChange={(e) => handleInputChange('department', e.target.value)}
-                className={errors.department ? 'error' : ''}
-              >
-                <option value="">Select a department</option>
-                {departments.map(department => (
-                  <option key={department.id} value={department.name}>
-                    {department.name}
-                  </option>
-                ))}
-              </select>
-              {errors.department && <span className="error-message">{errors.department}</span>}
-            </div>
-
-            <div className="form-group">
               <label htmlFor="owner_name">Initiative Owner Name</label>
               <input
                 type="text"
@@ -662,32 +597,31 @@ const InitiativeForm: React.FC<InitiativeFormProps> = ({
               <label htmlFor="status">Status</label>
               <select
                 id="status"
-                value={formData.status || 'concept'}
+                value={formData.status || 'intention'}
                 onChange={(e) => handleInputChange('status', e.target.value)}
               >
-                <option value="concept">Concept</option>
-                <option value="proof_of_concept">Proof of Concept</option>
-                <option value="validation">Validation</option>
-                <option value="pilot">Pilot</option>
-                <option value="production">Production</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="kanban_pillar">Delivery Status</label>
-              <select
-                id="kanban_pillar"
-                value={formData.kanban_pillar || 'backlog'}
-                onChange={(e) => handleInputChange('kanban_pillar', e.target.value)}
-              >
-                <option value="backlog">Backlog</option>
-                <option value="prioritised">Prioritised</option>
-                <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
+                <option value="intention">Intention</option>
+                <option value="experimentation">Experimentation</option>
+                <option value="commitment">Commitment</option>
+                <option value="implementation">Implementation</option>
+                <option value="integration">Integration</option>
                 <option value="blocked">Blocked</option>
                 <option value="slow_burner">Slow Burner</option>
                 <option value="de_prioritised">De-prioritised</option>
                 <option value="on_hold">On Hold</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="effort_level">Effort Level</label>
+              <select
+                id="effort_level"
+                value={formData.effort_level || 'Medium'}
+                onChange={(e) => handleInputChange('effort_level', e.target.value)}
+              >
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
               </select>
             </div>
 
@@ -742,22 +676,6 @@ const InitiativeForm: React.FC<InitiativeFormProps> = ({
                 </div>
               )}
               <small className="form-help-text">Add custom tags to categorize this initiative (press Enter or click Add Tag)</small>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="data_sensitivity">Data Sensitivity (Optional)</label>
-              <select
-                id="data_sensitivity"
-                value={formData.data_sensitivity || 'Public'}
-                onChange={(e) => handleInputChange('data_sensitivity', e.target.value)}
-              >
-                {dataSensitivityLevels.map(level => (
-                  <option key={level.name} value={level.name}>
-                    {level.name}
-                  </option>
-                ))}
-              </select>
-              <small className="form-help-text">Classification level for data sensitivity</small>
             </div>
 
             <div className="form-group">
@@ -830,45 +748,45 @@ const InitiativeForm: React.FC<InitiativeFormProps> = ({
               />
             </div>
 
-            {/* Manage Agents Button - Styled like AI Assistant */}
+            {/* Manage Tasks Button */}
             <button
               type="button"
               className="generative-toggle"
               onClick={() => {
-                console.log('Manage Agents button clicked');
+                console.log('Manage Tasks button clicked');
                 // Scroll to top before opening modal
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 // Small delay to allow scroll to complete before opening modal
                 setTimeout(() => {
-                  setShowAIAgentModal(true);
-                  console.log('showAIAgentModal set to true');
+                  setShowTaskModal(true);
+                  console.log('showTaskModal set to true');
                 }, 300);
               }}
             >
               <FaMagic />
-              Manage Agents ({linkedAgents.length} linked)
+              Manage Tasks ({linkedTasks.length} linked)
             </button>
 
-            {linkedAgents.length > 0 && (
-              <div className="linked-agents-preview">
-                <h4>Linked Agents:</h4>
-                <div className="agents-chips">
-                  {linkedAgents.map(agent => (
-                    <div key={agent.id} className="agent-chip">
-                      <span className="agent-chip-title">{agent.title}</span>
-                      <span className="agent-chip-type">{agent.agent_type}</span>
+            {linkedTasks.length > 0 && (
+              <div className="linked-tasks-preview">
+                <h4>Linked Tasks:</h4>
+                <div className="tasks-chips">
+                  {linkedTasks.map(task => (
+                    <div key={task.id} className="task-chip">
+                      <span className="task-chip-title">{task.title}</span>
+                      <span className="task-chip-status">{task.status}</span>
                       <button
                         type="button"
-                        className="agent-chip-remove"
+                        className="task-chip-remove"
                         onClick={() => {
-                          console.log('Unlinking agent from preview chip:', agent.id);
-                          const updatedAgents = linkedAgents.filter(a => a.id !== agent.id);
-                          setLinkedAgents(updatedAgents);
-                          setSelectedAgentIds(updatedAgents.map(a => a.id));
+                          console.log('Unlinking task from preview chip:', task.id);
+                          const updatedTasks = linkedTasks.filter(t => t.id !== task.id);
+                          setLinkedTasks(updatedTasks);
+                          setSelectedTaskIds(updatedTasks.map(t => t.id));
                         }}
-                        title="Remove agent"
+                        title="Remove task"
                       >
-                        ×
+                        x
                       </button>
                     </div>
                   ))}
@@ -877,65 +795,6 @@ const InitiativeForm: React.FC<InitiativeFormProps> = ({
             )}
           </div>
 
-
-          {/* Complexity Section */}
-          <div className="form-section">
-            <h2>Complexity Assessment</h2>
-            
-            <div className="complexity-grid">
-              <div className="form-group">
-                <label htmlFor="data_complexity">Data Complexity</label>
-                <select
-                  id="data_complexity"
-                  value={formData.complexity?.data_complexity || 'Low'}
-                  onChange={(e) => handleComplexityChange('data_complexity', e.target.value)}
-                >
-                  <option value="Low">Low</option>
-                  <option value="Medium">Medium</option>
-                  <option value="High">High</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="integration_complexity">Integration Complexity</label>
-                <select
-                  id="integration_complexity"
-                  value={formData.complexity?.integration_complexity || 'Low'}
-                  onChange={(e) => handleComplexityChange('integration_complexity', e.target.value)}
-                >
-                  <option value="Low">Low</option>
-                  <option value="Medium">Medium</option>
-                  <option value="High">High</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="intelligence_complexity">Intelligence Complexity</label>
-                <select
-                  id="intelligence_complexity"
-                  value={formData.complexity?.intelligence_complexity || 'Low'}
-                  onChange={(e) => handleComplexityChange('intelligence_complexity', e.target.value)}
-                >
-                  <option value="Low">Low</option>
-                  <option value="Medium">Medium</option>
-                  <option value="High">High</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="functional_complexity">Functional Complexity</label>
-                <select
-                  id="functional_complexity"
-                  value={formData.complexity?.functional_complexity || 'Low'}
-                  onChange={(e) => handleComplexityChange('functional_complexity', e.target.value)}
-                >
-                  <option value="Low">Low</option>
-                  <option value="Medium">Medium</option>
-                  <option value="High">High</option>
-                </select>
-              </div>
-            </div>
-          </div>
 
           {/* Strategic Impact Section */}
           <div className="form-section">
@@ -1045,7 +904,7 @@ const InitiativeForm: React.FC<InitiativeFormProps> = ({
                     .filter(uc =>
                       uc.title.toLowerCase().includes(relatedUseCasesSearchTerm.toLowerCase()) ||
                       uc.description?.toLowerCase().includes(relatedUseCasesSearchTerm.toLowerCase()) ||
-                      uc.department?.toLowerCase().includes(relatedUseCasesSearchTerm.toLowerCase())
+                      uc.category?.toLowerCase().includes(relatedUseCasesSearchTerm.toLowerCase())
                     )
                     .slice(0, 10)
                     .map(uc => (
@@ -1066,7 +925,7 @@ const InitiativeForm: React.FC<InitiativeFormProps> = ({
                         <div className="use-case-info">
                           <div className="use-case-title">{uc.title}</div>
                           <div className="use-case-meta">
-                            {uc.department} • {uc.category}
+                            {uc.category}
                           </div>
                         </div>
                       </label>
@@ -1075,7 +934,7 @@ const InitiativeForm: React.FC<InitiativeFormProps> = ({
                   {allUseCases.filter(uc =>
                     uc.title.toLowerCase().includes(relatedUseCasesSearchTerm.toLowerCase()) ||
                     uc.description?.toLowerCase().includes(relatedUseCasesSearchTerm.toLowerCase()) ||
-                    uc.department?.toLowerCase().includes(relatedUseCasesSearchTerm.toLowerCase())
+                    uc.category?.toLowerCase().includes(relatedUseCasesSearchTerm.toLowerCase())
                   ).length === 0 && (
                     <p className="no-results">
                       {relatedUseCasesSearchTerm ? 'No matching initiatives found' : 'No initiatives available'}
@@ -1112,19 +971,18 @@ const InitiativeForm: React.FC<InitiativeFormProps> = ({
         </div>
       </form>
 
-      {/* AI Agent Linking Modal */}
-      <AIAgentLinkingModal
-        isOpen={showAIAgentModal}
-        onClose={() => setShowAIAgentModal(false)}
-        linkedAgents={linkedAgents}
-        onAgentsChange={handleAgentsChange}
+      {/* Task Linking Modal */}
+      <TaskLinkingModal
+        isOpen={showTaskModal}
+        onClose={() => setShowTaskModal(false)}
+        linkedTasks={linkedTasks}
+        onTasksChange={handleTasksChange}
         initiativeDescription={formData.description}
         initiativeTitle={formData.title}
         ownerName={formData.owner_name}
         ownerEmail={formData.owner_email}
         initiativeId={useCase?.id}
         isEditingInitiative={isEditing}
-        initiativeDepartment={formData.department}
       />
     </div>
   );

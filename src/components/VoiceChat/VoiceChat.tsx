@@ -100,7 +100,7 @@ const VoiceChat: React.FC<VoiceChatProps> = ({ isVisible, onClose, useCases }) =
         <div className="voice-chat-header">
           <div className="voice-chat-title">
             <FaVolumeUp className="voice-icon" />
-            Hekmah - Voice Assistant
+            Samantha - Voice Assistant
             {voiceMode === 'push-to-talk' && (
               <span className="voice-mode-badge">PTT</span>
             )}

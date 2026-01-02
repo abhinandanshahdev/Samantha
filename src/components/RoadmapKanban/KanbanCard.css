@@ -9,15 +9,20 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1),
               inset 0 1px 0 rgba(255, 255, 255, 0.9),
               inset 0 -1px 0 rgba(0, 0, 0, 0.05);
-  cursor: pointer;
+  cursor: grab;
   transition: all 0.3s ease;
   border: 1px solid rgba(220, 220, 220, 0.5);
   display: flex;
   align-items: flex-start;
   gap: 8px;
+  touch-action: none;
 }
 
-/* Drag handle - hidden on desktop, visible on mobile */
+.kanban-card:active {
+  cursor: grabbing;
+}
+
+/* Drag handle - hidden on desktop, visible on mobile/touch */
 .kanban-card-drag-handle {
   display: none;
   flex-shrink: 0;
@@ -44,6 +49,7 @@
 
   .kanban-card {
     cursor: pointer;
+    touch-action: auto;
   }
 }
 
@@ -51,6 +57,11 @@
 @media (max-width: 768px) {
   .kanban-card-drag-handle {
     display: flex;
+  }
+  
+  .kanban-card {
+    cursor: pointer;
+    touch-action: auto;
   }
 }
 
