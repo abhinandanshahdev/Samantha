@@ -201,6 +201,7 @@ az webapp log config --name voyagers-app --resource-group rg-ai-usecase-prod \
 
 | Version | Date | Description |
 |---------|------|-------------|
+| v2-amd64 | 2026-01-03 | Add Initiatives/Tasks toggle, family-oriented AI prompts |
 | v1-amd64 | 2026-01-02 | Initial deployment |
 
 ## Notes
