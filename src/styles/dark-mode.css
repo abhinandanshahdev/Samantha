@@ -1014,6 +1014,35 @@ body.dark-mode .ai-chat-send-button:disabled {
   background: linear-gradient(135deg, var(--dm-border-2) 0%, var(--dm-border-1) 100%);
 }
 
+/* Pending attachments bar */
+body.dark-mode .ai-chat-attachments-bar {
+  background: var(--dm-surface-2);
+  border-top-color: var(--dm-border-1);
+}
+
+body.dark-mode .ai-chat-attachment-chip {
+  background: var(--dm-surface-3);
+  border-color: var(--dm-border-1);
+  color: var(--dm-text-1);
+}
+
+body.dark-mode .ai-chat-attachment-chip .attachment-icon {
+  background: var(--dm-accent);
+}
+
+body.dark-mode .ai-chat-attachment-chip .attachment-size {
+  color: var(--dm-text-3);
+}
+
+body.dark-mode .ai-chat-attachment-chip .attachment-remove {
+  color: var(--dm-text-3);
+}
+
+body.dark-mode .ai-chat-attachment-chip .attachment-remove:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #F87171;
+}
+
 /* Markdown in chat */
 body.dark-mode .ai-chat-message.ai .ai-chat-message-content code {
   background: rgba(167, 139, 250, 0.15);
@@ -1197,6 +1226,27 @@ body.dark-mode .artifacts-close-btn:hover {
   color: var(--dm-text-1);
 }
 
+body.dark-mode .artifacts-tabs {
+  background: var(--dm-surface-2);
+  border-bottom-color: var(--dm-border-1);
+}
+
+body.dark-mode .artifacts-tab {
+  color: var(--dm-text-2);
+  background: transparent;
+}
+
+body.dark-mode .artifacts-tab:hover {
+  color: var(--dm-text-1);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .artifacts-tab.active {
+  color: var(--dm-accent);
+  border-bottom-color: var(--dm-accent);
+  background: transparent;
+}
+
 body.dark-mode .artifacts-toolbar {
   background: var(--dm-surface-2);
   border-bottom-color: var(--dm-border-1);
@@ -1253,6 +1303,22 @@ body.dark-mode .download-btn:hover:not(:disabled) {
   background: linear-gradient(135deg, var(--dm-accent) 0%, var(--dm-accent-dark) 100%);
   border-color: var(--dm-accent);
   color: var(--dm-accent-text);
+}
+
+body.dark-mode .delete-btn {
+  background: transparent;
+  border-color: var(--dm-border-1);
+  color: var(--dm-text-3);
+}
+
+body.dark-mode .delete-btn:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: var(--dm-error);
+}
+
+body.dark-mode .col-size {
+  color: var(--dm-text-2);
 }
 
 body.dark-mode .artifacts-empty {

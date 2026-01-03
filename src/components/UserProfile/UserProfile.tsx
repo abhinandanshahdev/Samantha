@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User } from '../../types';
 import { authAPI } from '../../services/apiService';
 import Header from '../Header/Header';
+import PhoneVerification from '../PhoneVerification/PhoneVerification';
 import { FaUser, FaEdit, FaSave, FaTimes, FaArrowLeft } from 'react-icons/fa';
 import './UserProfile.css';
 
@@ -239,7 +240,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
               <li><strong>Email:</strong> Your email is managed by Single Sign-On (SSO) and cannot be changed here</li>
               <li><strong>Role:</strong> Your role determines what actions you can perform in the system</li>
             </ul>
-            
+
             <h4>Role Permissions:</h4>
             <ul>
               <li><strong>Viewer:</strong> Can view initiatives and strategic goals</li>
@@ -247,6 +248,9 @@ const UserProfile: React.FC<UserProfileProps> = ({
               <li><strong>Admin:</strong> Full access including user management and system settings</li>
             </ul>
           </div>
+
+          {/* Phone Verification / WhatsApp Integration */}
+          <PhoneVerification />
         </div>
       </div>
     </div>

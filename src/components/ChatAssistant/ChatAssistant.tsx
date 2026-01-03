@@ -9,10 +9,11 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-sanitize';
 import rehypeExternalLinks from 'rehype-external-links';
-import { FaTrash, FaMicrophone, FaMicrophoneSlash, FaDownload, FaFilePowerpoint, FaFileExcel, FaFileWord, FaFileAlt, FaFileCode, FaStop } from 'react-icons/fa';
+import { FaTrash, FaMicrophone, FaMicrophoneSlash, FaDownload, FaFilePowerpoint, FaFileExcel, FaFileWord, FaFileAlt, FaFileCode, FaStop, FaPaperclip } from 'react-icons/fa';
 import { Sparkles, Book, Check, AlertTriangle, X as XIcon } from 'lucide-react';
 import { SkillsBrowser } from '../SkillsBrowser';
 import { parseArtifactsFromResponse, downloadArtifact, getArtifactTypeName, ArtifactReference } from '../../services/artifactService';
+import { attachmentAPI } from '../../services/apiService';
 import './ChatAssistant.css';
 
 // Progress step for timeline display
@@ -371,6 +372,79 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ useCases, isOpen, onClose
         ? [...prev, skillName]
         : prev.filter(s => s !== skillName)
     );
+  };
+
+  // File upload state
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [pendingAttachments, setPendingAttachments] = useState<Array<{
+    id: number;
+    filename: string;
+    file_size: number;
+    mime_type: string;
+  }>>([]);
+
+  // Handle file upload
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Clear the input so the same file can be re-selected
+    e.target.value = '';
+
+    setIsUploading(true);
+    setUploadError(null);
+
+    try {
+      const result = await attachmentAPI.uploadChatFile(file, claudeSessionId || undefined);
+
+      if (result.success) {
+        // Add to pending attachments bar instead of messages
+        setPendingAttachments(prev => [...prev, {
+          id: result.attachment.id,
+          filename: result.attachment.filename,
+          file_size: result.attachment.file_size,
+          mime_type: result.attachment.mime_type
+        }]);
+      }
+    } catch (error: any) {
+      console.error('File upload failed:', error);
+      setUploadError(error.response?.data?.error || 'Failed to upload file');
+      // Clear error after 5 seconds
+      setTimeout(() => setUploadError(null), 5000);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // Remove a pending attachment (also deletes from Azure)
+  const handleRemoveAttachment = async (id: number) => {
+    // Remove from UI immediately
+    setPendingAttachments(prev => prev.filter(a => a.id !== id));
+    // Delete from Azure in background
+    try {
+      await attachmentAPI.deleteChatFile(id);
+    } catch (err) {
+      console.error('Failed to delete attachment from storage:', err);
+    }
+  };
+
+  // Get file icon based on mime type
+  const getFileIcon = (mimeType: string): string => {
+    if (mimeType?.includes('word') || mimeType?.includes('document')) return 'W';
+    if (mimeType?.includes('spreadsheet') || mimeType?.includes('excel')) return 'X';
+    if (mimeType?.includes('presentation') || mimeType?.includes('powerpoint')) return 'P';
+    if (mimeType?.includes('pdf')) return 'PDF';
+    if (mimeType?.includes('image')) return 'IMG';
+    return 'F';
+  };
+
+  // Format file size for display
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
   // Voice chat integration
@@ -1114,10 +1188,49 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ useCases, isOpen, onClose
           </div>
         )}
         
+        {/* Upload error display */}
+        {uploadError && (
+          <div className="ai-chat-upload-error">
+            {uploadError}
+          </div>
+        )}
+
+        {/* Pending attachments bar */}
+        {pendingAttachments.length > 0 && (
+          <div className="ai-chat-attachments-bar">
+            {pendingAttachments.map(attachment => (
+              <div key={attachment.id} className="ai-chat-attachment-chip">
+                <span className="attachment-icon">{getFileIcon(attachment.mime_type)}</span>
+                <span className="attachment-name" title={attachment.filename}>
+                  {attachment.filename.length > 20
+                    ? attachment.filename.substring(0, 17) + '...'
+                    : attachment.filename}
+                </span>
+                <span className="attachment-size">({formatFileSize(attachment.file_size)})</span>
+                <button
+                  className="attachment-remove"
+                  onClick={() => handleRemoveAttachment(attachment.id)}
+                  title="Remove"
+                >
+                  x
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Show either text input OR voice interface */}
         {!isVoiceConnected && !isVoiceConnecting ? (
           // Text input mode
           <div className="ai-chat-input">
+            {/* Hidden file input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              style={{ display: 'none' }}
+              accept="*/*"
+            />
             <button
               className="ai-chat-voice-toggle"
               onClick={() => startVoiceChat()}
@@ -1125,11 +1238,19 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ useCases, isOpen, onClose
             >
               <FaMicrophone />
             </button>
+            <button
+              className={`ai-chat-upload-toggle ${isUploading ? 'uploading' : ''}`}
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading || isLoading}
+              title="Upload a file"
+            >
+              <FaPaperclip />
+            </button>
             <textarea
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Ask a question..."
+              placeholder={pendingAttachments.length > 0 ? "Add a message about these files..." : "Ask a question..."}
               className="ai-chat-textarea"
               rows={2}
               disabled={isLoading}

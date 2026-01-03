@@ -726,7 +726,7 @@ router.get('/', verifyToken, requireConsumerOrAdmin, (req, res) => {
     LEFT JOIN users u ON uc.author_id = u.id
     LEFT JOIN use_case_tags uct ON uc.id = uct.use_case_id
     LEFT JOIN tags t ON uct.tag_id = t.id
-    LEFT JOIN attachments a ON uc.id = a.use_case_id
+    LEFT JOIN attachments a ON uc.id = a.entity_id AND a.entity_type = 'initiative'
     LEFT JOIN use_case_goal_alignments uga ON uc.id = uga.use_case_id
     LEFT JOIN strategic_goals sg ON uga.strategic_goal_id = sg.id
     LEFT JOIN (
@@ -884,7 +884,7 @@ router.get('/:id', verifyToken, requireConsumerOrAdmin, (req, res) => {
     LEFT JOIN users u ON uc.author_id = u.id
     LEFT JOIN use_case_tags uct ON uc.id = uct.use_case_id
     LEFT JOIN tags t ON uct.tag_id = t.id
-    LEFT JOIN attachments a ON uc.id = a.use_case_id
+    LEFT JOIN attachments a ON uc.id = a.entity_id AND a.entity_type = 'initiative'
     LEFT JOIN (
       SELECT use_case_id, COUNT(DISTINCT strategic_goal_id) as goal_count
       FROM use_case_goal_alignments
@@ -1568,7 +1568,7 @@ router.delete('/:id', verifyToken, requireAdmin, (req, res) => {
       'DELETE FROM task_initiative_associations WHERE use_case_id = ?',
       'DELETE FROM likes WHERE use_case_id = ?',
       'DELETE FROM comments WHERE use_case_id = ?',
-      'DELETE FROM attachments WHERE use_case_id = ?',
+      'DELETE FROM attachments WHERE entity_id = ? AND entity_type = \'initiative\'',
       'DELETE FROM use_case_associations WHERE use_case_id = ? OR related_use_case_id = ?'
     ];
 

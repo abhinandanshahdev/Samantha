@@ -239,6 +239,7 @@ const TOOL_STATUS_MESSAGES = {
   render_html_to_image: () => 'Rendering preview...',
   view_thumbnail_grid: () => 'Checking slide layout...',
   execute_code: () => 'Processing...',
+  register_workspace_file: () => 'Registering file...',
 
   // Excel tools
   excel_init: () => 'Preparing spreadsheet...',
@@ -271,7 +272,15 @@ const TOOL_STATUS_MESSAGES = {
   update_task: () => 'Updating task...',
   batch_update_task_field: (args) => `Updating ${args.task_ids?.length || 0} tasks...`,
   link_task_to_initiatives: () => 'Linking task to initiatives...',
-  add_task_comment: () => 'Adding comment...'
+  add_task_comment: () => 'Adding comment...',
+
+  // Attachment tools
+  list_initiative_attachments: () => 'Loading attachments...',
+  list_task_attachments: () => 'Loading attachments...',
+  read_attachment_content: () => 'Reading file content...',
+  list_chat_files: () => 'Loading chat uploads...',
+  read_docx_attachment: () => 'Reading Word document...',
+  read_pdf_attachment: () => 'Reading PDF document...'
 };
 
 /**
@@ -821,7 +830,7 @@ const createSamanthaMcpServer = (domainId = null, userId = null, userRole = null
       // Tool 15: Execute JavaScript code
       tool(
         "execute_code",
-        "Execute JavaScript code in the workspace context. Use for complex processing, rendering, or file manipulation. The code runs with Node.js and has access to fs, path, and the workspace directory.",
+        "Execute JavaScript code in the workspace context. Use for complex processing, rendering, or file manipulation. The code runs with Node.js and has access to fs, path, and the workspace directory. For docx generation, use require('docx') and write to workspacePath + '/output/filename.docx'.",
         {
           sessionId: z.string().describe("The workspace session ID"),
           code: z.string().describe("JavaScript code to execute. Use 'workspacePath' variable to access workspace directory.")
@@ -837,6 +846,68 @@ const createSamanthaMcpServer = (domainId = null, userId = null, userRole = null
               }]
             };
           } catch (error) {
+            return {
+              content: [{
+                type: "text",
+                text: JSON.stringify({ success: false, error: error.message })
+              }]
+            };
+          }
+        }
+      ),
+
+      // Tool 15b: Register workspace file as downloadable artifact
+      tool(
+        "register_workspace_file",
+        "Register a file created in the workspace (via execute_code) as a downloadable artifact. Use this after execute_code generates a file to make it available for user download.",
+        {
+          sessionId: z.string().describe("The workspace session ID"),
+          filePath: z.string().describe("Relative path to the file within workspace (e.g., 'output/document.docx')"),
+          title: z.string().describe("Display title for the artifact"),
+          type: z.enum(["document", "presentation", "spreadsheet", "image", "other"]).describe("Type of artifact")
+        },
+        async (args) => {
+          try {
+            const workspacePath = codeExecutionService.getWorkspacePath(args.sessionId);
+            const fullPath = path.join(workspacePath, args.filePath);
+
+            // Check file exists
+            const fs = require('fs');
+            if (!fs.existsSync(fullPath)) {
+              return {
+                content: [{
+                  type: "text",
+                  text: JSON.stringify({ success: false, error: `File not found: ${args.filePath}` })
+                }]
+              };
+            }
+
+            // Register the artifact
+            const artifact = await artifactService.registerExternalFile(
+              fullPath,
+              args.title,
+              args.type
+            );
+
+            console.log('📎 Registered workspace file as artifact:', args.filePath);
+            return {
+              content: [{
+                type: "text",
+                text: JSON.stringify({
+                  success: true,
+                  artifact: {
+                    id: artifact.id,
+                    type: args.type,
+                    title: args.title,
+                    fileName: path.basename(args.filePath),
+                    downloadUrl: `/api/artifacts/${artifact.id}/download`
+                  },
+                  message: `File "${args.title}" is ready for download.`
+                })
+              }]
+            };
+          } catch (error) {
+            console.error('Failed to register workspace file:', error);
             return {
               content: [{
                 type: "text",
@@ -1415,15 +1486,22 @@ const createSamanthaMcpServer = (domainId = null, userId = null, userRole = null
       // Tool 25: Create Word Document
       tool(
         "create_docx",
-        "Create a professional Word document (.docx). Supports sections, paragraphs, bullet/numbered lists, tables, and highlighted boxes. Returns a download link.",
+        "Create a professional Word document (.docx). Supports sections, paragraphs, bullet/numbered lists, tables, and highlighted boxes. Customize colors and fonts as needed. Returns a download link.",
         {
           sessionId: z.string().describe("The workspace session ID from workspace_init"),
           title: z.string().describe("Document title"),
           subtitle: z.string().optional().describe("Document subtitle"),
-          author: z.string().optional().describe("Author name"),
+          author: z.string().optional().describe("Author name (e.g., person's name, company, or organization)"),
           includeTableOfContents: z.boolean().optional().describe("Include table of contents (default: false)"),
           headerText: z.string().optional().describe("Header text for all pages"),
-          footerText: z.string().optional().describe("Footer text"),
+          footerText: z.string().optional().describe("Footer text (if omitted, shows only page numbers)"),
+          font: z.string().optional().describe("Font family for the document (default: Arial). Examples: Calibri, Times New Roman, Georgia"),
+          colors: z.object({
+            primary: z.string().optional().describe("Primary color for title and headings (hex without #, e.g., '2C3E50')"),
+            secondary: z.string().optional().describe("Secondary color for subheadings (hex without #)"),
+            accent: z.string().optional().describe("Accent color (hex without #)"),
+            gray: z.string().optional().describe("Gray color for subtle text (hex without #)")
+          }).optional().describe("Custom color scheme. Defaults: primary='2C3E50', secondary='34495E', accent='3498DB'"),
           sections: z.array(z.object({
             heading: z.string().optional().describe("Section heading"),
             level: z.number().optional().describe("Heading level: 1, 2, or 3 (default: 1)"),
@@ -1449,7 +1527,9 @@ const createSamanthaMcpServer = (domainId = null, userId = null, userRole = null
               sections: args.sections,
               includeTableOfContents: args.includeTableOfContents,
               headerText: args.headerText,
-              footerText: args.footerText
+              footerText: args.footerText,
+              font: args.font,
+              colors: args.colors
             });
 
             // Register the artifact for download
@@ -2515,6 +2595,493 @@ const createSamanthaMcpServer = (domainId = null, userId = null, userRole = null
             return { content: [{ type: "text", text: JSON.stringify({ success: false, error: error.message }) }] };
           }
         }
+      ),
+
+      // =====================================================
+      // FILE ATTACHMENT TOOLS
+      // =====================================================
+
+      // Tool 37: List Initiative Attachments
+      tool(
+        "list_initiative_attachments",
+        "List all file attachments for a specific initiative. Returns file names, sizes, types, and download information.",
+        {
+          initiative_id: z.string().optional().describe("ID of the initiative"),
+          initiative_title: z.string().optional().describe("Title of the initiative (alternative lookup)")
+        },
+        async (args) => {
+          try {
+            // Look up initiative
+            let initiativeId = args.initiative_id;
+            if (!initiativeId && args.initiative_title) {
+              const result = await new Promise((resolve, reject) => {
+                db.query('SELECT id FROM use_cases WHERE title LIKE ? LIMIT 1', [`%${args.initiative_title}%`], (err, rows) => {
+                  if (err) reject(err);
+                  else resolve(rows[0] || null);
+                });
+              });
+              initiativeId = result?.id;
+            }
+
+            if (!initiativeId) {
+              return { content: [{ type: "text", text: JSON.stringify({ success: false, error: 'Initiative not found' }) }] };
+            }
+
+            // Get attachments
+            const attachments = await new Promise((resolve, reject) => {
+              db.query(
+                `SELECT id, filename, file_size, mime_type, created_date
+                 FROM attachments
+                 WHERE entity_type = 'initiative' AND entity_id = ?
+                 ORDER BY created_date DESC`,
+                [initiativeId],
+                (err, rows) => {
+                  if (err) reject(err);
+                  else resolve(rows || []);
+                }
+              );
+            });
+
+            return {
+              content: [{
+                type: "text",
+                text: JSON.stringify({
+                  success: true,
+                  initiative_id: initiativeId,
+                  count: attachments.length,
+                  attachments: attachments.map(a => ({
+                    id: a.id,
+                    filename: a.filename,
+                    file_size: a.file_size,
+                    mime_type: a.mime_type,
+                    created_date: a.created_date
+                  }))
+                })
+              }]
+            };
+          } catch (error) {
+            return { content: [{ type: "text", text: JSON.stringify({ success: false, error: error.message }) }] };
+          }
+        }
+      ),
+
+      // Tool 38: List Task Attachments
+      tool(
+        "list_task_attachments",
+        "List all file attachments for a specific task. Returns file names, sizes, types, and download information.",
+        {
+          task_id: z.string().optional().describe("ID of the task"),
+          task_title: z.string().optional().describe("Title of the task (alternative lookup)")
+        },
+        async (args) => {
+          try {
+            // Look up task
+            let taskId = args.task_id;
+            if (!taskId && args.task_title) {
+              const result = await new Promise((resolve, reject) => {
+                db.query('SELECT id FROM tasks WHERE title LIKE ? LIMIT 1', [`%${args.task_title}%`], (err, rows) => {
+                  if (err) reject(err);
+                  else resolve(rows[0] || null);
+                });
+              });
+              taskId = result?.id;
+            }
+
+            if (!taskId) {
+              return { content: [{ type: "text", text: JSON.stringify({ success: false, error: 'Task not found' }) }] };
+            }
+
+            // Get attachments
+            const attachments = await new Promise((resolve, reject) => {
+              db.query(
+                `SELECT id, filename, file_size, mime_type, created_date
+                 FROM attachments
+                 WHERE entity_type = 'task' AND entity_id = ?
+                 ORDER BY created_date DESC`,
+                [taskId],
+                (err, rows) => {
+                  if (err) reject(err);
+                  else resolve(rows || []);
+                }
+              );
+            });
+
+            return {
+              content: [{
+                type: "text",
+                text: JSON.stringify({
+                  success: true,
+                  task_id: taskId,
+                  count: attachments.length,
+                  attachments: attachments.map(a => ({
+                    id: a.id,
+                    filename: a.filename,
+                    file_size: a.file_size,
+                    mime_type: a.mime_type,
+                    created_date: a.created_date
+                  }))
+                })
+              }]
+            };
+          } catch (error) {
+            return { content: [{ type: "text", text: JSON.stringify({ success: false, error: error.message }) }] };
+          }
+        }
+      ),
+
+      // Tool 39: Read Attachment Content
+      tool(
+        "read_attachment_content",
+        "Read the content of a text-based file attachment (text, markdown, JSON, CSV, code files). Cannot read binary files like images or PDFs.",
+        {
+          attachment_id: z.number().describe("ID of the attachment to read")
+        },
+        async (args) => {
+          try {
+            // Get attachment info
+            const attachment = await new Promise((resolve, reject) => {
+              db.query(
+                'SELECT id, filename, file_path, mime_type, file_size FROM attachments WHERE id = ?',
+                [args.attachment_id],
+                (err, rows) => {
+                  if (err) reject(err);
+                  else resolve(rows[0] || null);
+                }
+              );
+            });
+
+            if (!attachment) {
+              return { content: [{ type: "text", text: JSON.stringify({ success: false, error: 'Attachment not found' }) }] };
+            }
+
+            // Check if it's a readable file type
+            const readableTypes = [
+              'text/', 'application/json', 'application/xml',
+              'application/javascript', 'application/typescript',
+              'application/csv', 'text/csv', 'text/markdown'
+            ];
+            const isReadable = readableTypes.some(type => attachment.mime_type.includes(type));
+
+            if (!isReadable) {
+              return {
+                content: [{
+                  type: "text",
+                  text: JSON.stringify({
+                    success: false,
+                    error: `Cannot read binary file type: ${attachment.mime_type}. Only text-based files can be read.`,
+                    filename: attachment.filename,
+                    mime_type: attachment.mime_type
+                  })
+                }]
+              };
+            }
+
+            // File size limit for reading (1MB)
+            if (attachment.file_size > 1024 * 1024) {
+              return {
+                content: [{
+                  type: "text",
+                  text: JSON.stringify({
+                    success: false,
+                    error: 'File too large to read (max 1MB for text content)',
+                    filename: attachment.filename,
+                    file_size: attachment.file_size
+                  })
+                }]
+              };
+            }
+
+            // Download and read the file content using Azure Blob Service
+            const azureBlobService = require('./azureBlobService');
+            if (!azureBlobService.isConfigured) {
+              return { content: [{ type: "text", text: JSON.stringify({ success: false, error: 'Azure Blob Storage not configured' }) }] };
+            }
+
+            const buffer = await azureBlobService.downloadBlob(attachment.file_path);
+            const content = buffer.toString('utf-8');
+
+            return {
+              content: [{
+                type: "text",
+                text: JSON.stringify({
+                  success: true,
+                  filename: attachment.filename,
+                  mime_type: attachment.mime_type,
+                  content: content
+                })
+              }]
+            };
+          } catch (error) {
+            return { content: [{ type: "text", text: JSON.stringify({ success: false, error: error.message }) }] };
+          }
+        }
+      ),
+
+      // Tool 40: List Chat Files
+      tool(
+        "list_chat_files",
+        "List files uploaded during the CURRENT chat session. Use this to see what files the user has just uploaded. Returns file names, sizes, types, and IDs for reading content.",
+        {
+          session_id: z.string().optional().describe("Optional: filter by specific session ID. If not provided, shows files from recent sessions.")
+        },
+        async (args) => {
+          try {
+            // Get chat files for the current user only (security: users can only see their own uploads)
+            if (!userId) {
+              return {
+                content: [{
+                  type: "text",
+                  text: JSON.stringify({
+                    success: false,
+                    error: 'User context not available',
+                    files: []
+                  })
+                }]
+              };
+            }
+
+            // Filter by session if provided, otherwise get recent files (last 24 hours)
+            let query, params;
+            if (args.session_id) {
+              // Filter by specific session
+              const entityIdPattern = `${userId}_${args.session_id}`;
+              query = `SELECT id, filename, file_path, file_size, mime_type, created_date, entity_id
+                       FROM attachments
+                       WHERE entity_type = 'chat' AND created_by = ? AND entity_id = ?
+                       ORDER BY created_date DESC`;
+              params = [userId, entityIdPattern];
+            } else {
+              // Get files from last 24 hours for this user (current session is likely recent)
+              query = `SELECT id, filename, file_path, file_size, mime_type, created_date, entity_id
+                       FROM attachments
+                       WHERE entity_type = 'chat' AND created_by = ? AND created_date > DATE_SUB(NOW(), INTERVAL 24 HOUR)
+                       ORDER BY created_date DESC
+                       LIMIT 20`;
+              params = [userId];
+            }
+
+            const files = await new Promise((resolve, reject) => {
+              db.query(query, params, (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows || []);
+              });
+            });
+
+            if (!files || files.length === 0) {
+              return {
+                content: [{
+                  type: "text",
+                  text: JSON.stringify({
+                    success: true,
+                    message: 'No files have been uploaded during chat sessions yet',
+                    files: []
+                  })
+                }]
+              };
+            }
+
+            // Generate download URLs if Azure Blob is configured
+            const azureBlobService = require('./azureBlobService');
+            const filesWithUrls = files.map(file => ({
+              id: file.id,
+              filename: file.filename,
+              file_size: file.file_size,
+              mime_type: file.mime_type,
+              uploaded_date: file.created_date,
+              downloadUrl: azureBlobService.isReady() && file.file_path
+                ? azureBlobService.generateSasUrl(file.file_path)
+                : null
+            }));
+
+            return {
+              content: [{
+                type: "text",
+                text: JSON.stringify({
+                  success: true,
+                  count: filesWithUrls.length,
+                  files: filesWithUrls
+                })
+              }]
+            };
+          } catch (error) {
+            return { content: [{ type: "text", text: JSON.stringify({ success: false, error: error.message }) }] };
+          }
+        }
+      ),
+
+      // Tool 41: Read DOCX Attachment Content
+      tool(
+        "read_docx_attachment",
+        "Read and extract text content from a DOCX (Word) file attachment. Downloads the file from storage and extracts the text content. Use this for .docx files uploaded to chat or initiatives/tasks.",
+        {
+          attachment_id: z.number().describe("ID of the DOCX attachment to read")
+        },
+        async (args) => {
+          try {
+            // Get attachment info with ownership check
+            const attachment = await new Promise((resolve, reject) => {
+              db.query(
+                'SELECT id, filename, file_path, mime_type, file_size, entity_type, created_by FROM attachments WHERE id = ?',
+                [args.attachment_id],
+                (err, rows) => {
+                  if (err) reject(err);
+                  else resolve(rows[0] || null);
+                }
+              );
+            });
+
+            if (!attachment) {
+              return { content: [{ type: "text", text: JSON.stringify({ success: false, error: 'Attachment not found' }) }] };
+            }
+
+            // Security: For chat attachments, verify the user owns it
+            if (attachment.entity_type === 'chat' && attachment.created_by !== userId) {
+              return { content: [{ type: "text", text: JSON.stringify({ success: false, error: 'Access denied: This attachment belongs to another user' }) }] };
+            }
+
+            // Check if it's a DOCX file
+            const isDocx = attachment.mime_type?.includes('wordprocessingml') ||
+                          attachment.filename?.toLowerCase().endsWith('.docx');
+
+            if (!isDocx) {
+              return {
+                content: [{
+                  type: "text",
+                  text: JSON.stringify({
+                    success: false,
+                    error: `Not a DOCX file. File type: ${attachment.mime_type}`,
+                    filename: attachment.filename
+                  })
+                }]
+              };
+            }
+
+            // Download from Azure Blob
+            const azureBlobService = require('./azureBlobService');
+            if (!azureBlobService.isReady()) {
+              return { content: [{ type: "text", text: JSON.stringify({ success: false, error: 'Azure Blob Storage not configured' }) }] };
+            }
+
+            const buffer = await azureBlobService.downloadBlob(attachment.file_path);
+
+            // Save to temp file and extract text using docxService
+            const fs = require('fs').promises;
+            const path = require('path');
+            const os = require('os');
+            const docxService = require('./docxService');
+
+            const tempDir = path.join(os.tmpdir(), 'samantha-docx');
+            await fs.mkdir(tempDir, { recursive: true });
+            const tempInput = path.join(tempDir, `input_${Date.now()}.docx`);
+            const tempOutput = path.join(tempDir, `output_${Date.now()}.md`);
+
+            await fs.writeFile(tempInput, buffer);
+
+            try {
+              const result = await docxService.extractTextFromDocx(tempInput, tempOutput, { trackChanges: 'all' });
+
+              // Cleanup temp files
+              await fs.unlink(tempInput).catch(() => {});
+              await fs.unlink(tempOutput).catch(() => {});
+
+              return {
+                content: [{
+                  type: "text",
+                  text: JSON.stringify({
+                    success: true,
+                    filename: attachment.filename,
+                    content: result.content,
+                    message: 'DOCX content extracted successfully'
+                  })
+                }]
+              };
+            } catch (extractError) {
+              // Cleanup on error
+              await fs.unlink(tempInput).catch(() => {});
+              throw extractError;
+            }
+          } catch (error) {
+            return { content: [{ type: "text", text: JSON.stringify({ success: false, error: error.message }) }] };
+          }
+        }
+      ),
+
+      // Tool 42: Read PDF Attachment Content
+      tool(
+        "read_pdf_attachment",
+        "Read and extract text content from a PDF file attachment. Downloads the file from storage and extracts the text content. Use this for .pdf files uploaded to chat or initiatives/tasks.",
+        {
+          attachment_id: z.number().describe("ID of the PDF attachment to read")
+        },
+        async (args) => {
+          try {
+            // Get attachment info with ownership check
+            const attachment = await new Promise((resolve, reject) => {
+              db.query(
+                'SELECT id, filename, file_path, mime_type, file_size, entity_type, created_by FROM attachments WHERE id = ?',
+                [args.attachment_id],
+                (err, rows) => {
+                  if (err) reject(err);
+                  else resolve(rows[0] || null);
+                }
+              );
+            });
+
+            if (!attachment) {
+              return { content: [{ type: "text", text: JSON.stringify({ success: false, error: 'Attachment not found' }) }] };
+            }
+
+            // Security: For chat attachments, verify the user owns it
+            if (attachment.entity_type === 'chat' && attachment.created_by !== userId) {
+              return { content: [{ type: "text", text: JSON.stringify({ success: false, error: 'Access denied: This attachment belongs to another user' }) }] };
+            }
+
+            // Check if it's a PDF file
+            const isPdf = attachment.mime_type?.includes('pdf') ||
+                          attachment.filename?.toLowerCase().endsWith('.pdf');
+
+            if (!isPdf) {
+              return {
+                content: [{
+                  type: "text",
+                  text: JSON.stringify({
+                    success: false,
+                    error: `Not a PDF file. File type: ${attachment.mime_type}`,
+                    filename: attachment.filename
+                  })
+                }]
+              };
+            }
+
+            // Download from Azure Blob
+            const azureBlobService = require('./azureBlobService');
+            if (!azureBlobService.isReady()) {
+              return { content: [{ type: "text", text: JSON.stringify({ success: false, error: 'Azure Blob Storage not configured' }) }] };
+            }
+
+            const buffer = await azureBlobService.downloadBlob(attachment.file_path);
+
+            // Extract text using pdfService
+            const pdfService = require('./pdfService');
+            const result = await pdfService.extractTextFromPdfBuffer(buffer);
+
+            return {
+              content: [{
+                type: "text",
+                text: JSON.stringify({
+                  success: true,
+                  filename: attachment.filename,
+                  content: result.content,
+                  pageCount: result.pageCount,
+                  method: result.method,
+                  message: 'PDF content extracted successfully'
+                })
+              }]
+            };
+          } catch (error) {
+            return { content: [{ type: "text", text: JSON.stringify({ success: false, error: error.message }) }] };
+          }
+        }
       )
     ]
   });
@@ -2591,6 +3158,14 @@ You can help ${userName} with questions about family ${initiativePlural}, includ
 
 DATA ACCESS:
 You have real-time tools to query family initiatives by status, goal, pillar, or priority level. You can also get goals by pillar, current statistics and counts, and detailed initiative information. You can search and filter tasks as well.
+
+CHAT FILE UPLOADS (IMPORTANT):
+Users can upload files during chat using the paperclip button. When a user mentions they have uploaded files, attached documents, or references "the file I uploaded" or similar phrases, you MUST:
+1. Call the list_chat_files tool FIRST to see all uploaded files with their IDs, filenames, and sizes
+2. For PDF files: use read_pdf_attachment with the attachment ID to extract the text content
+3. For DOCX/Word files: use read_docx_attachment with the attachment ID to extract the text content
+4. For other text files (txt, md, csv, json): use read_attachment_content with the attachment ID
+The files are stored in Azure Blob and you can access them using these tools. Always check for uploads when the user references attached or uploaded files. When the user says "I've attached" or "use the attachment" or references filenames, call list_chat_files immediately.
 
 ANTI-HALLUCINATION RULES (CRITICAL):
 Never make up or guess information about initiatives, goals, or statistics. If you don't have specific data, always use the available tools to get current information. If a tool call fails or returns no data, say "I don't have that specific information available right now." Never provide numbers, names, or details unless they come from tool calls. When asked about specific initiatives or statistics, always call the appropriate tool first. Do not respond with example data or hypothetical scenarios - only real data from tools.
@@ -2785,6 +3360,7 @@ const generateClaudeAgentResponse = async (
           "mcp__samantha-tools__workspace_read_file",
           "mcp__samantha-tools__workspace_list_files",
           "mcp__samantha-tools__execute_code",
+          "mcp__samantha-tools__register_workspace_file",
           "mcp__samantha-tools__create_pptx",
           "mcp__samantha-tools__workspace_cleanup",
           "mcp__samantha-tools__render_html_to_image",
@@ -2799,6 +3375,13 @@ const generateClaudeAgentResponse = async (
           "mcp__samantha-tools__extract_docx_text",
           "mcp__samantha-tools__unpack_docx",
           "mcp__samantha-tools__pack_docx",
+          // File attachment tools
+          "mcp__samantha-tools__list_initiative_attachments",
+          "mcp__samantha-tools__list_task_attachments",
+          "mcp__samantha-tools__read_attachment_content",
+          "mcp__samantha-tools__list_chat_files",
+          "mcp__samantha-tools__read_docx_attachment",
+          "mcp__samantha-tools__read_pdf_attachment",
           // Write operation tools - in allowedTools so Claude knows they exist,
           // but PreToolUse hook returns 'ask' to trigger canUseTool for approval
           "mcp__samantha-tools__create_initiative",
@@ -3198,17 +3781,13 @@ async function* generateClaudeAgentResponseStream(
           "mcp__samantha-tools__ask_user_clarification",
           "mcp__samantha-tools__get_use_cases_by_tag",
           "mcp__samantha-tools__get_domain_metadata",
-          "mcp__samantha-tools__search_agents",
-          "mcp__samantha-tools__get_agents_by_criteria",
-          "mcp__samantha-tools__get_agents_by_initiative",
-          "mcp__samantha-tools__get_agent_statistics",
-          "mcp__samantha-tools__get_agent_details",
           "mcp__samantha-tools__create_artifact",
           "mcp__samantha-tools__workspace_init",
           "mcp__samantha-tools__workspace_write_file",
           "mcp__samantha-tools__workspace_read_file",
           "mcp__samantha-tools__workspace_list_files",
           "mcp__samantha-tools__execute_code",
+          "mcp__samantha-tools__register_workspace_file",
           "mcp__samantha-tools__create_pptx",
           "mcp__samantha-tools__workspace_cleanup",
           "mcp__samantha-tools__render_html_to_image",
@@ -3223,6 +3802,20 @@ async function* generateClaudeAgentResponseStream(
           "mcp__samantha-tools__extract_docx_text",
           "mcp__samantha-tools__unpack_docx",
           "mcp__samantha-tools__pack_docx",
+          // File attachment tools
+          "mcp__samantha-tools__list_initiative_attachments",
+          "mcp__samantha-tools__list_task_attachments",
+          "mcp__samantha-tools__read_attachment_content",
+          "mcp__samantha-tools__list_chat_files",
+          "mcp__samantha-tools__read_docx_attachment",
+          "mcp__samantha-tools__read_pdf_attachment",
+          // Task tools
+          "mcp__samantha-tools__search_tasks",
+          "mcp__samantha-tools__get_tasks_by_criteria",
+          "mcp__samantha-tools__get_tasks_by_initiative",
+          "mcp__samantha-tools__get_task_statistics",
+          "mcp__samantha-tools__get_task_details",
+          // Write operation tools
           "mcp__samantha-tools__create_initiative",
           "mcp__samantha-tools__update_initiative",
           "mcp__samantha-tools__batch_update_initiative_field",

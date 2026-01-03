@@ -41,6 +41,8 @@ RUN apt-get update && apt-get install -y \
     git \
     # Pandoc for DOCX text extraction
     pandoc \
+    # Poppler for PDF text extraction (pdftotext, pdfinfo)
+    poppler-utils \
     # Playwright dependencies (for Chromium)
     libnss3 \
     libnspr4 \

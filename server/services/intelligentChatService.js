@@ -1545,6 +1545,208 @@ const FUNCTION_IMPLEMENTATIONS = {
       question: params.question,
       context: params.context || null
     };
+  },
+
+  // File attachment functions
+  list_initiative_attachments: async (params, domainId) => {
+    console.log('📎 Backend: Listing attachments for initiative:', params.initiative_id || params.initiative_title);
+
+    let initiativeId = params.initiative_id;
+
+    // If initiative_title provided, look up the ID
+    if (!initiativeId && params.initiative_title) {
+      const initiative = await new Promise((resolve, reject) => {
+        let query = 'SELECT id FROM use_cases WHERE LOWER(title) LIKE ?';
+        const queryParams = [`%${params.initiative_title.toLowerCase()}%`];
+
+        if (domainId) {
+          query += ' AND domain_id = ?';
+          queryParams.push(domainId);
+        }
+
+        db.query(query, queryParams, (err, results) => {
+          if (err) reject(err);
+          else resolve(results[0] || null);
+        });
+      });
+
+      if (!initiative) {
+        return {
+          error: `Initiative "${params.initiative_title}" not found`,
+          attachments: []
+        };
+      }
+      initiativeId = initiative.id;
+    }
+
+    const attachments = await new Promise((resolve, reject) => {
+      db.query(
+        `SELECT id, filename, file_size, mime_type, created_date
+         FROM attachments
+         WHERE entity_type = 'initiative' AND entity_id = ?
+         ORDER BY created_date DESC`,
+        [initiativeId],
+        (err, results) => {
+          if (err) reject(err);
+          else resolve(results);
+        }
+      );
+    });
+
+    return {
+      initiative_id: initiativeId,
+      count: attachments.length,
+      attachments: attachments.map(a => ({
+        id: a.id,
+        filename: a.filename,
+        file_size: a.file_size,
+        file_size_formatted: a.file_size < 1024 ? `${a.file_size} B` :
+                            a.file_size < 1024 * 1024 ? `${(a.file_size / 1024).toFixed(1)} KB` :
+                            `${(a.file_size / (1024 * 1024)).toFixed(1)} MB`,
+        mime_type: a.mime_type,
+        created_date: a.created_date
+      }))
+    };
+  },
+
+  list_task_attachments: async (params, domainId) => {
+    console.log('📎 Backend: Listing attachments for task:', params.task_id || params.task_title);
+
+    let taskId = params.task_id;
+
+    // If task_title provided, look up the ID
+    if (!taskId && params.task_title) {
+      const task = await new Promise((resolve, reject) => {
+        let query = 'SELECT id FROM tasks WHERE LOWER(title) LIKE ?';
+        const queryParams = [`%${params.task_title.toLowerCase()}%`];
+
+        if (domainId) {
+          query += ' AND domain_id = ?';
+          queryParams.push(domainId);
+        }
+
+        db.query(query, queryParams, (err, results) => {
+          if (err) reject(err);
+          else resolve(results[0] || null);
+        });
+      });
+
+      if (!task) {
+        return {
+          error: `Task "${params.task_title}" not found`,
+          attachments: []
+        };
+      }
+      taskId = task.id;
+    }
+
+    const attachments = await new Promise((resolve, reject) => {
+      db.query(
+        `SELECT id, filename, file_size, mime_type, created_date
+         FROM attachments
+         WHERE entity_type = 'task' AND entity_id = ?
+         ORDER BY created_date DESC`,
+        [taskId],
+        (err, results) => {
+          if (err) reject(err);
+          else resolve(results);
+        }
+      );
+    });
+
+    return {
+      task_id: taskId,
+      count: attachments.length,
+      attachments: attachments.map(a => ({
+        id: a.id,
+        filename: a.filename,
+        file_size: a.file_size,
+        file_size_formatted: a.file_size < 1024 ? `${a.file_size} B` :
+                            a.file_size < 1024 * 1024 ? `${(a.file_size / 1024).toFixed(1)} KB` :
+                            `${(a.file_size / (1024 * 1024)).toFixed(1)} MB`,
+        mime_type: a.mime_type,
+        created_date: a.created_date
+      }))
+    };
+  },
+
+  read_attachment_content: async (params) => {
+    console.log('📄 Backend: Reading attachment content:', params.attachment_id);
+
+    const azureBlobService = require('./azureBlobService');
+
+    if (!azureBlobService.isReady()) {
+      return {
+        error: 'File storage service is not configured',
+        content: null
+      };
+    }
+
+    // Get attachment details
+    const attachment = await new Promise((resolve, reject) => {
+      db.query(
+        `SELECT id, entity_type, entity_id, filename, file_path, mime_type
+         FROM attachments WHERE id = ?`,
+        [params.attachment_id],
+        (err, results) => {
+          if (err) reject(err);
+          else resolve(results[0] || null);
+        }
+      );
+    });
+
+    if (!attachment) {
+      return {
+        error: `Attachment with ID ${params.attachment_id} not found`,
+        content: null
+      };
+    }
+
+    // Only read text-based files
+    const textMimeTypes = [
+      'text/plain',
+      'text/csv',
+      'text/markdown',
+      'application/json',
+      'text/html',
+      'text/xml'
+    ];
+
+    if (!textMimeTypes.some(t => attachment.mime_type.includes(t))) {
+      return {
+        id: attachment.id,
+        filename: attachment.filename,
+        mime_type: attachment.mime_type,
+        error: `Cannot read content of ${attachment.mime_type} files. Only text-based files (txt, csv, markdown, json, html, xml) can be read.`,
+        content: null
+      };
+    }
+
+    try {
+      const buffer = await azureBlobService.downloadBlob(attachment.file_path);
+      let content = buffer.toString('utf-8');
+
+      // Limit content length
+      const maxChars = params.max_chars || 10000;
+      if (content.length > maxChars) {
+        content = content.substring(0, maxChars) + '\n\n[Content truncated. Full file has ' + buffer.length + ' characters]';
+      }
+
+      return {
+        id: attachment.id,
+        filename: attachment.filename,
+        mime_type: attachment.mime_type,
+        content_length: buffer.length,
+        content
+      };
+    } catch (error) {
+      return {
+        id: attachment.id,
+        filename: attachment.filename,
+        error: `Failed to read file: ${error.message}`,
+        content: null
+      };
+    }
   }
 };
 

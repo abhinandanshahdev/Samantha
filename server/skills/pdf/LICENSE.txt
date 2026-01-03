@@ -1,0 +1,14 @@
+PDF Skill - Anthropic Skills Repository
+
+This skill is derived from the Anthropic Skills repository.
+Original source: https://github.com/anthropics/skills/tree/main/skills/pdf
+
+Usage of these materials is subject to your agreement with Anthropic - either
+the Consumer Terms of Service or Commercial Terms of Service, depending on
+your arrangement.
+
+The skill files and scripts are provided for use within Claude Code and
+Claude Agent SDK applications.
+
+For the latest terms and conditions, please refer to:
+https://www.anthropic.com/terms

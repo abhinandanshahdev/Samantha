@@ -22,21 +22,33 @@ const ARTIFACT_EXPIRY_MS = 60 * 60 * 1000;
 const ARTIFACT_TYPES = {
   PRESENTATION: 'presentation',
   SPREADSHEET: 'spreadsheet',
-  DASHBOARD: 'dashboard'
+  DASHBOARD: 'dashboard',
+  DOCUMENT: 'document',
+  MARKDOWN: 'markdown',
+  JSON: 'json',
+  CSV: 'csv'
 };
 
 // File extensions by type
 const FILE_EXTENSIONS = {
   [ARTIFACT_TYPES.PRESENTATION]: '.pptx',
   [ARTIFACT_TYPES.SPREADSHEET]: '.xlsx',
-  [ARTIFACT_TYPES.DASHBOARD]: '.html'
+  [ARTIFACT_TYPES.DASHBOARD]: '.html',
+  [ARTIFACT_TYPES.DOCUMENT]: '.docx',
+  [ARTIFACT_TYPES.MARKDOWN]: '.md',
+  [ARTIFACT_TYPES.JSON]: '.json',
+  [ARTIFACT_TYPES.CSV]: '.csv'
 };
 
 // MIME types by artifact type
 const MIME_TYPES = {
   [ARTIFACT_TYPES.PRESENTATION]: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   [ARTIFACT_TYPES.SPREADSHEET]: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  [ARTIFACT_TYPES.DASHBOARD]: 'text/html'
+  [ARTIFACT_TYPES.DASHBOARD]: 'text/html',
+  [ARTIFACT_TYPES.DOCUMENT]: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  [ARTIFACT_TYPES.MARKDOWN]: 'text/markdown',
+  [ARTIFACT_TYPES.JSON]: 'application/json',
+  [ARTIFACT_TYPES.CSV]: 'text/csv'
 };
 
 // In-memory artifact registry
@@ -636,9 +648,21 @@ const registerExternalFile = async (filePath, title, type = 'presentation') => {
       case '.xlsx':
         mimeType = MIME_TYPES[ARTIFACT_TYPES.SPREADSHEET];
         break;
+      case '.docx':
+        mimeType = MIME_TYPES[ARTIFACT_TYPES.DOCUMENT];
+        break;
       case '.html':
       case '.htm':
         mimeType = MIME_TYPES[ARTIFACT_TYPES.DASHBOARD];
+        break;
+      case '.md':
+        mimeType = MIME_TYPES[ARTIFACT_TYPES.MARKDOWN];
+        break;
+      case '.json':
+        mimeType = MIME_TYPES[ARTIFACT_TYPES.JSON];
+        break;
+      case '.csv':
+        mimeType = MIME_TYPES[ARTIFACT_TYPES.CSV];
         break;
       default:
         mimeType = 'application/octet-stream';
@@ -686,8 +710,21 @@ const createArtifact = async (type, data, options = {}) => {
     case 'dashboard':
       return createDashboard(data, options);
 
+    case ARTIFACT_TYPES.MARKDOWN:
+    case 'md':
+    case 'markdown':
+      return createMarkdown(data);
+
+    case ARTIFACT_TYPES.JSON:
+    case 'json':
+      return createJSON(data);
+
+    case ARTIFACT_TYPES.CSV:
+    case 'csv':
+      return createCSV(data);
+
     default:
-      throw new Error(`Unsupported artifact type: ${type}. Supported types: 'presentation', 'spreadsheet', 'dashboard'.`);
+      throw new Error(`Unsupported artifact type: ${type}. Supported types: 'presentation', 'spreadsheet', 'dashboard', 'markdown', 'json', 'csv'. For DOCX, use docxService.createDocx() then registerExternalFile().`);
   }
 };
 

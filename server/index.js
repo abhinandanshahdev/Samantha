@@ -70,6 +70,9 @@ const skillsRoutes = require('./routes/skills');
 const artifactsRoutes = require('./routes/artifacts');
 const analyticsRoutes = require('./routes/analytics');
 const adminUsersRoutes = require('./routes/adminUsers');
+const attachmentsRoutes = require('./routes/attachments');
+const phoneVerificationRoutes = require('./routes/phoneVerification');
+const whatsappRoutes = require('./routes/whatsapp');
 
 // Routes
 console.log('Setting up routes...');
@@ -97,6 +100,9 @@ app.use('/api/audit-logs', auditLogsRoutes);
 app.use('/api/tags', tagsRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin/users', adminUsersRoutes);
+app.use('/api/attachments', attachmentsRoutes);
+app.use('/api/phone', phoneVerificationRoutes);
+app.use('/api/whatsapp', whatsappRoutes);
 console.log('Routes set up successfully');
 
 // Health check endpoint (enhanced for Azure App Service)

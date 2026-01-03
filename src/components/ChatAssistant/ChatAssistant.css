@@ -717,6 +717,128 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
+/* File upload button */
+.ai-chat-upload-toggle {
+  background: #6366F1;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ai-chat-upload-toggle:hover:not(:disabled) {
+  background: #5558E3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
+}
+
+.ai-chat-upload-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ai-chat-upload-toggle.uploading {
+  animation: pulse-upload 1s infinite;
+}
+
+@keyframes pulse-upload {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Upload error message */
+.ai-chat-upload-error {
+  padding: 8px 16px;
+  margin: 0 16px;
+  background: #FEE2E2;
+  border: 1px solid #EF4444;
+  border-radius: 8px;
+  color: #B91C1C;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Pending attachments bar (like email attachments) */
+.ai-chat-attachments-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #F9FAFB;
+  border-top: 1px solid #E5E7EB;
+}
+
+.ai-chat-attachment-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 16px;
+  font-size: 12px;
+  color: #374151;
+  max-width: 250px;
+}
+
+.ai-chat-attachment-chip .attachment-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: #6366F1;
+  color: white;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.ai-chat-attachment-chip .attachment-name {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ai-chat-attachment-chip .attachment-size {
+  color: #9CA3AF;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.ai-chat-attachment-chip .attachment-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: none;
+  border: none;
+  color: #9CA3AF;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 0;
+  margin-left: 2px;
+  border-radius: 50%;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.ai-chat-attachment-chip .attachment-remove:hover {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+
 /* Voice interface container */
 .ai-chat-voice-interface {
   padding: 16px 20px;

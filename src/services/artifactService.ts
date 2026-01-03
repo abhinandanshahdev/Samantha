@@ -8,7 +8,7 @@ import api from './apiService';
 
 export interface Artifact {
   id: string;
-  type: 'presentation' | 'spreadsheet' | 'csv' | 'json' | 'markdown';
+  type: 'presentation' | 'spreadsheet' | 'document' | 'csv' | 'json' | 'markdown';
   title: string;
   fileName: string;
   mimeType: string;
@@ -211,6 +211,8 @@ export const getArtifactIcon = (type: string): string => {
       return 'file-powerpoint';
     case 'spreadsheet':
       return 'file-excel';
+    case 'document':
+      return 'file-word';
     case 'csv':
       return 'file-csv';
     case 'json':

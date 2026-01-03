@@ -3,6 +3,7 @@ import { Task, User, TaskInitiativeAssociation, InitiativeTaskAssociation, Kanba
 import { taskAssociationsAPI, taskAPI } from '../../services/apiService';
 import { motion } from 'framer-motion';
 import CommentThread from '../CommentThread/CommentThread';
+import FileAttachments from '../FileAttachments/FileAttachments';
 import './TaskDetail.css';
 import { FaHeart } from 'react-icons/fa';
 import { ViewType } from '../../hooks/useHistoryNavigation';
@@ -312,6 +313,15 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
               <p>{task.justification}</p>
             </div>
           )}
+
+          {/* Documents Section */}
+          <div className="detail-section">
+            <FileAttachments
+              entityType="task"
+              entityId={task.id}
+              canEdit={canEdit}
+            />
+          </div>
 
           <div className="detail-section">
             <h2>Related Initiatives</h2>

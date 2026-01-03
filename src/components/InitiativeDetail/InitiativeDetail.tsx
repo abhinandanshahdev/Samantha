@@ -3,6 +3,7 @@ import { UseCase, UseCaseGoalAlignment, User, UseCaseAssociation, Task } from '.
 import { useCaseAPI, associationsAPI, taskAssociationsAPI, taskAPI } from '../../services/apiService';
 import { motion } from 'framer-motion';
 import CommentThread from '../CommentThread/CommentThread';
+import FileAttachments from '../FileAttachments/FileAttachments';
 import './InitiativeDetail.css';
 // Import stars
 import { FaHeart } from 'react-icons/fa';
@@ -503,31 +504,28 @@ const InitiativeDetail: React.FC<InitiativeDetailProps> = ({
             )}
           </div>
 
-          {(useCase.tags && useCase.tags.length > 0) || (useCase.attachments && useCase.attachments.length > 0) ? (
+          {useCase.tags && useCase.tags.length > 0 && (
             <div className="detail-section">
               <h2>Additional Information</h2>
-              {useCase.tags && useCase.tags.length > 0 && (
-                <div className="meta-item">
-                  <span className="meta-label">Tags:</span>
-                  <div className="tags-container">
-                    {useCase.tags.map((tag, index) => (
-                      <span key={index} className="tag">{tag}</span>
-                    ))}
-                  </div>
+              <div className="meta-item">
+                <span className="meta-label">Tags:</span>
+                <div className="tags-container">
+                  {useCase.tags.map((tag, index) => (
+                    <span key={index} className="tag">{tag}</span>
+                  ))}
                 </div>
-              )}
-              {useCase.attachments && useCase.attachments.length > 0 && (
-                <div className="meta-item">
-                  <span className="meta-label">Attachments:</span>
-                  <div className="attachments-container">
-                    {useCase.attachments.map((attachment, index) => (
-                      <span key={index} className="attachment">{attachment}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
-          ) : null}
+          )}
+
+          {/* Documents Section */}
+          <div className="detail-section">
+            <FileAttachments
+              entityType="initiative"
+              entityId={useCase.id}
+              canEdit={canEdit}
+            />
+          </div>
 
           {/* Comments Section */}
           {currentUserId ? (

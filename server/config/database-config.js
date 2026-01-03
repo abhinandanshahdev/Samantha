@@ -228,14 +228,16 @@ class DatabaseConfig {
       // 12. Attachments table
       attachments: `CREATE TABLE IF NOT EXISTS attachments (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        use_case_id VARCHAR(36),
+        entity_type ENUM('initiative', 'task', 'chat') DEFAULT 'initiative',
+        entity_id VARCHAR(100),
         filename VARCHAR(255) NOT NULL,
         file_path VARCHAR(500),
         file_url VARCHAR(500),
         file_size INT,
         mime_type VARCHAR(100),
+        created_by VARCHAR(36),
         created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        INDEX idx_attachments_use_case (use_case_id)
+        INDEX idx_attachments_entity (entity_id, entity_type)
       )`,
 
       // 13. Comments table (supports both use_cases and tasks)
@@ -323,7 +325,7 @@ class DatabaseConfig {
         id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
         event_type VARCHAR(50) NOT NULL,
         entity_type VARCHAR(20) NOT NULL,
-        entity_id VARCHAR(36) NOT NULL,
+        entity_id VARCHAR(100) NOT NULL,
         entity_title VARCHAR(255),
         user_id VARCHAR(36),
         user_name VARCHAR(255),

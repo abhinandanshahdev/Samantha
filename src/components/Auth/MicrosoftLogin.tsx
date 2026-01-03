@@ -55,7 +55,7 @@ const MicrosoftLogin: React.FC<MicrosoftLoginProps> = ({ onSuccess }) => {
         <div style={{ marginBottom: '40px' }}>
           <img
             src="/logo-samantha.svg"
-            alt="Samantha Logo"
+            alt="Voyagers AI Logo"
             style={{
               height: '64px',
               width: 'auto',
@@ -68,7 +68,7 @@ const MicrosoftLogin: React.FC<MicrosoftLoginProps> = ({ onSuccess }) => {
             color: '#6366F1',
             margin: '0 0 8px 0',
             fontFamily: 'Montserrat, sans-serif'
-          }}>Samantha</h1>
+          }}>Voyagers AI</h1>
           <p style={{
             color: '#2C3E50',
             fontSize: '18px',
@@ -85,7 +85,7 @@ const MicrosoftLogin: React.FC<MicrosoftLoginProps> = ({ onSuccess }) => {
               marginBottom: '32px',
               lineHeight: '1.5'
             }}>
-              Sign in with your Microsoft account to access Samantha
+              Sign in with your Microsoft account to access Voyagers AI
             </p>
             
             <button

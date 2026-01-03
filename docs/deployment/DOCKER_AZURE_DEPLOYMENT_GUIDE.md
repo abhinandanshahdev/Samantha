@@ -87,6 +87,35 @@ az webapp config appsettings set \
     DEFAULT_AI_PROVIDER="compass"
 ```
 
+### Azure Blob Storage (File Attachments)
+
+```bash
+az webapp config appsettings set \
+  --name voyagers-app \
+  --resource-group rg-ai-usecase-prod \
+  --settings \
+    AZURE_STORAGE_ACCOUNT_NAME="aiusecasestorage" \
+    AZURE_STORAGE_ACCOUNT_KEY="<storage-key>" \
+    AZURE_STORAGE_CONTAINER_NAME="samantha-attachments"
+```
+
+Storage containers:
+- Production: `samantha-attachments` (in `aiusecasestorage`)
+- Development: `samantha-attachments-dev` (in `aiusecasestorage`)
+
+### Feature Flags
+
+```bash
+az webapp config appsettings set \
+  --name voyagers-app \
+  --resource-group rg-ai-usecase-prod \
+  --settings \
+    FEATURE_TWILIO_ENABLED="false" \
+    FEATURE_WHATSAPP_ENABLED="false"
+```
+
+Set to `"true"` to enable Twilio/WhatsApp integration (requires Twilio credentials).
+
 ## Authentication Model
 
 Samantha uses a **gated access** model:

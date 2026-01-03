@@ -29,12 +29,12 @@ const PendingAccess: React.FC<PendingAccessProps> = ({ user, onLogout }) => {
       }}>
         {/* Logo and Header */}
         <div style={{ marginBottom: '40px' }}>
-          <img 
-            src="/assets/DoFLogo.png" 
-            alt="Department of Finance Abu Dhabi Logo" 
+          <img
+            src="/logo-samantha.svg"
+            alt="Voyagers AI Logo"
             style={{
-              width: '120px',
-              height: 'auto',
+              height: '64px',
+              width: 'auto',
               marginBottom: '20px'
             }}
           />
@@ -44,13 +44,13 @@ const PendingAccess: React.FC<PendingAccessProps> = ({ user, onLogout }) => {
             color: '#6366F1',
             margin: '0 0 8px 0',
             fontFamily: 'Montserrat, sans-serif'
-          }}>Samantha</h1>
+          }}>Voyagers AI</h1>
           <p style={{
             color: '#2C3E50',
             fontSize: '18px',
             margin: '0',
             fontWeight: '600'
-          }}>Family Management</p>
+          }}>Family Strategy AI</p>
         </div>
 
         {/* Pending Access Message */}
@@ -89,7 +89,7 @@ const PendingAccess: React.FC<PendingAccessProps> = ({ user, onLogout }) => {
             lineHeight: '1.6',
             marginBottom: '24px'
           }}>
-            You don't have access to Samantha yet. Your account ({user.email}) has been logged, 
+            You don't have access to Voyagers AI yet. Your account ({user.email}) has been logged,
             and an administrator will review your access request shortly.
           </p>
           
@@ -164,7 +164,7 @@ const PendingAccess: React.FC<PendingAccessProps> = ({ user, onLogout }) => {
             fontSize: '14px',
             margin: '0'
           }}>
-            &copy; 2024 Department of Finance Abu Dhabi. All rights reserved.
+            &copy; 2026 Abhinandan Shah. All rights reserved.
           </p>
         </div>
       </div>

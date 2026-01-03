@@ -1017,4 +1017,136 @@ export const adminUsersAPI = {
   }
 };
 
+// Attachments API
+export interface Attachment {
+  id: number;
+  entity_type: 'initiative' | 'task' | 'chat';
+  entity_id: string;
+  filename: string;
+  file_path: string;
+  file_url: string;
+  file_size: number;
+  mime_type: string;
+  created_by: string;
+  created_date: string;
+  downloadUrl?: string;
+}
+
+export const attachmentAPI = {
+  // Get all attachments for an entity
+  getAll: async (entityType: 'initiative' | 'task', entityId: string): Promise<Attachment[]> => {
+    const response = await api.get(`/attachments/${entityType}/${entityId}`);
+    return response.data;
+  },
+
+  // Upload a file attachment
+  upload: async (entityType: 'initiative' | 'task', entityId: string, file: File): Promise<{ success: boolean; attachment: Attachment }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await api.post(`/attachments/upload/${entityType}/${entityId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  // Get download URL for an attachment
+  getDownloadUrl: async (attachmentId: number): Promise<{ id: number; filename: string; mimeType: string; downloadUrl: string }> => {
+    const response = await api.get(`/attachments/${attachmentId}/download`);
+    return response.data;
+  },
+
+  // Delete an attachment
+  delete: async (attachmentId: number): Promise<{ success: boolean; message: string }> => {
+    const response = await api.delete(`/attachments/${attachmentId}`);
+    return response.data;
+  },
+
+  // Check if attachment service is available
+  getStatus: async (): Promise<{ configured: boolean; message: string }> => {
+    const response = await api.get('/attachments/status');
+    return response.data;
+  },
+
+  // Chat file upload methods
+  uploadChatFile: async (file: File, sessionId?: string): Promise<{ success: boolean; attachment: Attachment }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (sessionId) {
+      formData.append('sessionId', sessionId);
+    }
+
+    const response = await api.post('/attachments/chat/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  // List all chat uploads for the current user
+  listChatFiles: async (): Promise<Attachment[]> => {
+    const response = await api.get('/attachments/chat/list');
+    return response.data;
+  },
+
+  // Delete a chat upload
+  deleteChatFile: async (attachmentId: number): Promise<{ success: boolean; message: string }> => {
+    const response = await api.delete(`/attachments/chat/${attachmentId}`);
+    return response.data;
+  }
+};
+
+// Phone Verification Response Types
+export interface PhoneStatus {
+  success: boolean;
+  service: {
+    configured: boolean;
+    whatsappEnabled: boolean;
+  };
+  user: {
+    phone_number: string | null;
+    phone_verified: boolean;
+    phone_verified_date: string | null;
+  };
+}
+
+export interface PhoneVerificationResponse {
+  success: boolean;
+  message?: string;
+  phone_number?: string;
+  error?: string;
+}
+
+export const phoneAPI = {
+  // Get phone verification status
+  getStatus: async (): Promise<PhoneStatus> => {
+    const response = await api.get('/phone/status');
+    return response.data;
+  },
+
+  // Send verification code via SMS
+  sendVerification: async (phoneNumber: string, countryCode?: string): Promise<PhoneVerificationResponse> => {
+    const response = await api.post('/phone/send-verification', {
+      phone_number: phoneNumber,
+      country_code: countryCode
+    });
+    return response.data;
+  },
+
+  // Verify the SMS code
+  verifyCode: async (code: string): Promise<PhoneVerificationResponse> => {
+    const response = await api.post('/phone/verify-code', { code });
+    return response.data;
+  },
+
+  // Unlink phone from account
+  unlink: async (): Promise<PhoneVerificationResponse> => {
+    const response = await api.delete('/phone/unlink');
+    return response.data;
+  }
+};
+
 export default api;
