@@ -189,7 +189,7 @@
   margin: 0 0 12px 0;
   font-size: 16px;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .prompt-textarea {
@@ -269,7 +269,7 @@
 
 .task-title {
   font-weight: 500;
-  color: #111827;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
 

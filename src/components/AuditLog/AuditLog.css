@@ -34,7 +34,7 @@
 .audit-log-header h1 {
   font-size: 32px;
   font-weight: 700;
-  color: #111827;
+  color: var(--text-primary);
   margin: 0 0 8px 0;
 }
 
@@ -233,7 +233,7 @@
 
 .entity-cell > div:first-child {
   font-weight: 500;
-  color: #111827;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
 
