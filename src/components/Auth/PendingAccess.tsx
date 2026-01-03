@@ -31,7 +31,7 @@ const PendingAccess: React.FC<PendingAccessProps> = ({ user, onLogout }) => {
         <div style={{ marginBottom: '40px' }}>
           <img
             src="/logo-samantha.svg"
-            alt="Voyagers AI Logo"
+            alt="Voyagers Logo"
             style={{
               height: '64px',
               width: 'auto',
@@ -44,13 +44,7 @@ const PendingAccess: React.FC<PendingAccessProps> = ({ user, onLogout }) => {
             color: '#6366F1',
             margin: '0 0 8px 0',
             fontFamily: 'Montserrat, sans-serif'
-          }}>Voyagers AI</h1>
-          <p style={{
-            color: '#2C3E50',
-            fontSize: '18px',
-            margin: '0',
-            fontWeight: '600'
-          }}>Family Strategy AI</p>
+          }}>Voyagers</h1>
         </div>
 
         {/* Pending Access Message */}
@@ -89,7 +83,7 @@ const PendingAccess: React.FC<PendingAccessProps> = ({ user, onLogout }) => {
             lineHeight: '1.6',
             marginBottom: '24px'
           }}>
-            You don't have access to Voyagers AI yet. Your account ({user.email}) has been logged,
+            You don't have access to Voyagers yet. Your account ({user.email}) has been logged,
             and an administrator will review your access request shortly.
           </p>
           

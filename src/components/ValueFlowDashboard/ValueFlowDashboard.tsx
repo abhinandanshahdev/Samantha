@@ -168,7 +168,7 @@ export default function ValueFlowDashboard({
             </svg>
           </span>
           <div className="news-outcome-info">
-            <span className="news-outcome-label">Key Outcome</span>
+            <span className="news-outcome-label">Strategic Outcome</span>
             <h3 className="news-outcome-title-inline">{outcome.title}</h3>
             {outcome.measure && (
               <p className="news-outcome-measure">{outcome.measure}</p>
@@ -203,16 +203,31 @@ export default function ValueFlowDashboard({
             </div>
           ) : usesMaturity ? (
             <div className="news-maturity-container">
-              <div className="news-maturity-dots">
-                {[1, 2, 3, 4, 5].map((level) => (
-                  <span
-                    key={level}
-                    className={`news-maturity-dot ${level <= (currentMaturity || 0) ? 'filled' : ''}`}
+              <div className={`news-maturity-donut ${
+                (currentMaturity || 0) < 2 ? 'level-red' :
+                (currentMaturity || 0) <= 3 ? 'level-orange' : 'level-green'
+              }`}>
+                <svg viewBox="0 0 36 36" className="news-maturity-ring">
+                  <circle
+                    className="news-maturity-bg"
+                    cx="18" cy="18" r="15.5"
+                    fill="none"
+                    strokeWidth="3"
                   />
-                ))}
+                  <circle
+                    className="news-maturity-progress"
+                    cx="18" cy="18" r="15.5"
+                    fill="none"
+                    strokeWidth="3"
+                    strokeDasharray={`${((currentMaturity || 0) / 5) * 97.4} 97.4`}
+                    strokeLinecap="round"
+                    transform="rotate(-90 18 18)"
+                  />
+                </svg>
+                <span className="news-maturity-value">{currentMaturity || 0}</span>
               </div>
               <div className="news-maturity-meta">
-                <span className="news-maturity-label">Level {currentMaturity}/5</span>
+                <span className="news-maturity-label">{(currentMaturity || 0) < 2 ? 'Low Maturity' : (currentMaturity || 0) <= 3 ? 'Medium Maturity' : 'High Maturity'}</span>
                 {userRole === 'admin' && (
                   <button className="news-btn-edit" onClick={() => handleEditOutcome(outcome.id!)}>Edit</button>
                 )}
@@ -240,8 +255,8 @@ export default function ValueFlowDashboard({
     <div className="news-dashboard">
       {/* Masthead - Left Aligned */}
       <header className="news-masthead">
+        <span className="news-masthead-label">Strategic North Star</span>
         <h1 className="news-masthead-title">{hero.title}</h1>
-        {hero.subtitle && <p className="news-masthead-subtitle">{hero.subtitle}</p>}
       </header>
 
       {/* Combined Outcome + Pillar Sections */}
@@ -265,7 +280,7 @@ export default function ValueFlowDashboard({
                 </svg>
               </span>
               <div className="news-pillar-text">
-                <span className="news-pillar-type-label">Strategic Action</span>
+                <span className="news-pillar-type-label">Action Pillar</span>
                 <h2 className="news-section-title">{pillar.name}</h2>
                 {pillar.description && (
                   <p className="news-section-desc">{pillar.description}</p>

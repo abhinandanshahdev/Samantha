@@ -83,7 +83,7 @@ const Header: React.FC<HeaderProps> = ({ onSearch, onUserMenuClick, user, onChat
           <div className="brand-group">
             <img
               src="/logo-samantha.svg"
-              alt="Voyagers AI"
+              alt="Voyagers"
               className="brand-logo"
             />
             <div className="brand-divider"></div>
@@ -145,7 +145,7 @@ const Header: React.FC<HeaderProps> = ({ onSearch, onUserMenuClick, user, onChat
             <button
               className="ai-chat-button"
               onClick={onChatClick}
-              title="Voyagers AI assistant"
+              title="Voyagers assistant"
             >
               <Sparkles size={16} strokeWidth={1.5} />
               <span>Ask Voyagers</span>

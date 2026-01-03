@@ -4382,13 +4382,17 @@ body.dark-mode .news-outcome-label {
   color: var(--dm-text-3) !important;
 }
 
-/* Maturity Dots - Dark Mode */
-body.dark-mode .news-maturity-dot {
-  background: #374151 !important;
+/* Maturity Donut - Dark Mode */
+body.dark-mode .news-maturity-bg {
+  stroke: #374151 !important;
 }
 
-body.dark-mode .news-maturity-dot.filled {
-  background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%) !important;
+body.dark-mode .news-maturity-progress {
+  stroke: #8B5CF6 !important;
+}
+
+body.dark-mode .news-maturity-value {
+  color: #F3F4F6 !important;
 }
 
 body.dark-mode .news-maturity-label {

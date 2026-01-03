@@ -907,7 +907,7 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ useCases, isOpen, onClose
         <div className="ai-chat-header">
           <div className="ai-chat-title">
             <Sparkles size={16} strokeWidth={1.5} />
-            <span>Samantha</span>
+            <span>Voyagers AI Assistant</span>
           </div>
           <div className="ai-chat-header-buttons">
             {!isVoiceConnected && !isVoiceConnecting && (

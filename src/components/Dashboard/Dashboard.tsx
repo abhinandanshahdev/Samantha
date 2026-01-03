@@ -216,7 +216,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       <button
         className="ai-float-button"
         onClick={() => setShowAIChat(true)}
-        title="Samantha Assistant"
+        title="Voyagers Assistant"
       >
         <FaComments />
       </button>

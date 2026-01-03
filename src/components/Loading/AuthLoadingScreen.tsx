@@ -18,7 +18,7 @@ const AuthLoadingScreen: React.FC = () => {
         {/* Logo */}
         <img
           src="/logo-samantha.svg"
-          alt="Samantha Logo"
+          alt="Voyagers Logo"
           style={{
             width: '100px',
             height: 'auto',
@@ -35,17 +35,8 @@ const AuthLoadingScreen: React.FC = () => {
           margin: '0 0 10px 0',
           fontFamily: 'Montserrat, sans-serif'
         }}>
-          Samantha
+          Voyagers
         </h1>
-        
-        <p style={{
-          color: '#6C757D',
-          fontSize: '14px',
-          margin: '0 0 40px 0',
-          fontWeight: '500'
-        }}>
-          Family Strategy AI
-        </p>
 
         {/* Elegant Loading Animation */}
         <div style={{

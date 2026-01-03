@@ -230,6 +230,8 @@ az webapp log config --name voyagers-app --resource-group rg-ai-usecase-prod \
 
 | Version | Date | Description |
 |---------|------|-------------|
+| v4-amd64 | 2026-01-03 | SQL migrations for attachments entity_type and phone verification |
+| v3-amd64 | 2026-01-03 | File attachments, PDF/DOCX support, artifacts browser, dynamic document styling |
 | v2-amd64 | 2026-01-03 | Add Initiatives/Tasks toggle, family-oriented AI prompts |
 | v1-amd64 | 2026-01-02 | Initial deployment |
 

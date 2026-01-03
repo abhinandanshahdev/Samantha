@@ -230,7 +230,7 @@ const PhoneVerification: React.FC<PhoneVerificationProps> = ({ onStatusChange })
             </div>
           )}
           <p className="verified-message">
-            You can now chat with Samantha via WhatsApp! Send a message to our WhatsApp number to get started.
+            You can now chat with Voyagers via WhatsApp! Send a message to our WhatsApp number to get started.
           </p>
         </div>
 
@@ -257,7 +257,7 @@ const PhoneVerification: React.FC<PhoneVerificationProps> = ({ onStatusChange })
       </div>
 
       <p className="phone-description">
-        Link your phone number to chat with Samantha via WhatsApp. You'll receive the same AI-powered assistance as the web chat.
+        Link your phone number to chat with Voyagers via WhatsApp. You'll receive the same AI-powered assistance as the web chat.
       </p>
 
       {step === 'enter' && (
