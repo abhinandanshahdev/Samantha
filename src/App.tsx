@@ -1474,7 +1474,7 @@ function App() {
               borderRadius: '12px',
               display: 'inline-block'
             }}>
-              Voyagers v1.0
+              Voyagers v1.1
             </div>
           </div>
         </div>
