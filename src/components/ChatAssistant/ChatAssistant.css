@@ -19,15 +19,13 @@
 
 .ai-chat-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10001;
   padding: 20px;
+  box-sizing: border-box;
 }
 
 .ai-chat-overlay > .ai-chat-container {
@@ -42,6 +40,7 @@
   flex-direction: column;
   border: 1px solid #E5E7EB;
   animation: slideUp 0.3s ease;
+  margin: auto;
 }
 
 @keyframes slideUp {
@@ -58,8 +57,8 @@
 .ai-chat-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
   position: relative;
+  overflow: hidden;
 }
 
 .ai-chat-header {

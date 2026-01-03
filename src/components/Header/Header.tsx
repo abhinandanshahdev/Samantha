@@ -147,8 +147,7 @@ const Header: React.FC<HeaderProps> = ({ onSearch, onUserMenuClick, user, onChat
               onClick={onChatClick}
               title="Voyagers assistant"
             >
-              <Sparkles size={16} strokeWidth={1.5} />
-              <span>Ask Voyagers</span>
+              <Sparkles size={18} strokeWidth={1.5} />
             </button>
           )}
 
