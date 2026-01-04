@@ -654,7 +654,197 @@
   font-size: 0.85rem;
   font-weight: 500;
   text-align: center;
-} 
+}
+
+/* Dark Mode Support */
+[data-theme="dark"] .use-case-form-container {
+  background: #1a1a2e;
+}
+
+[data-theme="dark"] .form-header {
+  background: #16213e;
+  border-color: #374151;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .form-header h1 {
+  color: #f3f4f6;
+}
+
+[data-theme="dark"] .cancel-button {
+  background: #374151;
+  border-color: #4b5563;
+  color: #d1d5db;
+}
+
+[data-theme="dark"] .cancel-button:hover {
+  background: #4b5563;
+  color: #f3f4f6;
+}
+
+[data-theme="dark"] .use-case-form {
+  background: #16213e;
+  border-color: #374151;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .form-section h2 {
+  color: #f3f4f6;
+  border-bottom-color: #374151;
+}
+
+[data-theme="dark"] .form-group label {
+  color: #d1d5db;
+}
+
+[data-theme="dark"] .form-group input,
+[data-theme="dark"] .form-group select,
+[data-theme="dark"] .form-group textarea {
+  background: #1f2937;
+  border-color: #374151;
+  color: #f3f4f6;
+}
+
+[data-theme="dark"] .form-group input::placeholder,
+[data-theme="dark"] .form-group textarea::placeholder {
+  color: #6b7280;
+}
+
+[data-theme="dark"] .form-group input:focus,
+[data-theme="dark"] .form-group select:focus,
+[data-theme="dark"] .form-group textarea:focus {
+  border-color: var(--dof-sea-green);
+  box-shadow: 0 0 0 3px rgba(127, 205, 205, 0.2);
+}
+
+[data-theme="dark"] .prompt-section {
+  background: #1f2937;
+  border-color: #374151;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .prompt-header h3 {
+  color: #f3f4f6;
+}
+
+[data-theme="dark"] .prompt-section p {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .prompt-input {
+  background: #16213e;
+  border-color: #374151;
+  color: #f3f4f6;
+}
+
+[data-theme="dark"] .category-description {
+  background: #1f2937;
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .strategic-goals-list {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+[data-theme="dark"] .strategic-goal-item {
+  background: #16213e;
+  border-color: #374151;
+}
+
+[data-theme="dark"] .strategic-goal-item:hover {
+  border-color: var(--dof-sea-green);
+}
+
+[data-theme="dark"] .goal-title {
+  color: #f3f4f6;
+}
+
+[data-theme="dark"] .goal-description {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .section-description {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .form-actions {
+  border-top-color: #374151;
+}
+
+[data-theme="dark"] .form-help-text {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .use-cases-list {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+[data-theme="dark"] .use-case-checkbox-item {
+  background: #16213e;
+  border-color: #374151;
+}
+
+[data-theme="dark"] .use-case-checkbox-item:hover {
+  background: #1f2937;
+}
+
+[data-theme="dark"] .use-case-title {
+  color: #f3f4f6;
+}
+
+[data-theme="dark"] .use-case-meta {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .use-cases-list .no-results {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .tags-display {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+[data-theme="dark"] .linked-tasks-preview {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+[data-theme="dark"] .linked-tasks-preview h4 {
+  color: #f3f4f6;
+}
+
+[data-theme="dark"] .task-chip {
+  background: #16213e;
+  border-color: #374151;
+}
+
+[data-theme="dark"] .task-chip-title {
+  color: #f3f4f6;
+}
+
+[data-theme="dark"] .task-chip-status {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .no-goals-message {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .related-use-cases-create .search-input {
+  background: #1f2937;
+  border-color: #374151;
+  color: #f3f4f6;
+}
+
+[data-theme="dark"] .tags-list .tag-item {
+  background: #1f4068;
+  border-color: #2563eb;
+  color: #93c5fd;
+}
+
 /* Linked Agents Preview */
 .linked-agents-preview {
   margin-top: 16px;
