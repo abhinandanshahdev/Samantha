@@ -24,9 +24,16 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Track if user was authenticated (to distinguish expired session from fresh visit)
+let wasAuthenticated = false;
+
 // Add response interceptor for error handling
 api.interceptors.response.use(
   (response) => {
+    // User successfully made an authenticated request
+    if (response.config.headers?.Authorization) {
+      wasAuthenticated = true;
+    }
     console.log('API Response:', response.config.method?.toUpperCase(), response.config.url, {
       status: response.status,
       data: response.data
@@ -42,19 +49,24 @@ api.interceptors.response.use(
     });
 
     if (error.response?.status === 401) {
-      // Token expired or invalid, clear tokens and show alert
+      // Clear tokens
       localStorage.removeItem('msal_jwt_token');
       localStorage.removeItem('token');
       sessionStorage.removeItem('token');
       sessionStorage.removeItem('jwt_token');
 
-      // Show user-friendly message
-      const errorMessage = error.response?.data?.error || 'Your session has expired. Please log in again.';
-      alert(errorMessage);
-
-      // Only reload if not already on login page
-      if (!window.location.pathname.includes('login')) {
-        window.location.reload();
+      // Only show alert and reload if user was previously authenticated (session expired)
+      // Don't show alerts for fresh visits or during login flow
+      if (wasAuthenticated) {
+        wasAuthenticated = false;
+        console.log('Session expired - redirecting to login');
+        // Only reload if not already on login page
+        if (!window.location.pathname.includes('login')) {
+          window.location.reload();
+        }
+      } else {
+        // Fresh visit or login flow - silently ignore 401s
+        console.log('401 during auth flow - ignoring (not yet authenticated)');
       }
     }
 
