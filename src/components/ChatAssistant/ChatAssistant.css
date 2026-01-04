@@ -1039,13 +1039,15 @@
 @media (max-width: 768px) {
   .ai-chat-overlay {
     padding: 0;
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
   }
 
   .ai-chat-overlay > .ai-chat-container {
     width: 100%;
     height: 100%;
-    height: 100dvh; /* Dynamic viewport height - adjusts with keyboard */
-    max-height: none;
+    max-height: 100dvh;
     max-width: none;
     border-radius: 0;
     overflow: hidden;
@@ -1079,6 +1081,9 @@
     gap: 10px;
     flex-shrink: 0;
     border-radius: 0;
+    position: sticky;
+    bottom: 0;
+    background: linear-gradient(to top, #F3F4F6 0%, #F9FAFB 100%);
   }
 
   .ai-chat-textarea {
