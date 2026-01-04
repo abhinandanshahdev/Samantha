@@ -3,6 +3,7 @@ import { FaMagic, FaLightbulb } from 'react-icons/fa';
 import { Task, UseCase, KanbanStatus, EffortLevel } from '../../types';
 import { taskAPI, useCaseAPI, aiAutoCompleteAPI } from '../../services/apiService';
 import { useActiveDomainId } from '../../context/DomainContext';
+import FileAttachments from '../FileAttachments/FileAttachments';
 import './TaskForm.css';
 
 interface TaskFormProps {
@@ -537,6 +538,18 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onSave, onCancel, isEdit = fa
               rows={3}
             />
           </div>
+
+          {/* File Attachments Section - only show when editing */}
+          {isEdit && task?.id && (
+            <div className="form-section" style={{ marginTop: '24px' }}>
+              <h2 className="section-title">Documents & Attachments</h2>
+              <FileAttachments
+                entityType="task"
+                entityId={task.id}
+                canEdit={true}
+              />
+            </div>
+          )}
         </div>
 
         <div className="form-actions">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaMagic } from 'react-icons/fa';
 import { FaLightbulb } from 'react-icons/fa';
 import { UseCase, Category, StrategicGoal, Task } from '../../types';
@@ -6,8 +6,8 @@ import { categoryAPI, strategicGoalsAPI, useCaseAPI, aiAutoCompleteAPI, taskAPI,
 import { useActiveDomainId } from '../../context/DomainContext';
 import RelatedInitiatives from '../RelatedInitiatives/RelatedInitiatives';
 import TaskLinkingModal from '../TaskLinkingModal/TaskLinkingModal';
+import FileAttachments from '../FileAttachments/FileAttachments';
 import './InitiativeForm.css';
-import { useRef } from 'react';
 
 interface InitiativeFormProps {
   useCase?: UseCase;
@@ -950,6 +950,18 @@ const InitiativeForm: React.FC<InitiativeFormProps> = ({
               </div>
             )}
           </div>
+
+          {/* File Attachments Section - only show when editing */}
+          {isEditing && useCase?.id && (
+            <div className="form-section">
+              <h2>Documents & Attachments</h2>
+              <FileAttachments
+                entityType="initiative"
+                entityId={useCase.id}
+                canEdit={true}
+              />
+            </div>
+          )}
         </div>
 
         <div className="form-actions">
