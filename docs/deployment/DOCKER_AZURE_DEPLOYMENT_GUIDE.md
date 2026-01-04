@@ -230,6 +230,7 @@ az webapp log config --name voyagers-app --resource-group rg-ai-usecase-prod \
 
 | Version | Date | Description |
 |---------|------|-------------|
+| v7-amd64 | 2026-01-04 | Fix audit_logs entity_id column length |
 | v6-amd64 | 2026-01-04 | Fix entity_id column length for chat attachments, token error handling, mobile keyboard positioning |
 | v5-amd64 | 2026-01-04 | UI refinements: ValueFlowDashboard redesign, contrast improvements, modal centering fix |
 | v4-amd64 | 2026-01-03 | SQL migrations for attachments entity_type and phone verification |
